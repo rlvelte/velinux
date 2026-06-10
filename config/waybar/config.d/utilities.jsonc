@@ -1,0 +1,70 @@
+{
+  "clock": {
+    "format": "{:%H:%M}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+    "onclick": "kalender"
+  },
+
+  "custom/power": {
+    "format": "",
+    "interval": 86400,
+    "tooltip": false,
+    "on-click": "bash $XDG_CONFIG_HOME/rofi/scripts.d/select-power.sh"
+  },
+
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+      "activated": "\uDB81\uDECA",
+      "deactivated": "\uDB83\uDFAA"
+    }
+  },
+
+  "pulseaudio": {
+    "format": "{volume}% {icon}",
+    "format-bluetooth": "{volume}% ",
+    "format-muted": "",
+    "format-icons": {
+      "headphone": "",
+      "default": ["", "", ""]
+    },
+    "scroll-step": 2,
+    "on-click": "pavucontrol"
+  },
+
+  "systemd-failed-units": {
+    "hide-on-ok": false,
+    "format": "  {nr_failed}",
+    "format-ok": "",
+    "system": false,
+    "user": true,
+    "tooltip-format": "{nr_failed} failed units:\n{failed_units_list}",
+    "tooltip-unit-format": "{scope}: {name} ({active_state})"
+  },
+
+  "cpu": {
+    "interval": 5,
+    "format": "CPU {usage}%",
+    "states": {
+      "warning": 70,
+      "critical": 90
+    }
+  },
+
+  "memory": {
+    "interval": 5,
+    "format": "RAM {percentage}%",
+    "states": {
+      "warning": 70,
+      "critical": 90
+    },
+    "tooltip-format": "{used:0.2f}/{total:0.2f}GiB"
+  },
+
+  "network": {
+    "interval": 2,
+    "format-ethernet": "{ipaddr}",
+    "format-disconnected": "Disconnected",
+    "tooltip": true
+  }
+}

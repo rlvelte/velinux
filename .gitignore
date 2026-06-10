@@ -1,0 +1,10 @@
+.idea/
+vlx/build/
+AGENTS.md
+
+*.hist_zsh
+*.zcompdump
+*.zcompdump.zwc
+*.DS_Store
+*.directory
+*.env

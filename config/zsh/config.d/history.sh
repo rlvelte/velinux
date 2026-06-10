@@ -1,0 +1,8 @@
+#!/bin/zsh
+
+# History
+SAVEHIST=50000
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt SHARE_HISTORY

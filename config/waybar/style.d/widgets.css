@@ -1,0 +1,86 @@
+#scratchpad {
+    color:         @subtext;
+    padding:       0 6px;
+}
+
+#custom-update {
+    color:         @subtext;
+    padding:       0 6px;
+}
+
+#custom-theme {
+    color:          @primary;
+    padding-left:   10px;
+    padding-right:  16px;
+}
+
+#custom-theme label {
+    min-width:      48px;
+    text-align:     center;
+}
+
+#custom-power {
+    color:          @subtext;
+    padding-left:   6px;
+    padding-right:  12px;
+}
+
+#idle_inhibitor {
+    color:          @subtext;
+    padding-left:   8px;
+    padding-right:  12px;
+}
+
+#idle_inhibitor.activated {
+    color: @primary;
+}
+
+#custom-weather {
+    color:          @subtext;
+    padding-left:   4px;
+    padding-right:  6px;
+}
+
+#pulseaudio {
+    color:          @subtext;
+    padding-left:   8px;
+    padding-right:  12px;
+}
+
+#clock {
+    color:       @primary;
+    font-weight: 700;
+    padding:     0 4px;
+}
+
+#mode,
+#submap {
+    background:  transparent;
+    color:       @error;
+    font-weight: 900;
+    font-style:  italic;
+}
+
+#cpu {
+    color: @subtext;
+}
+#cpu.warning {
+    color: @warning;
+}
+#cpu.critical {
+    color: @error;
+}
+
+#memory {
+    color: @subtext;
+}
+#memory.warning {
+    color: @warning;
+}
+#memory.critical {
+    color: @error;
+}
+
+#network {
+    color: @subtext;
+}

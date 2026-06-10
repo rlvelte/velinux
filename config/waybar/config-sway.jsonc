@@ -1,0 +1,79 @@
+//            _ _                  _                
+// __   _____| (_)_ __  _   ___  _| |__   __ _ _ __ 
+// \ \ / / _ \ | | '_ \| | | \ \/ / '_ \ / _` | '__|
+//  \ V /  __/ | | | | | |_| |>  <| |_) | (_| | |   
+//   \_/ \___|_|_|_| |_|\__,_/_/\_\_.__/ \__,_|_|   
+//                                  Waybar by rvelte
+{
+  "include": [
+    "~/.config/waybar/config.d/desktop/sway.jsonc",
+    "~/.config/waybar/config.d/utilities.jsonc",
+    "~/.config/waybar/config.d/format.jsonc",
+    "~/.config/waybar/config.d/vlx.jsonc"
+  ],
+
+  "layer": "top",
+  "position": "top",
+  "margin": "8 8 0 8",
+  "spacing": 0,
+  "height": 35,
+
+  "modules-left": [
+    "group/os",
+    "group/workspaces"
+  ],
+
+  "modules-center": [
+    "group/windows"
+  ],
+
+  "modules-right": [
+    "group/util"
+  ],
+
+  "group/os":{
+    "orientation": "horizontal",
+    "modules":[
+      "custom/openbracket",
+      "custom/theme",
+      "custom/seperator",
+      "cpu",
+      "custom/seperator",
+      "memory",
+      "custom/seperator"
+    ]
+  },
+
+  "group/workspaces":{
+    "orientation": "horizontal",
+    "modules":[
+      "sway/workspaces",
+      "custom/seperator",
+      "sway/scratchpad",
+      "custom/closebracket"
+    ]
+  },
+
+  "group/windows": {
+    "orientation":"horizontal",
+    "modules":[
+      "custom/openbracket",
+      "sway/window",
+      "sway/mode",
+      "custom/closebracket"
+    ]
+  },
+
+  "group/util": {
+    "orientation": "horizontal",
+    "modules": [
+      "custom/openbracket",
+      "pulseaudio",
+      "custom/seperator",
+      "clock",
+      "custom/seperator",
+      "custom/power",
+      "custom/closebracket"
+    ]
+  }
+}

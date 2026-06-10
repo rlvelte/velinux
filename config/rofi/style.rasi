@@ -1,0 +1,107 @@
+window {
+    background-color: @background;
+    border: 2px;
+    border-color: @primary;
+    padding: 20px;
+}
+
+mainbox {
+    background-color: @background;
+    spacing: 15px;
+    padding: 0;
+}
+
+inputbar {
+    background-color: @background-alt;
+    border-radius: 8px;
+    padding: 12px 15px;
+    children: [prompt, entry];
+    spacing: 10px;
+}
+
+prompt {
+    text-color: @primary;
+    font: @font;
+}
+
+entry {
+    text-color: @foreground;
+    cursor: @accent;
+    placeholder-color: @muted;
+    placeholder: "Search...";
+}
+
+textbox {
+    text-color: @foreground-alt;
+}
+
+listview {
+    background-color: @background;
+    spacing: 5px;
+    fixed-height: false;
+    dynamic: true;
+    lines: 8;
+}
+
+element {
+    background-color: transparent;
+    padding: 10px 15px;
+    border-radius: 6px;
+}
+
+element normal {
+    background-color: @background;
+    text-color: @foreground;
+}
+
+element selected {
+    background-color: @primary;
+    text-color: @on-primary;
+}
+
+element alternate {
+    background-color: @background-alt;
+    text-color: @foreground;
+}
+
+element-text {
+    background-color: transparent;
+    text-color: inherit;
+    vertical-align: 0.5;
+}
+
+element-icon {
+    background-color: transparent;
+    size: 24px;
+    margin: 0 10px 0 0;
+}
+
+scrollbar {
+    background-color: @background-alt;
+    handle-color: @primary-dim;
+    handle-width: 6px;
+    border-radius: 3px;
+}
+
+mode-switcher {
+    background-color: @background-alt;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+button {
+    text-color: @foreground-alt;
+    background-color: transparent;
+    border-radius: 6px;
+    padding: 8px 12px;
+}
+
+button selected {
+    text-color: @on-primary;
+    background-color: @primary;
+}
+
+error-message {
+    background-color: @error;
+    text-color: @primary;
+}

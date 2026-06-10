@@ -1,0 +1,16 @@
+{
+  "custom/openbracket": {
+    "format": "[",
+    "tooltip": false
+  },
+
+  "custom/closebracket": {
+    "format": "]",
+    "tooltip": false
+  },
+
+  "custom/seperator": {
+    "format": "|",
+    "tooltip": false
+  }
+}

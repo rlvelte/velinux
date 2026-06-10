@@ -1,0 +1,23 @@
+{
+  "$schema": "./pkg.schema.json",
+  "zypper": [
+    // Container runtime
+    "docker",
+    "containerd",
+    
+    // SELinux support
+    "k3s-selinux",
+    
+    // Kubernetes CLI tools
+    "k9s",
+    "helm"
+  ],
+  "post": [
+    // Enable and start Docker
+    "sudo systemctl enable --now docker",
+    "sudo usermod -aG docker $USER",
+    
+    // Install k3s
+    "curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC=\"--write-kubeconfig-mode 644\" sh -s -"
+  ]
+}

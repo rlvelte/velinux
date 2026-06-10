@@ -1,0 +1,11 @@
+{
+  "$schema": "./pkg.schema.json",
+  "zypper": [
+    "curl",
+    "git"
+  ],
+  "post": [
+    // Install mise via official script
+    "curl https://mise.run | sh"
+  ]
+}

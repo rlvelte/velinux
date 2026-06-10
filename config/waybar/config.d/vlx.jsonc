@@ -1,0 +1,10 @@
+{
+  "custom/theme": {
+    "format": "{}",
+    "exec": "vlx themes waybar",
+    "interval": 86400,
+    "signal": 1,
+    "tooltip": false,
+    "on-click": "vlx themes switch"
+  },
+}
