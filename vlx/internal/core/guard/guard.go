@@ -2,15 +2,12 @@ package guard
 
 import (
 	"errors"
+	"fmt"
 	"net"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
-)
-
-var (
-	errUnsupportedPlatform = errors.New("unsupported platform")
-	errNoConnection        = errors.New("no internet connection")
 )
 
 const osReleasePath = "/etc/os-release"
@@ -19,12 +16,12 @@ const osReleasePath = "/etc/os-release"
 func OS() error {
 	info, err := os.ReadFile(osReleasePath)
 	if err != nil {
-		return errUnsupportedPlatform
+		return err
 	}
 
 	content := strings.ToLower(string(info))
 	if !strings.Contains(content, "opensuse") {
-		return errUnsupportedPlatform
+		return fmt.Errorf("%s is not an OpenSUSE release", osReleasePath)
 	}
 
 	return nil
@@ -34,9 +31,19 @@ func OS() error {
 func Connection() error {
 	conn, err := net.DialTimeout("tcp", "1.1.1.1:53", 3*time.Second)
 	if err != nil {
-		return errNoConnection
+		return fmt.Errorf("you seem to be offline: %s", err)
 	}
 
 	_ = conn.Close()
+	return nil
+}
+
+// Binaries verifies that all required executables are available on PATH.
+func Binaries(required ...string) error {
+	for _, bin := range required {
+		if _, err := exec.LookPath(bin); err != nil {
+			return errors.New("required binary not found: " + bin)
+		}
+	}
 	return nil
 }

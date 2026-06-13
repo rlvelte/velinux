@@ -4,12 +4,13 @@ import (
 	"context"
 	"os"
 
-	"github.com/rvelte/vlx/internal/core/picker/backends"
 	"golang.org/x/term"
 )
 
-// Backend handles interactive item selection.
-type Backend interface {
+const ContextKey = "picker"
+
+// Variant handles interactive item selection.
+type Variant interface {
 	Available() bool                                                   // Available reports whether this backend can be used.
 	Select(ctx context.Context, items []string) (string, error)        // Select prompts the user to choose one item.
 	SelectMulti(ctx context.Context, items []string) ([]string, error) // SelectMulti prompts the user to choose multiple items.
@@ -17,48 +18,48 @@ type Backend interface {
 
 // Picker is the unified picking engine.
 type Picker struct {
-	backend Backend // The selected Backend for this picker.
+	variant Variant // The selected Variant for this picker.
 }
 
 // New creates an engine with an auto-detected backend.
 func New() *Picker {
 	return &Picker{
-		backend: detect(),
+		variant: auto(),
 	}
 }
 
 // Select prompts the user to choose one item.
 func (e *Picker) Select(ctx context.Context, items []string) (string, error) {
-	return e.backend.Select(ctx, items)
+	return e.variant.Select(ctx, items)
 }
 
 // SelectMulti prompts the user to choose multiple items.
 func (e *Picker) SelectMulti(ctx context.Context, items []string) ([]string, error) {
-	return e.backend.SelectMulti(ctx, items)
+	return e.variant.SelectMulti(ctx, items)
 }
 
-// UseRofi forces the rofi backend.
-func (e *Picker) UseRofi() *Picker {
-	e.backend = &backends.Rofi{}
+// ForceRofi forces the rofi backend.
+func (e *Picker) ForceRofi() *Picker {
+	e.variant = &RofiPicker{}
 	return e
 }
 
-// UseFzf forces the fzf backend.
-func (e *Picker) UseFzf() *Picker {
-	e.backend = &backends.Fzf{}
+// ForceFzf forces the fzf backend.
+func (e *Picker) ForceFzf() *Picker {
+	e.variant = &FzfPicker{}
 	return e
 }
 
-func detect() Backend {
+func auto() Variant {
 	if term.IsTerminal(int(os.Stdout.Fd())) {
-		f := &backends.Fzf{}
+		f := &FzfPicker{}
 		if f.Available() {
 			return f
 		}
 	}
 
 	if os.Getenv("DISPLAY") != "" || os.Getenv("WAYLAND_DISPLAY") != "" {
-		r := &backends.Rofi{}
+		r := &RofiPicker{}
 		if r.Available() {
 			return r
 		}

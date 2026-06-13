@@ -1,4 +1,4 @@
-package xdg
+package fsys
 
 import (
 	"os"

@@ -1,4 +1,4 @@
-package backends
+package picker
 
 import (
 	"context"
@@ -6,19 +6,19 @@ import (
 	"strings"
 )
 
-// Rofi is a backends backend that uses rofi graphical picker.
-type Rofi struct {
+// RofiPicker is a backend that uses rofi graphical picker.
+type RofiPicker struct {
 	ConfigPath string
 }
 
 // Available reports whether rofi is installed.
-func (r *Rofi) Available() bool {
+func (r *RofiPicker) Available() bool {
 	_, err := exec.LookPath("rofi")
 	return err == nil
 }
 
 // Select prompts the user to choose one item via rofi.
-func (r *Rofi) Select(ctx context.Context, items []string) (string, error) {
+func (r *RofiPicker) Select(ctx context.Context, items []string) (string, error) {
 	args := r.baseArgs()
 	args = append(args, "-dmenu")
 
@@ -33,7 +33,7 @@ func (r *Rofi) Select(ctx context.Context, items []string) (string, error) {
 }
 
 // SelectMulti prompts the user to choose multiple items via rofi.
-func (r *Rofi) SelectMulti(ctx context.Context, items []string) ([]string, error) {
+func (r *RofiPicker) SelectMulti(ctx context.Context, items []string) ([]string, error) {
 	args := r.baseArgs()
 	args = append(args, "-dmenu", "-multi-select")
 
@@ -55,7 +55,7 @@ func (r *Rofi) SelectMulti(ctx context.Context, items []string) ([]string, error
 	return result, nil
 }
 
-func (r *Rofi) baseArgs() []string {
+func (r *RofiPicker) baseArgs() []string {
 	if r.ConfigPath != "" {
 		return []string{"-config", r.ConfigPath}
 	}
