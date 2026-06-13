@@ -1,74 +1,87 @@
 package themes
 
 import (
-	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
 
-	"github.com/rvelte/vlx/internal/app/themes/templates"
 	"gopkg.in/ini.v1"
 )
 
-func currentTheme() (Theme, error) {
-	return loadTheme("current"), nil
+type Theme struct {
+	Icon      string
+	Id        string
+	Name      string
+	Wallpaper string
+	Path      string
 }
 
-func listThemes() ([]Theme, error) {
-	entries, err := os.ReadDir(stateDir())
-
+func decodeTheme(_ string, path string, data []byte) (*Theme, error) {
+	cfg, err := ini.LoadSources(ini.LoadOptions{SpaceBeforeInlineComment: true}, data)
 	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return []Theme{}, nil
-		}
 		return nil, err
 	}
 
-	var themes []Theme
-	for _, entry := range entries {
-		if !entry.IsDir() || entry.Name() == "current" {
-			continue
-		}
-		theme := loadTheme(entry.Name())
-		themes = append(themes, theme)
-	}
-
-	return themes, nil
-}
-
-func loadTheme(from string) Theme {
-	path := filepath.Join(stateDir(), from, "theme.conf")
-
-	cfg, err := ini.Load(path)
-	if err != nil {
-		return Theme{Location: path, Name: path, Valid: false}
-	}
-
-	section := cfg.Section("theme")
-	return Theme{
-		Icon:     section.Key("icon").String(),
-		Id:       section.Key("id").String(),
-		Name:     section.Key("name").String(),
-		Location: path,
-		Valid:    true,
-	}
-}
-
-func loadThemeData(name string) (templates.ThemeColorData, error) {
-	path := filepath.Join(stateDir(), name, "theme.conf")
-
-	cfg, err := ini.LoadSources(ini.LoadOptions{
-		IgnoreInlineComment: true,
-		AllowShadows:        false,
-	}, path)
-
-	if err != nil {
-		return templates.ThemeColorData{}, fmt.Errorf("failed to load theme data for %q: %w", name, err)
-	}
-
 	s := cfg.Section("theme")
+	t := &Theme{
+		Icon:      s.Key("icon").String(),
+		Id:        s.Key("id").String(),
+		Name:      s.Key("name").String(),
+		Wallpaper: s.Key("wallpaper").String(),
+		Path:      path,
+	}
+	if t.Id == "" {
+		return nil, fmt.Errorf("theme %s has no id", path)
+	}
+	return t, nil
+}
 
-	d := templates.ThemeColorData{
+type ThemeContent struct {
+	Primary         string
+	PrimaryDim      string
+	PrimarySubtle   string
+	PrimaryMuted    string
+	Secondary       string
+	SecondaryDim    string
+	SecondaryLight  string
+	Accent          string
+	AccentDim       string
+	AccentLight     string
+	Base            string
+	Mantle          string
+	Crust           string
+	Surface0        string
+	Surface1        string
+	Surface2        string
+	Text            string
+	Subtext         string
+	Overlay         string
+	Muted           string
+	Success         string
+	Warning         string
+	WarningSubtle   string
+	Error           string
+	ErrorSubtle     string
+	Info            string
+	InfoSubtle      string
+	OnPrimary       string
+	OnSecondary     string
+	OnAccent        string
+	OnSurface       string
+	FontName        string
+	FontNameHeading string
+	FontNameMono    string
+	FontSize        string
+	FontSizeSmall   string
+	FontSizeLarge   string
+	FontSizeHeading string
+}
+
+func decodeThemeContent(_ string, _ string, data []byte) (*ThemeContent, error) {
+	cfg, err := ini.LoadSources(ini.LoadOptions{SpaceBeforeInlineComment: true}, data)
+	if err != nil {
+		return nil, err
+	}
+	s := cfg.Section("theme")
+	return &ThemeContent{
 		Primary:         s.Key("color_primary").String(),
 		PrimaryDim:      s.Key("color_primary_dim").String(),
 		PrimarySubtle:   s.Key("color_primary_subtle").String(),
@@ -107,7 +120,5 @@ func loadThemeData(name string) (templates.ThemeColorData, error) {
 		FontSizeSmall:   s.Key("font_size_small").String(),
 		FontSizeLarge:   s.Key("font_size_large").String(),
 		FontSizeHeading: s.Key("font_size_heading").String(),
-	}
-
-	return d, nil
+	}, nil
 }
