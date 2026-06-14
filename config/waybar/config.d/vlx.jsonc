@@ -7,4 +7,9 @@
     "tooltip": false,
     "on-click": "vlx themes switch"
   },
+  "custom/stat": {
+    "exec": "vlx stat waybar",
+    "interval": 3600,
+    "signal": 2
+  }
 }

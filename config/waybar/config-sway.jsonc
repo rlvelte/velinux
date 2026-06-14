@@ -70,6 +70,7 @@
       "custom/openbracket",
       "pulseaudio",
       "custom/seperator",
+      "clock#date",
       "clock",
       "custom/seperator",
       "custom/power",
