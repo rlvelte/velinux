@@ -29,6 +29,7 @@ func Command() *cobra.Command {
 		Long:              "Manage and switch between theme profiles for velinux.",
 		PersistentPreRunE: setup,
 		Args:              cobra.NoArgs,
+		Aliases:           []string{"theme"}, // typo protection
 		SilenceUsage:      true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
@@ -153,7 +154,6 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 				break
 			}
 		}
-
 	} else {
 		req := args[0]
 		for _, t := range themes {

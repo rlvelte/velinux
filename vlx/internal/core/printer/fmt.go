@@ -71,13 +71,13 @@ func (b *FmtPrinter) Confirm(msg string, defaultYes bool) bool {
 
 // Spinner shows a progress indicator.
 func (b *FmtPrinter) Spinner(label string, fn func() error) error {
-	fmt.Printf("%s...", label)
+	fmt.Printf("%s...\n", label)
 	err := fn()
 
 	if err != nil {
-		fmt.Println(" failed")
+		fmt.Println("Failed")
 	} else {
-		fmt.Println(" done")
+		fmt.Println("Done")
 	}
 
 	return err

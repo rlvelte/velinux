@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/rlvelte/velinux/vlx/internal/app/bundle"
 	"github.com/rlvelte/velinux/vlx/internal/core/guard"
 	"github.com/spf13/cobra"
 
@@ -29,6 +30,7 @@ func main() {
 		completions(),
 		pkg.Command(),
 		themes.Command(),
+		bundle.Command(),
 	)
 
 	if err := root.Execute(); err != nil {

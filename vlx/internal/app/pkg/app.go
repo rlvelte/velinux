@@ -31,6 +31,7 @@ func Command() *cobra.Command {
 		Long:              "Package install wrapper around zypper with interactive search.",
 		PersistentPreRunE: setup,
 		Args:              cobra.ArbitraryArgs,
+		Aliases:           []string{"pgk"}, // typo protection
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmdInstall(cmd, strings.Join(args, " "))
 		},
