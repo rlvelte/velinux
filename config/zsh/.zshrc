@@ -34,6 +34,9 @@ plugins=(
     zsh-autosuggestions
     zsh-syntax-highlighting
     zsh-eza
+    extract
+    docker
+    mise
 )
 
 # Source

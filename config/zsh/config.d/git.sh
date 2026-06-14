@@ -4,7 +4,7 @@
 alias ga="git add ."
 alias gs="git status"
 alias gp="git push"
-gco() { git commit "$1" "$2" }
+gco() { git commit "$@"; }
 
 # Hooks
 autoload -U add-zsh-hook
