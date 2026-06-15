@@ -1,0 +1,45 @@
+{
+  "$schema": "bundle.schema.json",
+  "zypper": [
+    "git",
+    "gcc",
+    "gcc-c++",
+    "meson",
+    "ninja",
+    "make",
+    "scdoc",
+    "pkgconf-pkg-config",
+    "wayland-devel",
+    "wayland-protocols-devel",
+    "libinput-devel",
+    "libevdev-devel",
+    "libdrm-devel",
+    "libgbm-devel",
+    "libxkbcommon-devel",
+    "libxcb-devel",
+    "systemd-devel",
+    "Mesa-libEGL-devel",
+    "Mesa-libGLESv2-devel",
+    "Mesa-dri",
+    "xwayland-devel",
+    "libpixman-1-0-devel",
+    "pango-devel",
+    "cairo-devel",
+    "gdk-pixbuf-devel",
+    "pcre2-devel",
+    "libjson-c-devel",
+    "hwdata",
+    "pam-devel",
+    "libpcap-devel",
+    "libliftoff-devel"
+  ],
+  "pre": [
+    "rm -rf /tmp/swayfx-build"
+  ],
+  "post": [
+    "git clone https://github.com/WillPower3309/swayfx.git /tmp/swayfx-build",
+    "cd /tmp/swayfx-build",
+    "meson setup build --prefix=/usr",
+    "sudo ninja -C build install"
+  ]
+}

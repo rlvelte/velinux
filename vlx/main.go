@@ -5,17 +5,22 @@ import (
 	"log"
 	"os"
 
+	"github.com/rlvelte/velinux/vlx/internal/app/bundle"
+	"github.com/rlvelte/velinux/vlx/internal/core/guard"
 	"github.com/spf13/cobra"
 
-	"github.com/rvelte/vlx/internal/app/pkg"
-	"github.com/rvelte/vlx/internal/app/stat"
-	"github.com/rvelte/vlx/internal/app/themes"
+	"github.com/rlvelte/velinux/vlx/internal/app/pkg"
+	"github.com/rlvelte/velinux/vlx/internal/app/themes"
 )
 
 func main() {
 	root := &cobra.Command{
 		Use:   "vlx",
-		Short: "vlx utility application by rvelte",
+		Short: "Horribly bad utility application",
+		Long:  "VeLinux centered command utility by rvelte.",
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			return guard.OS()
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -24,8 +29,8 @@ func main() {
 	root.AddCommand(
 		completions(),
 		pkg.Command(),
-		stat.Command(),
 		themes.Command(),
+		bundle.Command(),
 	)
 
 	if err := root.Execute(); err != nil {

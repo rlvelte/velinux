@@ -40,6 +40,8 @@
       "cpu",
       "custom/seperator",
       "memory",
+      "custom/seperator",
+      "custom/home-disk",
       "custom/seperator"
     ]
   },
@@ -68,9 +70,9 @@
       "custom/openbracket",
       "pulseaudio",
       "custom/seperator",
-      "clock",
+      "clock#date",
       "custom/seperator",
-      "custom/power",
+      "clock",
       "custom/closebracket"
     ]
   }

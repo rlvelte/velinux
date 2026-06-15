@@ -1,0 +1,15 @@
+{
+  "$schema": "bundle.schema.json",
+  "zypper": [
+    "docker",
+    "containerd",
+    "k3s-selinux",
+    "k9s",
+    "helm"
+  ],
+  "post": [
+    "sudo systemctl enable --now docker",
+    "sudo usermod -aG docker $USER",
+    "curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC=\"--write-kubeconfig-mode 644\" sh -s -"
+  ]
+}

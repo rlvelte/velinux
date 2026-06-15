@@ -1,42 +1,36 @@
 package themes
 
 import (
-	"errors"
+	"context"
 	"fmt"
-	"log/slog"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"sort"
 
-	"github.com/rvelte/vlx/internal/core/notify"
-	"github.com/rvelte/vlx/internal/core/picker"
-	"github.com/rvelte/vlx/internal/system/guard"
-	"github.com/rvelte/vlx/internal/system/xdg"
+	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
+	"github.com/rlvelte/velinux/vlx/internal/core/notify"
+	"github.com/rlvelte/velinux/vlx/internal/core/picker"
+	"github.com/rlvelte/velinux/vlx/internal/core/printer"
 	"github.com/spf13/cobra"
 )
 
-// Theme information for identification.
-type Theme struct {
-	Icon     string // Icon in ASCII format
-	Id       string // Id for this theme
-	Name     string // Human-readable Name
-	Location string // Filesystem Location
-	Valid    bool   // If .ini file is Valid
+// setup configures all requirements and guards against wrong usage.
+func setup(cmd *cobra.Command, _ []string) error {
+	cmd.SetContext(context.WithValue(cmd.Context(), notify.ContextKey, notify.New()))
+	cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, printer.New()))
+	return nil
 }
 
-// stateDir returns the location of system-wide installed themes.
-func stateDir() string {
-	return xdg.ConfigPath("vlx", "themes")
-}
-
-// ensure validates all requirements for further processing.
-func ensure(_ *cobra.Command, _ []string) error {
-	return guard.OS()
-}
-
-// Command returns the cobra command tree for vlx themes.
 func Command() *cobra.Command {
 	root := &cobra.Command{
 		Use:               "themes",
-		Short:             "Theming manager for velinux",
-		PersistentPreRunE: ensure,
+		Short:             "Horribly bad theming manager for velinux",
+		Long:              "Manage and switch between theme profiles for velinux.",
+		PersistentPreRunE: setup,
+		Args:              cobra.NoArgs,
+		Aliases:           []string{"theme"}, // typo protection
+		SilenceUsage:      true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -46,102 +40,212 @@ func Command() *cobra.Command {
 		&cobra.Command{
 			Use:     "list",
 			Short:   "List available theme profiles",
+			Long:    "List all available theme profiles with their icons and IDs.",
 			Aliases: []string{"ls"},
+			Args:    cobra.NoArgs,
 			RunE:    cmdList,
 		},
 		&cobra.Command{
-			Use:     "switch [theme]",
-			Short:   "Switch to theme and apply",
+			Use:     "apply [theme]",
+			Short:   "Apply a theme",
+			Long:    "Apply a theme by name or interactively select from a list.",
 			Aliases: []string{"sw"},
-			RunE:    cmdSwitch,
+			Args:    cobra.MaximumNArgs(1),
+			RunE:    cmdApply,
 		},
 		&cobra.Command{
-			Use:   "waybar",
-			Short: "Show current theme in waybar format",
-			RunE:  cmdWaybar,
+			Use:    "waybar",
+			Short:  "Show current theme for waybar",
+			Long:   "Output the current theme's icon in waybar-compatible format.",
+			Args:   cobra.NoArgs,
+			Hidden: true,
+			RunE:   cmdWaybar,
 		},
 	)
 
 	return root
 }
 
-// cmdList lists all available themes.
-func cmdList(_ *cobra.Command, _ []string) error {
-	themes, err := listThemes()
+func cmdList(cmd *cobra.Command, _ []string) error {
+	p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+
+	themesDir := fsys.ConfigPath("vlx", "themes")
+	store := fsys.NewStore(themesDir, decodeTheme, ".conf")
+	active := current()
+
+	all, err := store.List()
 	if err != nil {
-		return fmt.Errorf("failed to list themes: %w", err)
-	}
-
-	if len(themes) == 0 {
-		slog.Warn("No themes found. Themes are located in: " + stateDir())
-		return nil
-	}
-
-	for _, t := range themes {
-		fmt.Printf("%s\t%s\t%s\n", t.Icon, t.Id, t.Name)
-	}
-
-	return nil
-}
-
-// cmdSwitch switches to the specified theme.
-func cmdSwitch(cmd *cobra.Command, args []string) error {
-	var name string
-
-	if len(args) == 0 {
-		themes, err := listThemes()
-		if err != nil {
-			return fmt.Errorf("failed to list themes: %w", err)
-		}
-
-		if len(themes) == 0 {
-			return errors.New("no themes available")
-		}
-
-		items := make([]string, len(themes))
-		for i, t := range themes {
-			items[i] = t.Name
-		}
-
-		picker := picker.New()
-		if picker == nil {
-			return errors.New("no picker backend available")
-		}
-
-		selected, err := picker.Select(cmd.Context(), items)
-		if err != nil {
-			return fmt.Errorf("theme selection cancelled: %w", err)
-		}
-
-		name = selected
-	} else {
-		name = args[0]
-	}
-
-	if err := switchTheme(name); err != nil {
 		return err
 	}
 
-	_ = notify.NotifyWith(&notify.NotifyConfig{
-		Title:   "vlx",
+	seen := make(map[string]bool)
+	var list []*Theme
+	for _, t := range all {
+		if seen[t.Id] {
+			continue
+		}
+
+		seen[t.Id] = true
+		list = append(list, t)
+	}
+
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].Name < list[j].Name
+	})
+
+	headers := []string{"ACTIVE", "ID", "Name"}
+	var rows [][]string
+	for _, t := range list {
+		marker := ""
+		if t.Id == active {
+			marker = "*"
+		}
+
+		rows = append(rows, []string{marker, t.Id, t.Name})
+	}
+
+	p.Table(headers, rows)
+	return nil
+}
+
+func cmdApply(cmd *cobra.Command, args []string) error {
+	themesDir := fsys.ConfigPath("vlx", "themes")
+
+	store := fsys.NewStore(themesDir, decodeTheme, ".conf")
+	all, err := store.List()
+	if err != nil {
+		return err
+	}
+
+	seen := make(map[string]bool)
+	var themes []*Theme
+	for _, t := range all {
+		if seen[t.Id] {
+			continue
+		}
+		seen[t.Id] = true
+		themes = append(themes, t)
+	}
+
+	var theme *Theme
+	if len(args) == 0 {
+		pkr := picker.New()
+		if pkr == nil {
+			return fmt.Errorf("no picker available")
+		}
+
+		sort.Slice(themes, func(i, j int) bool {
+			return themes[i].Name < themes[j].Name
+		})
+
+		names := make([]string, len(themes))
+		for i, t := range themes {
+			names[i] = t.Name
+		}
+
+		selected, err := pkr.Select(cmd.Context(), names)
+		if err != nil {
+			return err
+		}
+
+		for _, t := range themes {
+			if t.Name == selected {
+				theme = t
+				break
+			}
+		}
+	} else {
+		req := args[0]
+		for _, t := range themes {
+			if t.Id == req || t.Name == req {
+				theme = t
+				break
+			}
+		}
+	}
+
+	if theme == nil {
+		return fmt.Errorf("theme not found")
+	}
+
+	data, err := os.ReadFile(theme.Path)
+	if err != nil {
+		return err
+	}
+
+	content, err := decodeThemeContent("", theme.Path, data)
+	if err != nil {
+		return err
+	}
+
+	currentPath := filepath.Join(themesDir, "current.conf")
+	if err := os.Remove(currentPath); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	if err := os.Symlink(filepath.Base(theme.Path), currentPath); err != nil {
+		return err
+	}
+
+	wallpaperPath := filepath.Join(themesDir, "current.png")
+	if err := os.Remove(wallpaperPath); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	if err := os.Symlink(theme.Wallpaper, wallpaperPath); err != nil {
+		return err
+	}
+
+	if err := GenerateAll(*content); err != nil {
+		return err
+	}
+
+	if err := exec.Command("makoctl", "reload").Run(); err != nil {
+		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+		if p != nil {
+			p.Warn("mako reload failed (mako may not be running)")
+		}
+	}
+
+	n := notify.New()
+	_ = n.Send("Switched to theme "+theme.Name, &notify.Details{
+		Title:   "VLX Themes",
 		Urgency: "normal",
-	}, "You've switched to theme "+name)
+	})
+
+	p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+	if p != nil {
+		p.Info("Applied theme " + theme.Name)
+	}
 
 	return nil
 }
 
-// cmdWaybar shows the current theme name in waybar format.
 func cmdWaybar(_ *cobra.Command, _ []string) error {
-	theme, err := currentTheme()
+	data, err := os.ReadFile(filepath.Join(fsys.ConfigPath("vlx", "themes"), "current.conf"))
 	if err != nil {
-		return fmt.Errorf("failed to read current theme: %w", err)
+		return err
 	}
 
-	if theme.Id == "suse" {
-		fmt.Printf("%s ", theme.Icon)
-		return nil
+	t, err := decodeTheme("current", "", data)
+	if err != nil {
+		return err
 	}
 
-	fmt.Printf("%s", theme.Icon)
+	fmt.Print(t.Icon)
 	return nil
+}
+
+// current returns the currently active theme id.
+func current() string {
+	themes := fsys.ConfigPath("vlx", "themes")
+	data, err := os.ReadFile(filepath.Join(themes, "current.conf"))
+	if err != nil {
+		return ""
+	}
+
+	t, err := decodeTheme("current", "", data)
+	if err != nil {
+		return ""
+	}
+
+	return t.Id
 }

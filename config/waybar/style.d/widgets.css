@@ -3,9 +3,8 @@
     padding:       0 6px;
 }
 
-#custom-update {
-    color:         @subtext;
-    padding:       0 6px;
+#custom-stat.updates {
+    color:         @primary;
 }
 
 #custom-theme {
@@ -15,42 +14,45 @@
 }
 
 #custom-theme label {
-    min-width:      48px;
-    text-align:     center;
+    min-width: 48px;
 }
 
 #custom-power {
     color:          @subtext;
-    padding-left:   6px;
-    padding-right:  12px;
+    padding-left:   8px;
+    padding-right:  10px;
 }
 
 #idle_inhibitor {
     color:          @subtext;
     padding-left:   8px;
-    padding-right:  12px;
+    padding-right:  10px;
 }
 
 #idle_inhibitor.activated {
     color: @primary;
 }
 
-#custom-weather {
-    color:          @subtext;
-    padding-left:   4px;
-    padding-right:  6px;
-}
-
 #pulseaudio {
     color:          @subtext;
     padding-left:   8px;
-    padding-right:  12px;
+    padding-right:  10px;
 }
 
 #clock {
     color:       @primary;
     font-weight: 700;
     padding:     0 4px;
+}
+
+#clock.date {
+    color:       @subtext;
+    font-weight: 600;
+    padding:     0 4px;
+}
+
+#clock.date label {
+    font-weight: 400;
 }
 
 #mode,
@@ -63,6 +65,7 @@
 
 #cpu {
     color: @subtext;
+    padding: 0 4px;
 }
 #cpu.warning {
     color: @warning;
@@ -73,6 +76,7 @@
 
 #memory {
     color: @subtext;
+    padding: 0 4px;
 }
 #memory.warning {
     color: @warning;
@@ -83,4 +87,16 @@
 
 #network {
     color: @subtext;
+}
+
+#custom-root-disk,
+#custom-home-disk {
+    color: @subtext;
+    padding: 0 4px;
+}
+#disk.warning {
+    color: @warning;
+}
+#disk.critical {
+    color: @error;
 }

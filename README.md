@@ -18,7 +18,10 @@ velinux/
 │   ├── zsh/         # Shell configuration
 │   ├── eza/         # Fancy ls
 │   ├── git/         # Git configuration
-│   └── keyd/        # Key remapping
+│   ├── keyd/        # Key remapping
+│   └── vlx/         # vlx utility config
+│       ├── bundles/ # Bundle definitions
+│       └── themes/  # Theme profiles and wallpapers
 │
 ├── etc/             → /etc/
 │   └── greetd/      # Graphical greeter
@@ -26,10 +29,15 @@ velinux/
 ├── vlx/             → /usr/local/bin/
 │   ├── internal/
 │   │   ├── app/
-│   │   │   ├── pkg/      # Packages/Schemes
-│   │   │   ├── stat/     # Statistics
-│   │   │   └── themes/   # Themes
-│   │   └── system/
+│   │   │   ├── pkg/      # Package management
+│   │   │   ├── bundle/   # Bundle management
+│   │   │   └── themes/   # Theme management
+│   │   └── core/
+│   │       ├── fsys/     # Filesystem utilities
+│   │       ├── guard/    # Precondition checks
+│   │       ├── notify/   # Desktop notifications
+│   │       ├── picker/   # Interactive selection
+│   │       └── printer/  # Terminal output
 │   ├── main.go
 │   └── Makefile
 │

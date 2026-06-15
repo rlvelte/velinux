@@ -1,8 +1,13 @@
 {
-  "clock": {
-    "format": "{:%H:%M}",
+  "clock#date": {
+    "format": "{:%d.%m.%Y}",
     "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
     "onclick": "kalender"
+  },
+
+  "clock": {
+    "format": "{:%H:%M}",
+    "tooltip": false
   },
 
   "custom/power": {
@@ -66,5 +71,17 @@
     "format-ethernet": "{ipaddr}",
     "format-disconnected": "Disconnected",
     "tooltip": true
+  },
+
+  "custom/root-disk": {
+    "exec": "df -h / --output=pcent | tail -1 | tr -d ' '",
+    "format": "ROOT {}",
+    "interval": 30
+  },
+
+  "custom/home-disk": {
+    "exec": "df -h /home --output=pcent | tail -1 | tr -d ' '",
+    "format": "HOME {}",
+    "interval": 30
   }
 }

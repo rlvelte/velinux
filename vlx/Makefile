@@ -11,7 +11,7 @@ ZSH_COMPLETION_DIR  := /usr/share/zsh/site-functions
 
 .PHONY: build restore install
 
-## install: Install binary and shell completions system-wide
+## install: Install binary and shell completions guard-wide
 install: build
 	sudo install -m 755 -t $(INSTALL_DIR) build/vlx
 	sudo install -Dm644 build/completions/vlx.bash $(BASH_COMPLETION_DIR)/vlx

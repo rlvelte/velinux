@@ -1,7 +1,8 @@
+
 .modules-left,
 .modules-center,
 .modules-right {
-    padding: 0 4px;
+    padding: 0 0px;
 }
 
 label,
@@ -15,7 +16,7 @@ button {
 #custom-closebracket {
     color:       @subtext;
     font-weight: 700;
-    padding:     0 1px;
+    padding:     0 2px;
 }
 
 #custom-seperator {

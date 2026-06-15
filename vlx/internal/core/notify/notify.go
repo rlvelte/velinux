@@ -1,44 +1,44 @@
 package notify
 
-import (
-	"os/exec"
-	"strconv"
-)
+const ContextKey = "notify"
 
-// NotifyConfig describes the context for sending a notification via libnotify.
-type NotifyConfig struct {
+// Details describes the context for sending a notification.
+type Details struct {
 	Title   string // Title of the notification
 	Urgency string // Level of Urgency for this notification
 	Icon    string // Path to an Icon
 	Timeout int    // When the notification will time out
 }
 
-// Notify sends a desktop notification
-func Notify(message string) error {
-	return NotifyWith(nil, message)
+// Variant handles notification delivery.
+type Variant interface {
+	Available() bool                             // Available reports whether this backend can be used.
+	Send(message string, details *Details) error // Send delivers a notification with optional details.
 }
 
-// NotifyWith sends a desktop notification with the supplied config.
-func NotifyWith(cfg *NotifyConfig, message string) error {
-	var args []string
-	if cfg != nil {
-		if cfg.Urgency != "" {
-			args = append(args, "-u", cfg.Urgency)
-		}
-		if cfg.Icon != "" {
-			args = append(args, "-i", cfg.Icon)
-		}
-		if cfg.Timeout > 0 {
-			args = append(args, "-t", strconv.Itoa(cfg.Timeout))
-		}
-	}
+// Notify is the unified notification engine.
+type Notify struct {
+	variant Variant // The selected Variant for this engine.
+}
 
-	if cfg != nil && cfg.Title != "" {
-		args = append(args, cfg.Title, message)
-	} else {
-		args = append(args, message)
+// New creates an engine with an auto-detected backend.
+func New() *Notify {
+	return &Notify{
+		variant: auto(),
 	}
+}
 
-	cmd := exec.Command("notify-send", args...)
-	return cmd.Run()
+// Send delivers a notification with default settings.
+func (n *Notify) Send(message string, details *Details) error {
+	return n.variant.Send(message, details)
+}
+
+// ForceLibnotify forces the libnotify backend.
+func (n *Notify) ForceLibnotify() *Notify {
+	n.variant = &LibNotify{}
+	return n
+}
+
+func auto() Variant {
+	return &LibNotify{}
 }
