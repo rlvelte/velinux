@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily zypper repository refresh
+Requires=zypper-refresh.service
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=1h
+
+[Install]
+WantedBy=timers.target

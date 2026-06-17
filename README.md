@@ -24,7 +24,11 @@ velinux/
 │       └── themes/  # Theme profiles and wallpapers
 │
 ├── etc/             → /etc/
-│   └── greetd/      # Graphical greeter
+│   ├── greetd/      # Graphical greeter
+│   └── systemd/
+│       └── system/
+│           ├── zypper-refresh.service  # Zypper refresh oneshot
+│           └── zypper-refresh.timer    # Daily trigger
 │
 ├── vlx/             → /usr/local/bin/
 │   ├── internal/
