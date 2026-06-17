@@ -8,7 +8,7 @@ The repository layout mirrors the target filesystem for clarity:
 
 ```
 velinux/
-├── config/          → ~/.config/
+├── config/          
 │   ├── hypr/        # Hyprland window manager
 │   ├── sway/        # Sway window manager
 │   ├── waybar/      # Waybar status bar
@@ -23,19 +23,19 @@ velinux/
 │   │   └── user/
 │   │       ├── vlx-bl-tracker.service  # Bundesliga poll oneshot
 │   │       └── vlx-bl-tracker.timer    # 2-minute trigger
-│   └── vlx/         # vlx utility config
-│       ├── bundles/ # Bundle definitions
-│       ├── themes/  # Theme profiles and wallpapers
-│       └── bundesliga/  # Bundesliga config
+│   └── vlx/         
+│       ├── bundles/ 		# Bundle definitions
+│       ├── themes/  		# Theme profiles and wallpapers
+│       └── bundesliga/  	# Bundesliga config
 │
-├── etc/             → /etc/
+├── etc/             
 │   ├── greetd/      # Graphical greeter
 │   └── systemd/
 │       └── system/
 │           ├── zypper-refresh.service  # Zypper refresh oneshot
 │           └── zypper-refresh.timer    # Daily trigger
 │
-├── vlx/             → /usr/local/bin/
+├── vlx/             
 │   ├── internal/
 │   │   ├── app/
 │   │   │   ├── bundesliga/  # Bundesliga match tracker
