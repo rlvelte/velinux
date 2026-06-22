@@ -8,7 +8,7 @@ The repository layout mirrors the target filesystem for clarity:
 
 ```
 velinux/
-├── config/          → ~/.config/
+├── config/          
 │   ├── hypr/        # Hyprland window manager
 │   ├── sway/        # Sway window manager
 │   ├── waybar/      # Waybar status bar
@@ -19,22 +19,33 @@ velinux/
 │   ├── eza/         # Fancy ls
 │   ├── git/         # Git configuration
 │   ├── keyd/        # Key remapping
-│   └── vlx/         # vlx utility config
-│       ├── bundles/ # Bundle definitions
-│       └── themes/  # Theme profiles and wallpapers
+│   ├── systemd/
+│   │   └── user/
+│   │       ├── vlx-bl-tracker.service  # Bundesliga poll oneshot
+│   │       └── vlx-bl-tracker.timer    # 2-minute trigger
+│   └── vlx/         
+│       ├── bundles/ 		# Bundle definitions
+│       ├── themes/  		# Theme profiles and wallpapers
+│       └── bundesliga/  	# Bundesliga config
 │
-├── etc/             → /etc/
-│   └── greetd/      # Graphical greeter
+├── etc/             
+│   ├── greetd/      # Graphical greeter
+│   └── systemd/
+│       └── system/
+│           ├── zypper-refresh.service  # Zypper refresh oneshot
+│           └── zypper-refresh.timer    # Daily trigger
 │
-├── vlx/             → /usr/local/bin/
+├── vlx/             
 │   ├── internal/
 │   │   ├── app/
-│   │   │   ├── pkg/      # Package management
-│   │   │   ├── bundle/   # Bundle management
-│   │   │   └── themes/   # Theme management
+│   │   │   ├── bundesliga/  # Bundesliga match tracker
+│   │   │   ├── bundle/      # Bundle management
+│   │   │   ├── pkg/         # Package management
+│   │   │   └── themes/      # Theme management
 │   │   └── core/
 │   │       ├── fsys/     # Filesystem utilities
 │   │       ├── guard/    # Precondition checks
+│   │       ├── http/     # HTTP client
 │   │       ├── notify/   # Desktop notifications
 │   │       ├── picker/   # Interactive selection
 │   │       └── printer/  # Terminal output

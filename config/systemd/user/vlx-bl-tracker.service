@@ -1,0 +1,6 @@
+[Unit]
+Description=Bundesliga live score check
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/vlx bl setup --poll

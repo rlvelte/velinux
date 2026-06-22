@@ -30,7 +30,6 @@ func (b *FmtPrinter) Error(msg string) {
 	fmt.Fprintln(os.Stderr, "[ERR]", msg)
 }
 
-// Table prints data in a tabular format.
 func (b *FmtPrinter) Table(headers []string, rows [][]string) {
 	if len(headers) > 0 {
 		for i, h := range headers {
