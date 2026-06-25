@@ -29,7 +29,7 @@ func Command() *cobra.Command {
 		Long:              "Manage and switch between theme profiles for velinux.",
 		PersistentPreRunE: setup,
 		Args:              cobra.NoArgs,
-		Aliases:           []string{"theme"}, // typo protection
+		Aliases:           []string{"theme"},
 		SilenceUsage:      true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()

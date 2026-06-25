@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/rlvelte/velinux/vlx/internal/app/bundle"
 	"github.com/rlvelte/velinux/vlx/internal/app/bundesliga"
-	"github.com/rlvelte/velinux/vlx/internal/app/pkg"
+	"github.com/rlvelte/velinux/vlx/internal/app/bundle"
+	"github.com/rlvelte/velinux/vlx/internal/app/package"
 	"github.com/rlvelte/velinux/vlx/internal/app/themes"
 	"github.com/rlvelte/velinux/vlx/internal/core/guard"
 	"github.com/spf13/cobra"
@@ -28,7 +28,7 @@ func main() {
 
 	root.AddCommand(
 		completions(),
-		pkg.Command(),
+		_package.Command(),
 		themes.Command(),
 		bundle.Command(),
 		bundesliga.Command(),
@@ -44,7 +44,7 @@ func completions() *cobra.Command {
 		Use:    "completion [bash|zsh|fish]",
 		Short:  "Generate shell completion script",
 		Hidden: true,
-		Args:  cobra.ExactArgs(1),
+		Args:   cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			switch args[0] {
 			case "bash":

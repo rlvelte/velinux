@@ -89,6 +89,10 @@
     color: @subtext;
 }
 
+#tray {
+    padding: 0 4px;
+}
+
 #custom-root-disk,
 #custom-home-disk {
     color: @subtext;

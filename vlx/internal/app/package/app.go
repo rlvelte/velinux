@@ -1,4 +1,4 @@
-package pkg
+package _package
 
 import (
 	"context"
@@ -23,15 +23,15 @@ func setup(cmd *cobra.Command, _ []string) error {
 	return nil
 }
 
-// Command returns the cobra command tree for vlx pkg.
+// Command returns the cobra command tree for vlx package.
 func Command() *cobra.Command {
 	root := &cobra.Command{
-		Use:               "pkg",
+		Use:               "package",
 		Short:             "Horribly bad package installer",
 		Long:              "Package install wrapper around zypper with interactive search.",
 		PersistentPreRunE: setup,
 		Args:              cobra.ArbitraryArgs,
-		Aliases:           []string{"pgk"}, // typo protection
+		Aliases:           []string{"pgk", "pkg"}, // typo protection
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmdInstall(cmd, strings.Join(args, " "))
 		},

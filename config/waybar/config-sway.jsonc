@@ -68,6 +68,8 @@
     "orientation": "horizontal",
     "modules": [
       "custom/openbracket",
+      "tray",
+      "custom/seperator",
       "pulseaudio",
       "custom/seperator",
       "clock#date",

@@ -34,6 +34,7 @@ func Command() *cobra.Command {
 		Short:             "Horribly bad bundle/recipe installer",
 		Long:              "",
 		PersistentPreRunE: setup,
+		Aliases: 		   []string{"bun"},
 		Args:              cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()

@@ -83,5 +83,10 @@
     "exec": "df -h /home --output=pcent | tail -1 | tr -d ' '",
     "format": "HOME {}",
     "interval": 30
+  },
+
+  "tray": {
+    "icon-size": 21,
+    "spacing": 10
   }
 }
