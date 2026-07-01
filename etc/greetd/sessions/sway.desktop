@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Sway
 Comment=i3-compatible Wayland compositor
-Exec=sway
+Exec=sway-run.sh
 Type=Application
 DesktopNames=sway;wlroots
