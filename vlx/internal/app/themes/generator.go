@@ -23,6 +23,7 @@ type target struct {
 var targets = []target{
 	{"sway", func(d string) string { return filepath.Join(d, "sway", "config.d", "40-theme.conf") }},
 	{"hypr", func(d string) string { return filepath.Join(d, "hypr", "config.d", "40-theme.conf") }},
+	{"mangowm", func(d string) string { return filepath.Join(d, "mango", "config.d", "40-theme.conf") }},
 	{"waybar", func(d string) string { return filepath.Join(d, "waybar", "theme.css") }},
 	{"rofi", func(d string) string { return filepath.Join(d, "rofi", "theme.rasi") }},
 	{"kitty", func(d string) string { return filepath.Join(d, "kitty", "theme.conf") }},
