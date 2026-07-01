@@ -10,6 +10,7 @@ The repository layout mirrors the target filesystem for clarity:
 velinux/
 ├── config/          
 │   ├── hypr/        # Hyprland window manager
+│   ├── mango/       # Mangowm window manager
 │   ├── sway/        # Sway window manager
 │   ├── waybar/      # Waybar status bar
 │   ├── rofi/        # Application launcher
@@ -24,7 +25,7 @@ velinux/
 │   │       ├── vlx-bl-tracker.service  # Bundesliga poll oneshot
 │   │       └── vlx-bl-tracker.timer    # 2-minute trigger
 │   └── vlx/         
-│       ├── bundles/ 		# Bundle definitions
+│       ├── bundles/ 		# Bundle definitions (k3s, mango, swayfx, jetbrains, photogimp)
 │       ├── themes/  		# Theme profiles and wallpapers
 │       └── bundesliga/  	# Bundesliga config
 │
