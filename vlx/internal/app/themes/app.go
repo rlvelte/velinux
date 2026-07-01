@@ -205,6 +205,27 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	if err := exec.Command("swaymsg", "reload").Run(); err != nil {
+		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+		if p != nil {
+			p.Warn("sway reload failed (sway may not be running)")
+		}
+	}
+
+	if err := exec.Command("hyprctl", "reload").Run(); err != nil {
+		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+		if p != nil {
+			p.Warn("hypr reload failed (Hyprland may not be running)")
+		}
+	}
+
+	if err := exec.Command("mmsg", "dispatch", "reload_config").Run(); err != nil {
+		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+		if p != nil {
+			p.Warn("mango reload failed (mango may not be running)")
+		}
+	}
+
 	n := notify.New()
 	_ = n.Send("Switched to theme "+theme.Name, &notify.Details{
 		Title:   "VLX Themes",
