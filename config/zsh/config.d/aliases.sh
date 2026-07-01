@@ -8,6 +8,9 @@ alias b='bat'
 alias ff='fastfetch'
 alias of='onefetch'
 
+# Opencode
+alias oc='opencode'
+
 # Systemctl
 alias shutdown='systemctl poweroff'
 alias reboot='systemctl reboot'
