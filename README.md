@@ -19,7 +19,6 @@ velinux/
 │   ├── zsh/         # Shell configuration
 │   ├── eza/         # Fancy ls
 │   ├── git/         # Git configuration
-│   ├── keyd/        # Key remapping
 │   ├── systemd/
 │   │   └── user/
 │   │       ├── vlx-bl-tracker.service  # Bundesliga poll oneshot
@@ -31,6 +30,7 @@ velinux/
 │
 ├── etc/             
 │   ├── greetd/      # Graphical greeter
+│   ├── keyd/        # Key remapping
 │   └── systemd/
 │       └── system/
 │           ├── zypper-refresh.service  # Zypper refresh oneshot
