@@ -1,57 +1,50 @@
 # VeLinux - Opinionated openSUSE Configuration
-My very own opinionated openSUSE dotfiles featuring a curated selection of packages, system configurations, and the `vlx` utility suite for theme management and some other tasks.
+
+My very own opinionated openSUSE dotfiles featuring a curated selection of packages,
+system configurations, and the `vlx` utility suite for theme management and more.
 
 > This is not a plug-and-play setup! Some manual linking and configuration is still required.
 
 ## Repository Structure
-The repository layout mirrors the target filesystem for clarity:
+
+The repository mirrors the target filesystem for clarity:
 
 ```
 velinux/
-├── config/          
-│   ├── hypr/        # Hyprland window manager
-│   ├── sway/        # Sway window manager
-│   ├── waybar/      # Waybar status bar
-│   ├── rofi/        # Application launcher
-│   ├── kitty/       # Terminal emulator
-│   ├── mako/        # Notification daemon
-│   ├── zsh/         # Shell configuration
-│   ├── eza/         # Fancy ls
-│   ├── git/         # Git configuration
-│   ├── keyd/        # Key remapping
-│   ├── systemd/
-│   │   └── user/
-│   │       ├── vlx-bl-tracker.service  # Bundesliga poll oneshot
-│   │       └── vlx-bl-tracker.timer    # 2-minute trigger
-│   └── vlx/         
-│       ├── bundles/ 		# Bundle definitions
-│       ├── themes/  		# Theme profiles and wallpapers
-│       └── bundesliga/  	# Bundesliga config
+├── config/              
+│   ├── environment.d/   # Environment variables
+│   ├── eza/             # Fancy ls
+│   ├── git/             # Git configuration
+│   ├── hypr/            # Hyprland window manager
+│   ├── kitty/           # Terminal emulator
+│   ├── mako/            # Notification daemon
+│   ├── mango/           # Mangowm window manager
+│   ├── quickshell/      # Desktop shell
+│   ├── sway/            # Sway window manager
+│   ├── systemd/		 # User scoped systemd services
+│   ├── vlx/
+│   │   ├── bundles/     # Bundle definitions
+│   │   ├── themes/      # Theme profiles and wallpapers
+│   │   └── bundesliga/  # Bundesliga config
+│   └── zsh/             # Shell configuration
 │
-├── etc/             
-│   ├── greetd/      # Graphical greeter
-│   └── systemd/
-│       └── system/
-│           ├── zypper-refresh.service  # Zypper refresh oneshot
-│           └── zypper-refresh.timer    # Daily trigger
+├── etc/                 
+│   ├── greetd/          # Graphical greeter
+│   ├── keyd/            # Key remapping
+│   └── systemd/		 # System scoped systemd services
 │
-├── vlx/             
+├── vlx/                 
 │   ├── internal/
 │   │   ├── app/
-│   │   │   ├── bundesliga/  # Bundesliga match tracker
-│   │   │   ├── bundle/      # Bundle management
-│   │   │   ├── pkg/         # Package management
-│   │   │   └── themes/      # Theme management
-│   │   └── core/
-│   │       ├── fsys/     # Filesystem utilities
-│   │       ├── guard/    # Precondition checks
-│   │       ├── http/     # HTTP client
-│   │       ├── notify/   # Desktop notifications
-│   │       ├── picker/   # Interactive selection
-│   │       └── printer/  # Terminal output
+│   │   │   ├── bundesliga/ # Bundesliga match tracker
+│   │   │   ├── bundle/     # Bundle installer
+│   │   │   ├── package/    # Package wrapper
+│   │   │   └── themes/     # Theme management
+│   │   └── core/			# Utilities
 │   ├── main.go
 │   └── Makefile
 │
+├── LICENSE.md
 └── README.md
 ```
 

@@ -11,4 +11,4 @@ include ~/.config/sway/config.d/bindings/*.conf
 include ~/.config/sway/config.d/rules/*.conf
 
 # Use only if you use SwayFX
-include ~/.config/sway/config.d/fx/*.conf
+# include ~/.config/sway/config.d/fx/*.conf

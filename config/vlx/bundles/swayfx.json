@@ -34,10 +34,18 @@
     "libliftoff-devel"
   ],
   "pre": [
-    "rm -rf /tmp/swayfx-build"
+    "rm -rf /tmp/wlroots-build /tmp/scenefx-build /tmp/swayfx-build"
   ],
   "post": [
-    "git clone https://github.com/WillPower3309/swayfx.git /tmp/swayfx-build",
+    "git clone -b 0.19.3 https://gitlab.freedesktop.org/wlroots/wlroots.git /tmp/wlroots-build",
+    "cd /tmp/wlroots-build",
+    "meson setup build --prefix=/usr",
+    "sudo ninja -C build install",
+    "git clone -b 0.4.1 https://github.com/wlrfx/scenefx.git /tmp/scenefx-build",
+    "cd /tmp/scenefx-build",
+    "meson setup build --prefix=/usr",
+    "sudo ninja -C build install",
+    "git clone -b 0.5.3 https://github.com/WillPower3309/swayfx.git /tmp/swayfx-build",
     "cd /tmp/swayfx-build",
     "meson setup build --prefix=/usr",
     "sudo ninja -C build install"

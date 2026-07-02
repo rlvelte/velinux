@@ -2,6 +2,7 @@ package themes
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -29,22 +30,25 @@ func Command() *cobra.Command {
 		Long:              "Manage and switch between theme profiles for velinux.",
 		PersistentPreRunE: setup,
 		Args:              cobra.NoArgs,
-		Aliases:           []string{"theme"}, // typo protection
+		Aliases:           []string{"theme"},
 		SilenceUsage:      true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
 	}
 
+	cmdListCmd := &cobra.Command{
+		Use:     "list",
+		Short:   "List available theme profiles",
+		Long:    "List all available theme profiles with their icons and IDs.",
+		Aliases: []string{"ls"},
+		Args:    cobra.NoArgs,
+		RunE:    cmdList,
+	}
+	cmdListCmd.Flags().BoolP("json", "j", false, "output as JSON")
+
 	root.AddCommand(
-		&cobra.Command{
-			Use:     "list",
-			Short:   "List available theme profiles",
-			Long:    "List all available theme profiles with their icons and IDs.",
-			Aliases: []string{"ls"},
-			Args:    cobra.NoArgs,
-			RunE:    cmdList,
-		},
+		cmdListCmd,
 		&cobra.Command{
 			Use:     "apply [theme]",
 			Short:   "Apply a theme",
@@ -53,22 +57,19 @@ func Command() *cobra.Command {
 			Args:    cobra.MaximumNArgs(1),
 			RunE:    cmdApply,
 		},
-		&cobra.Command{
-			Use:    "waybar",
-			Short:  "Show current theme for waybar",
-			Long:   "Output the current theme's icon in waybar-compatible format.",
-			Args:   cobra.NoArgs,
-			Hidden: true,
-			RunE:   cmdWaybar,
-		},
 	)
 
 	return root
 }
 
-func cmdList(cmd *cobra.Command, _ []string) error {
-	p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+type themeJSON struct {
+	Id     string `json:"id"`
+	Name   string `json:"name"`
+	Icon   string `json:"icon"`
+	Active bool   `json:"active"`
+}
 
+func cmdList(cmd *cobra.Command, _ []string) error {
 	themesDir := fsys.ConfigPath("vlx", "themes")
 	store := fsys.NewStore(themesDir, decodeTheme, ".conf")
 	active := current()
@@ -84,6 +85,9 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 		if seen[t.Id] {
 			continue
 		}
+		if filepath.Base(t.Path) == "current.conf" {
+			continue
+		}
 
 		seen[t.Id] = true
 		list = append(list, t)
@@ -93,6 +97,28 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 		return list[i].Name < list[j].Name
 	})
 
+	jsonFlag, _ := cmd.Flags().GetBool("json")
+	if jsonFlag {
+		var out []themeJSON
+		for _, t := range list {
+			out = append(out, themeJSON{
+				Id:     t.Id,
+				Name:   t.Name,
+				Icon:   t.Icon,
+				Active: t.Id == active,
+			})
+		}
+
+		data, err := json.Marshal(out)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(string(data))
+		return nil
+	}
+
+	p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 	headers := []string{"ACTIVE", "ID", "Name"}
 	var rows [][]string
 	for _, t := range list {
@@ -121,6 +147,9 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 	var themes []*Theme
 	for _, t := range all {
 		if seen[t.Id] {
+			continue
+		}
+		if filepath.Base(t.Path) == "current.conf" {
 			continue
 		}
 		seen[t.Id] = true
@@ -198,10 +227,31 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	if err := exec.Command("swaymsg", "reload").Run(); err != nil {
+		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+		if p != nil {
+			p.Warn("sway reload failed (sway may not be running)")
+		}
+	}
+
+	if err := exec.Command("hyprctl", "reload").Run(); err != nil {
+		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+		if p != nil {
+			p.Warn("hypr reload failed (Hyprland may not be running)")
+		}
+	}
+
 	if err := exec.Command("makoctl", "reload").Run(); err != nil {
 		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 		if p != nil {
 			p.Warn("mako reload failed (mako may not be running)")
+		}
+	}
+
+	if err := exec.Command("mmsg", "dispatch", "reload_config").Run(); err != nil {
+		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+		if p != nil {
+			p.Warn("mango reload failed (mango may not be running)")
 		}
 	}
 
@@ -216,21 +266,6 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 		p.Info("Applied theme " + theme.Name)
 	}
 
-	return nil
-}
-
-func cmdWaybar(_ *cobra.Command, _ []string) error {
-	data, err := os.ReadFile(filepath.Join(fsys.ConfigPath("vlx", "themes"), "current.conf"))
-	if err != nil {
-		return err
-	}
-
-	t, err := decodeTheme("current", "", data)
-	if err != nil {
-		return err
-	}
-
-	fmt.Print(t.Icon)
 	return nil
 }
 
