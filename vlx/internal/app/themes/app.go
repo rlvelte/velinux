@@ -36,15 +36,18 @@ func Command() *cobra.Command {
 		},
 	}
 
+	cmdListCmd := &cobra.Command{
+		Use:     "list",
+		Short:   "List available theme profiles",
+		Long:    "List all available theme profiles with their icons and IDs.",
+		Aliases: []string{"ls"},
+		Args:    cobra.NoArgs,
+		RunE:    cmdList,
+	}
+	cmdListCmd.Flags().BoolP("json", "j", false, "output as JSON")
+
 	root.AddCommand(
-		&cobra.Command{
-			Use:     "list",
-			Short:   "List available theme profiles",
-			Long:    "List all available theme profiles with their icons and IDs.",
-			Aliases: []string{"ls"},
-			Args:    cobra.NoArgs,
-			RunE:    cmdList,
-		},
+		cmdListCmd,
 		&cobra.Command{
 			Use:     "apply [theme]",
 			Short:   "Apply a theme",
@@ -237,21 +240,6 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 		p.Info("Applied theme " + theme.Name)
 	}
 
-	return nil
-}
-
-func cmdWaybar(_ *cobra.Command, _ []string) error {
-	data, err := os.ReadFile(filepath.Join(fsys.ConfigPath("vlx", "themes"), "current.conf"))
-	if err != nil {
-		return err
-	}
-
-	t, err := decodeTheme("current", "", data)
-	if err != nil {
-		return err
-	}
-
-	fmt.Print(t.Icon)
 	return nil
 }
 
