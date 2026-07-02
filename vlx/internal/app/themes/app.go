@@ -241,6 +241,13 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	if err := exec.Command("makoctl", "reload").Run(); err != nil {
+		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+		if p != nil {
+			p.Warn("mako reload failed (mako may not be running)")
+		}
+	}
+
 	if err := exec.Command("mmsg", "dispatch", "reload_config").Run(); err != nil {
 		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 		if p != nil {
