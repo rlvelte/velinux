@@ -1,0 +1,14 @@
+[Unit]
+Description=VeLinux Quickshell
+Documentation=https://quickshell.org
+After=graphical-session.target
+Wants=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/env QT_QPA_PLATFORM=wayland quickshell -p %h/.config/quickshell
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

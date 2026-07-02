@@ -12,10 +12,8 @@ velinux/
 │   ├── hypr/        # Hyprland window manager
 │   ├── mango/       # Mangowm window manager
 │   ├── sway/        # Sway window manager
-│   ├── waybar/      # Waybar status bar
-│   ├── rofi/        # Application launcher
+│   ├── quickshell/  # Desktop shell (bar, launcher, notifications)
 │   ├── kitty/       # Terminal emulator
-│   ├── mako/        # Notification daemon
 │   ├── zsh/         # Shell configuration
 │   ├── eza/         # Fancy ls
 │   ├── git/         # Git configuration
