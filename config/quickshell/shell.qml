@@ -3,14 +3,15 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import qs.bar
+import qs.commandcenter
 import qs.lock
 import qs.menus
-import qs.vlx
+import qs.services
 
 ShellRoot {
-    LauncherMenu {}
+    PickerMenu {}
     PowerMenu {}
-    VlxPicker { id: pickerInstance }
+    CommandCenterPanel {}
 
     LockContext {
         id: lockContext
@@ -28,18 +29,6 @@ ShellRoot {
                 anchors.fill: parent
                 context: lockContext
             }
-        }
-    }
-
-    IpcHandler {
-        target: "picker"
-
-        function open(filePath: string, resultPath: string): void {
-            pickerInstance.open(filePath, resultPath, false)
-        }
-
-        function openMulti(filePath: string, resultPath: string): void {
-            pickerInstance.open(filePath, resultPath, true)
         }
     }
 
