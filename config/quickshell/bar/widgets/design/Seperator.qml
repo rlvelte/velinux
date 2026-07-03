@@ -12,7 +12,7 @@ Item {
         text: "|"
         color: Theme.surface1
         font.family: Theme.fontName
-        font.pixelSize: 18
+        font.pixelSize: Theme.fontSizeHeading
         rightPadding: 4
         leftPadding: 4
         verticalAlignment: Text.AlignVCenter

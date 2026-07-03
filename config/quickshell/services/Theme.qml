@@ -50,9 +50,9 @@ Singleton {
     // --- Typography ---
     readonly property string fontName: "SUSE"
     readonly property string fontNameHeading: "SUSE"
-    readonly property string fontNameMono: "JetBrains Mono"
-    readonly property int fontSize: 12
-    readonly property int fontSizeSmall: 10
-    readonly property int fontSizeLarge: 14
-    readonly property int fontSizeHeading: 16
+    readonly property string fontNameMono: "SUSE Mono"
+    readonly property int fontSize: 16
+    readonly property int fontSizeSmall: 14
+    readonly property int fontSizeLarge: 18
+    readonly property int fontSizeHeading: 20
 }

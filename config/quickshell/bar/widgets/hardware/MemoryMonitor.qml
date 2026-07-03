@@ -19,7 +19,7 @@ Item {
             return Theme.subtext
         }
         font.family: Theme.fontName
-        font.pixelSize: 18
+        font.pixelSize: Theme.fontSizeHeading
         font.weight: Font.Medium
         verticalAlignment: Text.AlignVCenter
     }

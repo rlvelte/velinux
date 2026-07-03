@@ -13,7 +13,7 @@ Item {
         text: ToplevelManager.activeToplevel ? ToplevelManager.activeToplevel.title.substring(0, 80) : "..."
         color: Theme.text
         font.family: Theme.fontName
-        font.pixelSize: 18
+        font.pixelSize: Theme.fontSizeHeading
         font.weight: Font.Medium
         elide: Text.ElideRight
         verticalAlignment: Text.AlignVCenter

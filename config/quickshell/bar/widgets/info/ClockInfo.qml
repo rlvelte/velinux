@@ -21,7 +21,7 @@ Item {
             text: Qt.formatDate(clock.date, "dd.MM.yyyy")
             color: Theme.subtext
             font.family: Theme.fontName
-            font.pixelSize: 18
+            font.pixelSize: Theme.fontSizeHeading
             font.weight: Font.Medium
         }
 
@@ -29,7 +29,7 @@ Item {
             text: "|"
             color: Theme.surface1
             font.family: Theme.fontName
-            font.pixelSize: 18
+            font.pixelSize: Theme.fontSizeHeading
             rightPadding: 4
             leftPadding: 4
         }
@@ -38,7 +38,7 @@ Item {
             text: Qt.formatTime(clock.date, "HH:mm")
             color: Theme.primary
             font.family: Theme.fontName
-            font.pixelSize: 18
+            font.pixelSize: Theme.fontSizeHeading
             font.weight: Font.Bold
         }
     }
