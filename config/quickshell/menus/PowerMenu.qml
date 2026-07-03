@@ -1,36 +1,75 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Wayland
 import qs.services
 
-FloatingWindow {
+PanelWindow {
     id: powerMenu
-    title: "vlx-power"
     color: "transparent"
-    implicitWidth: 640
-    implicitHeight: 560
+
+    anchors { top: true; bottom: true; left: true; right: true }
+    exclusiveZone: 0
+
+    focusable: true
+    WlrLayershell.keyboardFocus: shown ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.layer: WlrLayer.Overlay
 
     property bool shown: false
+    property bool animatingOut: false
+    property bool canClose: false
     property int selected: 0
 
-    visible: shown
+    property int screenWidth: screen ? screen.width : (Quickshell.screens.length > 0 ? Quickshell.screens[0].width : 1920)
+
+    visible: shown || animatingOut
 
     IpcHandler {
         target: "power"
-        function toggle(): void { powerMenu.shown = !powerMenu.shown }
+        function toggle(): void { if (powerMenu.shown) powerMenu.hide(); else powerMenu.shown = true }
         function open(): void { powerMenu.shown = true }
-        function close(): void { powerMenu.shown = false }
+        function close(): void { powerMenu.hide() }
     }
 
     onShownChanged: {
         if (shown) {
             selected = 0
-            powerMenu.focus = true
+            canClose = false
+            contentTranslate.y = -80
+            dropTimer.restart()
+            closeGuard.restart()
         }
     }
 
+    Timer {
+        id: dropTimer
+        interval: 50
+        repeat: false
+        onTriggered: {
+            showAnim.start()
+            contentRect.forceActiveFocus()
+        }
+    }
+
+    Timer {
+        id: closeGuard
+        interval: 200
+        repeat: false
+        onTriggered: canClose = true
+    }
+
+    Timer {
+        id: hideTimer
+        interval: 200
+        repeat: false
+        onTriggered: animatingOut = false
+    }
+
     function hide() {
+        if (!shown || animatingOut) return
+        animatingOut = true
         shown = false
+        hideAnim.start()
     }
 
     function executeCommand(cmd) {
@@ -47,7 +86,8 @@ FloatingWindow {
             { command: ["quickshell", "ipc", "call", "lock", "lock"] },
             { command: ["loginctl", "terminate-session", "$XDG_SESSION_ID"] },
             { command: ["systemctl", "poweroff"] },
-            { command: ["systemctl", "reboot"] }
+            { command: ["systemctl", "reboot"] },
+            { command: ["systemctl", "reboot", "--firmware-setup"] }
         ]
         executeCommand(model[index].command)
     }
@@ -56,59 +96,90 @@ FloatingWindow {
         id: processRunner
     }
 
-    Rectangle {
+    NumberAnimation {
+        id: showAnim
+        target: contentTranslate
+        property: "y"
+        from: -80
+        to: 0
+        duration: 200
+        easing.type: Easing.OutCubic
+    }
+
+    NumberAnimation {
+        id: hideAnim
+        target: contentTranslate
+        property: "y"
+        from: 0
+        to: -80
+        duration: 200
+        easing.type: Easing.InCubic
+        onFinished: hideTimer.restart()
+    }
+
+    MouseArea {
         anchors.fill: parent
-        anchors.margins: 16
+        z: -1
+        enabled: powerMenu.canClose
+        onClicked: powerMenu.hide()
+    }
+
+    Rectangle {
+        id: contentRect
+        width: Math.round(powerMenu.screenWidth / 3)
+        height: 80
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: 0
         color: Theme.base
         radius: 12
         border.color: Theme.surface1
         border.width: 1
         focus: true
 
-        Keys.onEscapePressed: powerMenu.hide()
-        Keys.onDownPressed: {
-            powerMenu.selected = Math.min(powerMenu.selected + 1, 3)
+        transform: Translate {
+            id: contentTranslate
+            y: -80
         }
-        Keys.onUpPressed: {
-            powerMenu.selected = Math.max(powerMenu.selected - 1, 0)
-        }
-        Keys.onReturnPressed: powerMenu.launch(powerMenu.selected)
 
-        Column {
+        MouseArea {
             anchors.fill: parent
-            anchors.margins: 16
-            spacing: 12
+            propagateComposedEvents: false
+            onClicked: {}
+        }
 
-            Text {
-                text: "Power"
-                font.family: Theme.fontName
-                font.pixelSize: 22
-                font.weight: Font.Bold
-                color: Theme.text
-                anchors.horizontalCenter: parent.horizontalCenter
-            }
+        Keys.onLeftPressed: {
+            selected = Math.max(selected - 1, 0)
+        }
+        Keys.onRightPressed: {
+            selected = Math.min(selected + 1, 4)
+        }
+        Keys.onReturnPressed: {
+            launch(selected)
+        }
+        Keys.onEscapePressed: {
+            powerMenu.hide()
+        }
 
-            ListView {
-                id: itemList
-                width: parent.width
-                height: parent.height - 60
-                clip: true
+        Row {
+            anchors.fill: parent
+            anchors.margins: 12
+            spacing: 4
+
+            Repeater {
                 model: [
-                    { icon: "", label: "Lock" },
-                    { icon: "", label: "Logout" },
-                    { icon: "", label: "Shutdown" },
-                    { icon: "", label: "Reboot" }
+                    { label: "Lock" },
+                    { label: "Logout" },
+                    { label: "Shutdown" },
+                    { label: "Reboot" },
+                    { label: "BIOS" }
                 ]
-                currentIndex: powerMenu.selected
-                highlightFollowsCurrentItem: true
-                boundsBehavior: Flickable.StopAtBounds
-                spacing: 4
 
                 delegate: Rectangle {
                     required property var modelData
                     required property int index
-                    width: itemList.width
-                    height: 48
+                    width: (parent.width - parent.spacing * 4) / 5
+                    height: parent.height
                     radius: 8
                     color: index === powerMenu.selected
                         ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.14)
@@ -124,27 +195,12 @@ FloatingWindow {
                         color: Theme.primary
                     }
 
-                    Row {
-                        anchors.fill: parent
-                        anchors.margins: 8
-                        spacing: 12
-                        anchors.verticalCenter: parent.verticalCenter
-
-                        Text {
-                            text: modelData.icon
-                            font.family: Theme.fontName
-                            font.pixelSize: 18
-                            color: Theme.primary
-                            width: 24
-                            horizontalAlignment: Text.AlignHCenter
-                        }
-
-                        Text {
-                            text: modelData.label
-                            font.family: Theme.fontName
-                            font.pixelSize: 20
-                            color: index === powerMenu.selected ? Theme.text : Theme.subtext
-                        }
+                    Text {
+                        anchors.centerIn: parent
+                        text: modelData.label
+                        font.family: Theme.fontName
+                        font.pixelSize: Theme.fontSizeHeading
+                        color: index === powerMenu.selected ? Theme.text : Theme.subtext
                     }
 
                     MouseArea {
@@ -157,12 +213,6 @@ FloatingWindow {
                     }
                 }
             }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            z: -1
-            onClicked: powerMenu.hide()
         }
     }
 }
