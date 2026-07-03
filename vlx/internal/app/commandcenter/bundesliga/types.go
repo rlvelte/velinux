@@ -1,8 +1,16 @@
 package bundesliga
 
-import "encoding/json"
-
-// TODO: Maybe use more info later...
+type TableRow struct {
+	Position      int    `json:"position"`
+	Team          string `json:"team"`
+	Points        int    `json:"points"`
+	GoalsFor      int    `json:"goals_for"`
+	GoalsAgainst  int    `json:"goals_against"`
+	Wins          int    `json:"wins"`
+	Draws         int    `json:"draws"`
+	Losses        int    `json:"losses"`
+	MatchesPlayed int    `json:"matches_played"`
+}
 
 type Config struct {
 	Team          TeamInfo `json:"team"`
@@ -76,12 +84,4 @@ type TableEntry struct {
 	Lost          int    `json:"lost"`
 	Draw          int    `json:"draw"`
 	GoalDiff      int    `json:"goalDiff"`
-}
-
-func decodeConfig(name, _ string, data []byte) (Config, error) {
-	var cfg Config
-	if err := json.Unmarshal(data, &cfg); err != nil {
-		return Config{}, err
-	}
-	return cfg, nil
 }

@@ -5,11 +5,12 @@ import (
 	"log"
 	"os"
 
-	"github.com/rlvelte/velinux/vlx/internal/app/bundesliga"
 	"github.com/rlvelte/velinux/vlx/internal/app/bundle"
+	"github.com/rlvelte/velinux/vlx/internal/app/commandcenter"
+	"github.com/rlvelte/velinux/vlx/internal/app/commandcenter/bundesliga"
+	"github.com/rlvelte/velinux/vlx/internal/app/launcher"
 	"github.com/rlvelte/velinux/vlx/internal/app/package"
 	"github.com/rlvelte/velinux/vlx/internal/app/themes"
-	"github.com/rlvelte/velinux/vlx/internal/core/guard"
 	"github.com/spf13/cobra"
 )
 
@@ -18,9 +19,6 @@ func main() {
 		Use:   "vlx",
 		Short: "Horribly bad utility application",
 		Long:  "VeLinux centered command utility by rvelte.",
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			return guard.OS()
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -32,6 +30,8 @@ func main() {
 		themes.Command(),
 		bundle.Command(),
 		bundesliga.Command(),
+		commandcenter.Command(),
+		launcher.Command(),
 	)
 
 	if err := root.Execute(); err != nil {
