@@ -1,0 +1,16 @@
+{
+  "feeds": [
+    { "name": "tagesschau", "url": "https://www.tagesschau.de/xml/rss2" },
+    { "name": "openSUSE News", "url": "https://news.opensuse.org/feed/" }
+  ],
+  "bundesliga": {
+    "team": {
+      "teamId": 0,
+      "teamName": "",
+      "shortName": "",
+      "teamIconUrl": "",
+      "teamGroupName": null
+    },
+    "notifications": false
+  }
+}

@@ -3,7 +3,10 @@
 My very own opinionated openSUSE dotfiles featuring a curated selection of packages,
 system configurations, and the `vlx` utility suite for theme management and more.
 
-> This is not a plug-and-play setup! Some manual linking and configuration is still required.
+> [!IMPORTANT]  
+> This is not a plug-and-play setup! 
+> Some manual linking and configuration is still required. Most configurations also work on other Linux distributions, but I couldn't be bothered to validate this.
+
 
 ## Repository Structure
 
@@ -22,10 +25,7 @@ velinux/
 │   ├── quickshell/      # Desktop shell
 │   ├── sway/            # Sway window manager
 │   ├── systemd/		 # User scoped systemd services
-│   ├── vlx/
-│   │   ├── bundles/     # Bundle definitions
-│   │   ├── themes/      # Theme profiles and wallpapers
-│   │   └── bundesliga/  # Bundesliga config
+│   ├── vlx/			 # Configuration files for vlx
 │   └── zsh/             # Shell configuration
 │
 ├── etc/                 
@@ -34,15 +34,8 @@ velinux/
 │   └── systemd/		 # System scoped systemd services
 │
 ├── vlx/                 
-│   ├── internal/
-│   │   ├── app/
-│   │   │   ├── bundesliga/ # Bundesliga match tracker
-│   │   │   ├── bundle/     # Bundle installer
-│   │   │   ├── package/    # Package wrapper
-│   │   │   └── themes/     # Theme management
-│   │   └── core/			# Utilities
-│   ├── main.go
-│   └── Makefile
+│   ├── ...
+│   └── Makefile		 # Build and install for vlx
 │
 ├── LICENSE.md
 └── README.md
