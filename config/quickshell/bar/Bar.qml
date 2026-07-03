@@ -59,17 +59,22 @@ PanelWindow {
         Item { Layout.fillWidth: true }
         BarWidget {
             Layout.alignment: Qt.AlignVCenter
-            TitleInfo { }
-        }
-
-        Item { Layout.fillWidth: true }
-        BarWidget {
-            Layout.alignment: Qt.AlignVCenter
             TrayInfo { }
             Seperator { }
             AudioInfo { }
             Seperator { }
             ClockInfo { }
         }
+    }
+
+    Row {
+        anchors.centerIn: parent
+        spacing: 0
+
+        BracketLeft { anchors.verticalCenter: parent.verticalCenter }
+        TitleInfo {
+            width: Math.min(implicitWidth, (bar.width - 400))
+        }
+        BracketRight { anchors.verticalCenter: parent.verticalCenter }
     }
 }
