@@ -19,7 +19,7 @@ import (
 
 // setup validates all requirements for further processing.
 func setup(cmd *cobra.Command, _ []string) error {
-	if err := errors.Join(guard.Connection(), guard.Binaries("zypper", "flatpak")); err != nil {
+	if err := errors.Join(guard.Network(), guard.Binaries("zypper", "flatpak", "bash")); err != nil {
 		return err
 	}
 
@@ -34,7 +34,7 @@ func Command() *cobra.Command {
 		Short:             "Horribly bad bundle/recipe installer",
 		Long:              "",
 		PersistentPreRunE: setup,
-		Aliases: 		   []string{"bun"},
+		Aliases:           []string{"bun"},
 		Args:              cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
@@ -120,9 +120,13 @@ func cmdInstall(cmd *cobra.Command, args []string) error {
 			return bundles[i].Name < bundles[j].Name
 		})
 
-		names := make([]string, len(bundles))
+		items := make([]picker.Item, len(bundles))
 		for i, b := range bundles {
-			names[i] = b.Name
+			desc := fmt.Sprintf("%d zypper, %d flatpak", len(b.Zypper), len(b.Flatpak))
+			items[i] = picker.Item{
+				Header:      b.Name,
+				Description: desc,
+			}
 		}
 
 		pkr := picker.New()
@@ -130,12 +134,12 @@ func cmdInstall(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("no picker available")
 		}
 
-		selected, err := pkr.Select(cmd.Context(), names)
+		selected, err := pkr.Select(cmd.Context(), items)
 		if err != nil {
 			return err
 		}
 
-		bundleName = selected
+		bundleName = selected.Header
 	} else {
 		bundleName = args[0]
 	}

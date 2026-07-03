@@ -26,8 +26,8 @@ func setup(cmd *cobra.Command, _ []string) error {
 func Command() *cobra.Command {
 	root := &cobra.Command{
 		Use:               "themes",
-		Short:             "Horribly bad theming manager for velinux",
-		Long:              "Manage and switch between theme profiles for velinux.",
+		Short:             "Horribly bad theming manager",
+		Long:              "Manage and switch between theme profiles.",
 		PersistentPreRunE: setup,
 		Args:              cobra.NoArgs,
 		Aliases:           []string{"theme"},
@@ -62,16 +62,9 @@ func Command() *cobra.Command {
 	return root
 }
 
-type themeJSON struct {
-	Id     string `json:"id"`
-	Name   string `json:"name"`
-	Icon   string `json:"icon"`
-	Active bool   `json:"active"`
-}
-
 func cmdList(cmd *cobra.Command, _ []string) error {
 	themesDir := fsys.ConfigPath("vlx", "themes")
-	store := fsys.NewStore(themesDir, decodeTheme, ".conf")
+	store := fsys.NewStore(themesDir, decodeTheme, ".json")
 	active := current()
 
 	all, err := store.List()
@@ -85,7 +78,7 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 		if seen[t.Id] {
 			continue
 		}
-		if filepath.Base(t.Path) == "current.conf" {
+		if filepath.Base(t.Path) == "current.json" {
 			continue
 		}
 
@@ -99,14 +92,12 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 
 	jsonFlag, _ := cmd.Flags().GetBool("json")
 	if jsonFlag {
-		var out []themeJSON
+		var out []Theme
 		for _, t := range list {
-			out = append(out, themeJSON{
-				Id:     t.Id,
-				Name:   t.Name,
-				Icon:   t.Icon,
-				Active: t.Id == active,
-			})
+			th := *t
+			th.Logo = filepath.Join(themesDir, t.Logo)
+			th.Active = t.Id == active
+			out = append(out, th)
 		}
 
 		data, err := json.Marshal(out)
@@ -137,7 +128,7 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 func cmdApply(cmd *cobra.Command, args []string) error {
 	themesDir := fsys.ConfigPath("vlx", "themes")
 
-	store := fsys.NewStore(themesDir, decodeTheme, ".conf")
+	store := fsys.NewStore(themesDir, decodeTheme, ".json")
 	all, err := store.List()
 	if err != nil {
 		return err
@@ -149,7 +140,7 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 		if seen[t.Id] {
 			continue
 		}
-		if filepath.Base(t.Path) == "current.conf" {
+		if filepath.Base(t.Path) == "current.json" {
 			continue
 		}
 		seen[t.Id] = true
@@ -167,18 +158,22 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 			return themes[i].Name < themes[j].Name
 		})
 
-		names := make([]string, len(themes))
+		items := make([]picker.Item, len(themes))
 		for i, t := range themes {
-			names[i] = t.Name
+			items[i] = picker.Item{
+				Icon:        filepath.Join(themesDir, t.Logo),
+				Header:      t.Name,
+				Description: t.Id,
+			}
 		}
 
-		selected, err := pkr.Select(cmd.Context(), names)
+		selected, err := pkr.Select(cmd.Context(), items)
 		if err != nil {
 			return err
 		}
 
 		for _, t := range themes {
-			if t.Name == selected {
+			if t.Name == selected.Header {
 				theme = t
 				break
 			}
@@ -207,7 +202,7 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	currentPath := filepath.Join(themesDir, "current.conf")
+	currentPath := filepath.Join(themesDir, "current.json")
 	if err := os.Remove(currentPath); err != nil && !os.IsNotExist(err) {
 		return err
 	}
@@ -272,7 +267,7 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 // current returns the currently active theme id.
 func current() string {
 	themes := fsys.ConfigPath("vlx", "themes")
-	data, err := os.ReadFile(filepath.Join(themes, "current.conf"))
+	data, err := os.ReadFile(filepath.Join(themes, "current.json"))
 	if err != nil {
 		return ""
 	}

@@ -2,57 +2,63 @@ package picker
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"time"
+
+	"github.com/rlvelte/velinux/vlx/internal/core/guard"
 )
 
-var _ Variant = (*QuickshellPicker)(nil)
-
+// QuickshellPicker is a backend that uses quickshell picker.
 type QuickshellPicker struct{}
 
+// Available reports whether quickshell is installed.
 func (q *QuickshellPicker) Available() bool {
-	_, err := exec.LookPath("quickshell")
-	if err != nil {
-		return false
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
-	defer cancel()
-	return exec.CommandContext(ctx, "quickshell", "ipc", "show").Run() == nil
+	return guard.Binaries("quickshell") == nil
 }
 
-func (q *QuickshellPicker) Select(ctx context.Context, items []string) (string, error) {
+// Select prompts the user to choose one item via quickshell.
+func (q *QuickshellPicker) Select(ctx context.Context, items []Item) (Item, error) {
 	result, err := q.pick(ctx, items, false)
 	if err != nil {
-		return "", err
+		return Item{}, err
 	}
+
 	if len(result) == 0 {
-		return "", fmt.Errorf("picker cancelled")
+		return Item{}, fmt.Errorf("picker cancelled")
 	}
+
 	return result[0], nil
 }
 
-func (q *QuickshellPicker) SelectMulti(ctx context.Context, items []string) ([]string, error) {
+// SelectMulti prompts the user to choose multiple items via quickshell multi.
+func (q *QuickshellPicker) SelectMulti(ctx context.Context, items []Item) ([]Item, error) {
 	return q.pick(ctx, items, true)
 }
 
-func (q *QuickshellPicker) pick(ctx context.Context, items []string, multi bool) ([]string, error) {
+func (q *QuickshellPicker) pick(ctx context.Context, items []Item, multi bool) ([]Item, error) {
 	ts := fmt.Sprintf("%d", time.Now().UnixNano())
 	itemsFile := filepath.Join(os.TempDir(), "vlx-picker-"+ts+"-items")
 	resultFile := filepath.Join(os.TempDir(), "vlx-picker-"+ts+"-result")
 
-	if err := os.WriteFile(itemsFile, []byte(strings.Join(items, "\n")), 0644); err != nil {
+	data, err := json.Marshal(items)
+	if err != nil {
+		return nil, fmt.Errorf("marshalling picker items: %w", err)
+	}
+
+	if err := os.WriteFile(itemsFile, data, 0644); err != nil {
 		return nil, fmt.Errorf("writing picker items: %w", err)
 	}
 	defer os.Remove(itemsFile)
 
-	cmd := "open"
+	cmd := "vlxOpen"
 	if multi {
-		cmd = "openMulti"
+		cmd = "vlxOpenMulti"
 	}
+
 	if err := exec.CommandContext(ctx, "quickshell", "ipc", "call", "picker", cmd, itemsFile, resultFile).Run(); err != nil {
 		return nil, fmt.Errorf("picker %s: %w", cmd, err)
 	}
@@ -62,24 +68,28 @@ func (q *QuickshellPicker) pick(ctx context.Context, items []string, multi bool)
 	}
 	defer os.Remove(resultFile)
 
-	data, err := os.ReadFile(resultFile)
+	raw, err := os.ReadFile(resultFile)
 	if err != nil {
 		return nil, fmt.Errorf("reading picker result: %w", err)
 	}
 
-	var result []string
-	for _, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(line)
-		if line != "" {
-			result = append(result, line)
+	var result []Item
+	if err := json.Unmarshal(raw, &result); err != nil {
+		var single Item
+		if err2 := json.Unmarshal(raw, &single); err2 != nil {
+			return nil, fmt.Errorf("parsing picker result: %w", err)
 		}
+
+		result = append(result, single)
 	}
+
 	return result, nil
 }
 
 func (q *QuickshellPicker) waitForResult(ctx context.Context, resultFile string) error {
 	ticker := time.NewTicker(50 * time.Millisecond)
 	defer ticker.Stop()
+
 	timeout := time.After(120 * time.Second)
 
 	for {

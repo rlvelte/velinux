@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/rlvelte/velinux/vlx/internal/core/guard"
@@ -15,7 +14,7 @@ import (
 
 // setup validates all requirements for further processing.
 func setup(cmd *cobra.Command, _ []string) error {
-	if err := errors.Join(guard.Connection(), guard.Binaries("zypper", "fzf")); err != nil {
+	if err := errors.Join(guard.Network(), guard.Binaries("zypper", "fzf")); err != nil {
 		return err
 	}
 
@@ -44,7 +43,6 @@ func Command() *cobra.Command {
 func cmdInstall(cmd *cobra.Command, query string) error {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 
-	p.Info("Searching packages...")
 	client := &Zypper{}
 
 	pkgs, err := client.Search(cmd.Context(), query)
@@ -59,14 +57,17 @@ func cmdInstall(cmd *cobra.Command, query string) error {
 	}
 
 	latestPkgs := latest(pkgs)
-	items := make([]string, len(latestPkgs))
+	items := make([]picker.Item, len(latestPkgs))
 	for i, pkg := range latestPkgs {
-		items[i] = format(pkg)
+		desc := pkg.Description
+		if desc == "" {
+			desc = string(pkg.Type)
+		}
+		items[i] = picker.Item{
+			Header:      pkg.Name,
+			Description: desc,
+		}
 	}
-
-	sort.Slice(items, func(i, j int) bool {
-		return len(items[i]) < len(items[j])
-	})
 
 	fzf := picker.New().ForceFzf()
 	selected, err := fzf.Select(cmd.Context(), items)
@@ -74,11 +75,7 @@ func cmdInstall(cmd *cobra.Command, query string) error {
 		return fmt.Errorf("fzf selection failed: %w", err)
 	}
 
-	if selected == "" {
-		return nil
-	}
-
-	pkgName := extractName(selected)
+	pkgName := selected.Header
 	info, err := client.Info(cmd.Context(), pkgName)
 	if err != nil {
 		p.Warn(fmt.Sprintf("Failed to get info for %s: %v", pkgName, err))
@@ -109,28 +106,4 @@ func latest(pkgs []Package) []Package {
 	}
 
 	return result
-}
-
-// format returns the fzf line style.
-func format(pkg Package) string {
-	status := " "
-	if pkg.Installed {
-		status = "i"
-	}
-
-	if pkg.Upgradable {
-		status = "i+"
-	}
-
-	return fmt.Sprintf("%s | %s", status, pkg.Name)
-}
-
-// extractName returns the name of the package.
-func extractName(item string) string {
-	parts := strings.SplitN(item, "|", 2)
-	if len(parts) > 1 {
-		return strings.TrimSpace(parts[1])
-	}
-
-	return strings.TrimSpace(item)
 }
