@@ -5,14 +5,13 @@ import qs.services
 
 Item {
     id: commandCenter
-    implicitWidth: commandCenterIcon.implicitWidth + 8
+    implicitWidth: commandCenterIcon.implicitWidth + 0
     implicitHeight: 40
 
     Image {
         id: commandCenterIcon
         anchors.centerIn: parent
-        width: 22
-        height: 22
+        height: 28
         fillMode: Image.PreserveAspectFit
         source: {
             for (let i = 0; i < Vlx.themes.length; i++) {
