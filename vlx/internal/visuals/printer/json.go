@@ -20,11 +20,6 @@ type JSONPrinter struct {
 	encoder *json.Encoder
 }
 
-// Available reports whether this backend can be used.
-func (b *JSONPrinter) Available() bool {
-	return true
-}
-
 // Print returns a message.
 func (b *JSONPrinter) Print(msg string) {
 	_ = b.encoder.Encode(jsonMessage{Message: msg})

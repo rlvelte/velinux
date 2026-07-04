@@ -46,7 +46,7 @@ Item {
 
     Process {
         id: feedsProcess
-        command: ["vlx", "cc", "feeds", "poll", root.currentFeedCmd, "--json"]
+        command: ["vlx", "cc", "--json", "feeds", root.currentFeedCmd]
         stdout: StdioCollector {
             onStreamFinished: {
                 try { root.feedsData = JSON.parse(text) } catch(e) { root.feedsData = []; console.error("cc feeds parse error:", e) }

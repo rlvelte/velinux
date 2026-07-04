@@ -12,14 +12,14 @@ import (
 
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
 	"github.com/rlvelte/velinux/vlx/internal/core/guard"
-	"github.com/rlvelte/velinux/vlx/internal/core/picker"
-	"github.com/rlvelte/velinux/vlx/internal/core/printer"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/picker"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 	"github.com/spf13/cobra"
 )
 
 // setup validates all requirements for further processing.
 func setup(cmd *cobra.Command, _ []string) error {
-	if err := errors.Join(guard.Network(), guard.Binaries("zypper", "flatpak", "bash")); err != nil {
+	if err := errors.Join(guard.Network(), guard.Binaries("bash", "fzf")); err != nil {
 		return err
 	}
 
@@ -31,8 +31,8 @@ func setup(cmd *cobra.Command, _ []string) error {
 func Command() *cobra.Command {
 	root := &cobra.Command{
 		Use:               "bundle",
-		Short:             "Horribly bad bundle/recipe installer",
-		Long:              "",
+		Short:             "Horribly bad bundle installer",
+		Long:              "Install predefined recipes with shell hooks.",
 		PersistentPreRunE: setup,
 		Aliases:           []string{"bun"},
 		Args:              cobra.NoArgs,
@@ -129,7 +129,7 @@ func cmdInstall(cmd *cobra.Command, args []string) error {
 			}
 		}
 
-		pkr := picker.New()
+		pkr := picker.New().ForceFzf()
 		if pkr == nil {
 			return fmt.Errorf("no picker available")
 		}

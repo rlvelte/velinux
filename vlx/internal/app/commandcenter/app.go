@@ -6,13 +6,18 @@ import (
 	"github.com/rlvelte/velinux/vlx/internal/app/commandcenter/bundesliga"
 	"github.com/rlvelte/velinux/vlx/internal/app/commandcenter/feeds"
 	"github.com/rlvelte/velinux/vlx/internal/app/commandcenter/hardware"
-	"github.com/rlvelte/velinux/vlx/internal/core/printer"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 	"github.com/spf13/cobra"
 )
 
 // setup validates all requirements for further processing.
 func setup(cmd *cobra.Command, _ []string) error {
-	cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, printer.New()))
+	p := printer.New()
+	if jsonFlag, _ := cmd.Flags().GetBool("json"); jsonFlag {
+		p = p.ForceJSON()
+	}
+
+	cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, p))
 	return nil
 }
 
@@ -28,6 +33,8 @@ func Command() *cobra.Command {
 			return cmd.Help()
 		},
 	}
+
+	root.PersistentFlags().BoolP("json", "j", false, "output as JSON")
 
 	root.AddCommand(
 		hardware.Command(),

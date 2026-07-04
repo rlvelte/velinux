@@ -2,6 +2,9 @@ package picker
 
 import (
 	"context"
+	"os"
+
+	"github.com/mattn/go-isatty"
 )
 
 const ContextKey = "picker"
@@ -59,14 +62,14 @@ func (p *Picker) ForceFzf() *Picker {
 }
 
 func auto() Variant {
+	f := &FzfPicker{}
+	if f.Available() && isatty.IsTerminal(os.Stdout.Fd()) {
+		return f
+	}
+
 	q := &QuickshellPicker{}
 	if q.Available() {
 		return q
-	}
-
-	f := &FzfPicker{}
-	if f.Available() {
-		return f
 	}
 
 	return nil

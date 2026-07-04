@@ -7,6 +7,7 @@
     "rm -rf /tmp/photogimp-download"
   ],
   "post": [
+    ": 'PhotoGIMP: Photoshop-like layout for GIMP (github.com/Diolinux/PhotoGIMP)'",
     "mkdir -p /tmp/photogimp-download",
     "gimp_dir=\"\"",
     "for d in ~/.config/GIMP/*/; do [ -d \"$d\" ] && gimp_dir=$(basename \"$d\") && break; done",
@@ -16,7 +17,7 @@
     "unzip -o /tmp/photogimp-download/PhotoGIMP-linux.zip -d /tmp/photogimp-download/extracted",
     "cp -rf /tmp/photogimp-download/extracted/PhotoGIMP-linux/.config/GIMP/3.0/* \"$HOME/.config/GIMP/$gimp_dir/\"",
     "cp -rf /tmp/photogimp-download/extracted/PhotoGIMP-linux/.local/share/* ~/.local/share/",
-    ": 'PhotoGIMP currently hardcodes gimp-3.0 but Flathub ships newer (3.2+) so sed it...'",
+    ": 'PhotoGIMP desktop file hardcodes gimp-3.0 but Flathub ships newer (3.2+) — fix it'",
     "sed -i \"s/--command=gimp-3.0/--command=gimp-$gimp_dir/\" \"$HOME/.local/share/applications/org.gimp.GIMP.desktop\"",
     "rm -rf /tmp/photogimp-download"
   ]

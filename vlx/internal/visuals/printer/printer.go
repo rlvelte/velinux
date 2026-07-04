@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"os"
 
-	"golang.org/x/term"
+	"github.com/mattn/go-isatty"
 )
 
 const ContextKey = "printer"
 
 // Variant handles terminal out/inputs
 type Variant interface {
-	Available() bool                          // Available reports whether this backend can be used.
 	Print(msg string)                         // Print prints a simple message
 	Warn(msg string)                          // Warn prints a warning message
 	Error(msg string)                         // Error prints a error message
@@ -73,7 +72,7 @@ func (p *Printer) ForceJSON() *Printer {
 }
 
 func auto() Variant {
-	if term.IsTerminal(int(os.Stdout.Fd())) {
+	if isatty.IsTerminal(os.Stdout.Fd()) {
 		return &FmtPrinter{}
 	}
 

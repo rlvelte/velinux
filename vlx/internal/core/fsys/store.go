@@ -8,16 +8,17 @@ import (
 	"strings"
 )
 
-type DecodeFunc[T any] func(name, path string, data []byte) (T, error)
-type EncodeFunc[T any] func(name, path string, data []byte) (T, error) // TODO: LATER
-
+// Store is a generic file-backed entity store.
 type Store[T any] struct {
-	dir     string
-	exts    []string
-	decode  DecodeFunc[T]
-	encoder EncodeFunc[T]
+	dir    string
+	exts   []string
+	decode DecodeFunc[T]
 }
 
+// DecodeFunc decodes a file into an entity.
+type DecodeFunc[T any] func(name, path string, data []byte) (T, error)
+
+// NewStore creates a Store backed by the given directory.
 func NewStore[T any](baseDir string, decode DecodeFunc[T], exts ...string) *Store[T] {
 	if len(exts) == 0 {
 		exts = []string{""}
@@ -26,6 +27,7 @@ func NewStore[T any](baseDir string, decode DecodeFunc[T], exts ...string) *Stor
 	return &Store[T]{dir: baseDir, exts: exts, decode: decode}
 }
 
+// List returns all decoded entities in the store.
 func (s *Store[T]) List() ([]T, error) {
 	entries, err := os.ReadDir(s.dir)
 	if err != nil {
@@ -63,6 +65,7 @@ func (s *Store[T]) List() ([]T, error) {
 	return entities, nil
 }
 
+// Get retrieves a single entity by name.
 func (s *Store[T]) Get(name string) (T, error) {
 	for _, ext := range s.exts {
 		path := filepath.Join(s.dir, name+ext)

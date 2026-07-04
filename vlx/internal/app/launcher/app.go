@@ -1,33 +1,47 @@
 package launcher
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 
-	"github.com/rlvelte/velinux/vlx/internal/core/picker"
+	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/picker"
 	"github.com/spf13/cobra"
 )
 
+// setup validates all requirements for further processing.
+func setup(cmd *cobra.Command, _ []string) error {
+	cmd.SetContext(context.WithValue(cmd.Context(), notify.ContextKey, notify.New()))
+	return nil
+}
+
 func Command() *cobra.Command {
 	return &cobra.Command{
-		Use:     "launcher",
-		Short:   "Launch applications via the picker",
-		Long:    "Scan desktop entries and launch via the quickshell/fzf picker.",
-		Aliases: []string{"run", "app"},
-		Args:    cobra.NoArgs,
-		RunE:    cmdLaunch,
+		Use:               "launcher",
+		Short:             "Launch applications via the picker",
+		Long:              "Scan desktop entries and launch via the quickshell/fzf picker.",
+		PersistentPreRunE: setup,
+		Aliases:           []string{"run", "app"},
+		Args:              cobra.NoArgs,
+		RunE:              cmdLaunch,
 	}
 }
 
 func cmdLaunch(cmd *cobra.Command, _ []string) error {
-	cfg, err := LoadConfig()
+	n := cmd.Context().Value(notify.ContextKey).(*notify.Notify)
+
+	store := fsys.NewStore(fsys.ConfigPath("vlx", "launcher"), decodeConfig, ".json")
+	cfg, err := store.Get("config")
 	if err != nil {
 		return fmt.Errorf("launcher config: %w", err)
 	}
 
-	state, err := LoadState()
+	stateStore := fsys.NewStore(fsys.DataPath("vlx", "launcher"), decodeState, ".json")
+	state, err := stateStore.Get("state")
 	if err != nil {
 		return fmt.Errorf("launcher state: %w", err)
 	}
@@ -39,6 +53,7 @@ func cmdLaunch(cmd *cobra.Command, _ []string) error {
 		if e.NoDisplay || e.Hidden || IsIgnored(cfg, e.ID) {
 			continue
 		}
+
 		visible = append(visible, e)
 	}
 
@@ -75,7 +90,13 @@ func cmdLaunch(cmd *cobra.Command, _ []string) error {
 		}
 	}
 	if chosen == nil {
-		return fmt.Errorf("selected app not found")
+		fmtErr := fmt.Errorf("selected app not found")
+		_ = n.Send(fmtErr.Error(), &notify.Details{
+			Title:   "Couldn't launch",
+			Urgency: "normal",
+		})
+
+		return fmtErr
 	}
 
 	Bump(state, chosen.ID)
@@ -86,7 +107,13 @@ func cmdLaunch(cmd *cobra.Command, _ []string) error {
 	execCmd.Stdout = os.Stdout
 	execCmd.Stderr = os.Stderr
 	if err := execCmd.Start(); err != nil {
-		return fmt.Errorf("failed to launch %s: %w", chosen.Name, err)
+		fmtErr := fmt.Errorf("failed to launch %s: %w", chosen.Name, err)
+		_ = n.Send(fmtErr.Error(), &notify.Details{
+			Title:   "Couldn't launch",
+			Urgency: "normal",
+		})
+
+		return fmtErr
 	}
 
 	return nil

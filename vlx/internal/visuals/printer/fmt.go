@@ -10,11 +10,6 @@ import (
 // FmtPrinter is a fallback backend that uses plain fmt and os operations.
 type FmtPrinter struct{}
 
-// Available reports whether this backend can be used.
-func (b *FmtPrinter) Available() bool {
-	return true
-}
-
 // Print prints a message.
 func (b *FmtPrinter) Print(msg string) {
 	fmt.Println(msg)

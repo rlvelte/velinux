@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/rlvelte/velinux/vlx/internal/core/guard"
-	"github.com/rlvelte/velinux/vlx/internal/core/picker"
-	"github.com/rlvelte/velinux/vlx/internal/core/printer"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/picker"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 	"github.com/spf13/cobra"
 )
 

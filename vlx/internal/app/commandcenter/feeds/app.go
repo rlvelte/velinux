@@ -1,8 +1,6 @@
 package feeds
 
 import (
-	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -11,30 +9,27 @@ import (
 
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
 	"github.com/rlvelte/velinux/vlx/internal/core/guard"
-	"github.com/rlvelte/velinux/vlx/internal/core/printer"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 	"github.com/spf13/cobra"
 )
 
 // setup validates all requirements for further processing.
-func setup(cmd *cobra.Command, _ []string) error {
+func setup(_ *cobra.Command, _ []string) error {
 	if err := errors.Join(guard.Network()); err != nil {
 		return err
 	}
 
-	cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, printer.New()))
 	return nil
 }
 
 // Command returns the cobra command tree for vlx commandcenter feeds.
 func Command() *cobra.Command {
 	root := &cobra.Command{
-		Use:               "feeds",
-		Short:             "Horribly bad RSS/Atom feed reader",
-		Aliases:           []string{"feed", "rss"},
-		PersistentPreRunE: setup,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmd.Help()
-		},
+		Use:     "feeds",
+		Short:   "Horribly bad RSS/Atom feed reader",
+		Aliases: []string{"feed", "rss"},
+		PreRunE: setup,
+		RunE:    cmdPoll,
 	}
 
 	listCmd := &cobra.Command{
@@ -42,26 +37,14 @@ func Command() *cobra.Command {
 		Short:   "List available feed sources",
 		Aliases: []string{"ls"},
 		Args:    cobra.NoArgs,
-		RunE:    cmdFeedsList,
+		RunE:    cmdList,
 	}
-
-	pollCmd := &cobra.Command{
-		Use:     "poll [source]",
-		Short:   "Poll feed(s) for latest items",
-		Long:    "Poll all feeds or a specific source. Run `vlx cc feeds list` to see available sources.",
-		Aliases: []string{"fetch", "get"},
-		Args:    cobra.MaximumNArgs(1),
-		RunE:    cmdFeedsPoll,
-	}
-	pollCmd.Flags().BoolP("json", "j", false, "output as JSON")
 
 	root.AddCommand(listCmd)
-	root.AddCommand(pollCmd)
-
 	return root
 }
 
-func cmdFeedsList(cmd *cobra.Command, args []string) error {
+func cmdList(cmd *cobra.Command, _ []string) error {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 
 	dir := fsys.ConfigPath("vlx", "commandcenter")
@@ -77,9 +60,8 @@ func cmdFeedsList(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func cmdFeedsPoll(cmd *cobra.Command, args []string) error {
+func cmdPoll(cmd *cobra.Command, args []string) error {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
-	jsonFlag, _ := cmd.Flags().GetBool("json")
 
 	dir := fsys.ConfigPath("vlx", "commandcenter")
 	store := fsys.NewStore(dir, decodeFeedsConfig, ".json")
@@ -132,18 +114,6 @@ func cmdFeedsPoll(cmd *cobra.Command, args []string) error {
 	}
 
 	wg.Wait()
-
-	if jsonFlag {
-		var feeds []*Feed
-		for _, r := range results {
-			if r.feed != nil {
-				feeds = append(feeds, r.feed)
-			}
-		}
-		data, _ := json.MarshalIndent(feeds, "", "  ")
-		fmt.Println(string(data))
-		return nil
-	}
 
 	for _, r := range results {
 		if r.err != nil {

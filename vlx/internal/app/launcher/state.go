@@ -12,29 +12,25 @@ import (
 
 // State tracks how often each application is launched.
 type State struct {
-	Usage map[string]UsageEntry `json:"usage"` // key = desktop entry ID
+	Usage map[string]UsageEntry `json:"usage"`
 }
 
 type UsageEntry struct {
 	Count    int   `json:"count"`
-	LastUsed int64 `json:"last_used"` // Unix timestamp
+	LastUsed int64 `json:"last_used"`
 }
 
-var statePath = filepath.Join(fsys.DataPath("vlx", "launcher"), "state.json")
+// RankedEntry wraps Entry with usage info for sorting.
+type RankedEntry struct {
+	Entry
+	Count    int
+	LastUsed int64
+}
 
-// LoadState reads the state file, creating a fresh one if absent.
-func LoadState() (*State, error) {
-	data, err := os.ReadFile(statePath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return &State{Usage: make(map[string]UsageEntry)}, nil
-		}
-		return nil, err
-	}
-
+func decodeState(_, _ string, data []byte) (*State, error) {
 	var s State
 	if err := json.Unmarshal(data, &s); err != nil {
-		return &State{Usage: make(map[string]UsageEntry)}, nil
+		return nil, err
 	}
 	if s.Usage == nil {
 		s.Usage = make(map[string]UsageEntry)
@@ -44,7 +40,7 @@ func LoadState() (*State, error) {
 
 // SaveState atomically writes the state file.
 func SaveState(s *State) error {
-	dir := filepath.Dir(statePath)
+	dir := filepath.Dir(filepath.Join(fsys.DataPath("vlx", "launcher"), "state.json"))
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
@@ -54,11 +50,12 @@ func SaveState(s *State) error {
 		return err
 	}
 
-	tmp := statePath + ".tmp"
+	tmp := filepath.Join(fsys.DataPath("vlx", "launcher"), "state.json") + ".tmp"
 	if err := os.WriteFile(tmp, data, 0644); err != nil {
 		return err
 	}
-	return os.Rename(tmp, statePath)
+
+	return os.Rename(tmp, filepath.Join(fsys.DataPath("vlx", "launcher"), "state.json"))
 }
 
 // Bump increments the usage count for an application.
@@ -69,13 +66,6 @@ func Bump(s *State, id string) {
 	s.Usage[id] = u
 }
 
-// RankedEntry wraps Entry with usage info for sorting.
-type RankedEntry struct {
-	Entry
-	Count    int
-	LastUsed int64
-}
-
 // Rank returns entries sorted by the state rules.
 func Rank(entries []Entry, state *State) []Entry {
 	var ranked []RankedEntry
@@ -84,7 +74,6 @@ func Rank(entries []Entry, state *State) []Entry {
 		ranked = append(ranked, RankedEntry{Entry: e, Count: u.Count, LastUsed: u.LastUsed})
 	}
 
-	// Sort: count desc, name asc
 	sort.Slice(ranked, func(i, j int) bool {
 		if ranked[i].Count != ranked[j].Count {
 			return ranked[i].Count > ranked[j].Count
@@ -93,12 +82,10 @@ func Rank(entries []Entry, state *State) []Entry {
 	})
 
 	var result []Entry
-	// Take top 10
 	for i := 0; i < len(ranked) && i < 10; i++ {
 		result = append(result, ranked[i].Entry)
 	}
 
-	// Append remaining entries in ABC order
 	if len(ranked) > 10 {
 		rest := ranked[10:]
 		sort.Slice(rest, func(i, j int) bool {

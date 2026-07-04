@@ -14,7 +14,7 @@ type FzfPicker struct{}
 
 // Available reports whether fzf is installed.
 func (f *FzfPicker) Available() bool {
-	return guard.Binaries("fzf") != nil
+	return guard.Binaries("fzf") == nil
 }
 
 // Select prompts the user to choose one item via fzf.

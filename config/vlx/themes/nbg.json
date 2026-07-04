@@ -35,11 +35,11 @@
   "color_on_secondary": "#f0ead8",
   "color_on_accent": "#0e0b06",
   "color_on_surface": "#f0ead8",
-  "font_name": "JetBrainsMono Nerd Font",
-  "font_name_heading": "JetBrainsMono Nerd Font",
+  "font_name": "Canterbury",
+  "font_name_heading": "Canterbury",
   "font_name_mono": "JetBrainsMono Nerd Font",
-  "font_size": "16",
-  "font_size_small": "14",
-  "font_size_large": "18",
-  "font_size_heading": "20"
+  "font_size": "18",
+  "font_size_small": "16",
+  "font_size_large": "20",
+  "font_size_heading": "22"
 }

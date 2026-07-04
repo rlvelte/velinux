@@ -3,6 +3,8 @@ package notify
 import (
 	"os/exec"
 	"strconv"
+
+	"github.com/rlvelte/velinux/vlx/internal/core/guard"
 )
 
 // LibNotify uses `notify-send` for desktop notifications.
@@ -10,8 +12,7 @@ type LibNotify struct{}
 
 // Available checks if `notify-send` is available.
 func (l *LibNotify) Available() bool {
-	_, err := exec.LookPath("notify-send")
-	return err == nil
+	return guard.Binaries("notify-send") == nil
 }
 
 // Send delivers a notification using `notify-send`.

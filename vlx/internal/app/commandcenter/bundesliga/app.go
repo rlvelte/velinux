@@ -1,7 +1,6 @@
 package bundesliga
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,19 +9,22 @@ import (
 	"time"
 
 	"github.com/rlvelte/velinux/vlx/internal/core/guard"
-	"github.com/rlvelte/velinux/vlx/internal/core/printer"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 	"github.com/spf13/cobra"
 )
+
+// TODO: -----
+// TODO: Testing when new season starts to proper evaluate how much i like it and what i want to add...
+// TODO: -----
 
 const apiBase = "https://api.openligadb.de"
 
 // setup validates all requirements for further processing.
-func setup(cmd *cobra.Command, _ []string) error {
+func setup(_ *cobra.Command, _ []string) error {
 	if err := errors.Join(guard.Network()); err != nil {
 		return err
 	}
 
-	cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, printer.New()))
 	return nil
 }
 
@@ -44,7 +46,6 @@ func Command() *cobra.Command {
 		RunE:  cmdTable,
 	}
 
-	tableCmd.Flags().BoolP("json", "j", false, "output as JSON")
 	tableCmd.Flags().String("league", "bl1", "league shortcut (bl1, bl2)")
 
 	root.AddCommand(tableCmd)
@@ -52,7 +53,6 @@ func Command() *cobra.Command {
 }
 
 func cmdTable(cmd *cobra.Command, _ []string) error {
-	jsonFlag, _ := cmd.Flags().GetBool("json")
 	league, _ := cmd.Flags().GetString("league")
 
 	url := fmt.Sprintf("%s/getbltable/%s/%d", apiBase, league, season())
@@ -79,12 +79,6 @@ func cmdTable(cmd *cobra.Command, _ []string) error {
 			Losses:        e.Lost,
 			MatchesPlayed: e.Matches,
 		})
-	}
-
-	if jsonFlag {
-		data, _ := json.MarshalIndent(rows, "", "  ")
-		fmt.Println(string(data))
-		return nil
 	}
 
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)

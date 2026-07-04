@@ -37,7 +37,7 @@ Item {
 
     Process {
         id: bl1Process
-        command: ["vlx", "cc", "bl", "table", "--json", "--league", "bl1"]
+        command: ["vlx", "cc", "--json", "bl", "table", "--league", "bl1"]
         stdout: StdioCollector {
             onStreamFinished: {
                 try { root.bl1Data = JSON.parse(text) } catch(e) { root.bl1Data = []; console.error("cc bl1 parse error:", e) }
@@ -47,7 +47,7 @@ Item {
 
     Process {
         id: bl2Process
-        command: ["vlx", "cc", "bl", "table", "--json", "--league", "bl2"]
+        command: ["vlx", "cc", "--json",  "bl", "table", "--league", "bl2"]
         stdout: StdioCollector {
             onStreamFinished: {
                 try { root.bl2Data = JSON.parse(text) } catch(e) { root.bl2Data = []; console.error("cc bl2 parse error:", e) }

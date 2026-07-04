@@ -9,14 +9,14 @@ import (
 
 // Entry represents a parsed desktop entry.
 type Entry struct {
-	ID          string // File basename without .desktop
-	Name        string
-	Comment     string
-	Icon        string
-	Exec        string
-	NoDisplay   bool
-	Hidden      bool
-	Terminal    bool
+	ID        string // File basename without .desktop
+	Name      string
+	Comment   string
+	Icon      string
+	Exec      string
+	NoDisplay bool
+	Hidden    bool
+	Terminal  bool
 }
 
 // Default scan directories in priority order.
@@ -26,6 +26,8 @@ var scanDirs = func() []string {
 		filepath.Join(home, ".local/share/applications"),
 		"/usr/share/applications",
 		"/usr/local/share/applications",
+		filepath.Join(home, ".local/share/flatpak/exports/share/applications"),
+		"/var/lib/flatpak/exports/share/applications",
 		filepath.Join(home, ".config/autostart"),
 	}
 }()
@@ -71,7 +73,7 @@ func parse(path string) *Entry {
 	ent := &Entry{}
 	var inDesktopEntry bool
 	var got int
-	const need = 6 // Name, Exec, plus we want Comment, Icon, NoDisplay, Hidden
+	const need = 6
 
 	scan := bufio.NewScanner(f)
 	for scan.Scan() {
@@ -84,13 +86,13 @@ func parse(path string) *Entry {
 			continue
 		}
 		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			// New group; if we already have enough, stop reading
 			if got >= need {
 				break
 			}
 			inDesktopEntry = false
 			continue
 		}
+
 		if !inDesktopEntry {
 			continue
 		}
@@ -122,7 +124,6 @@ func parse(path string) *Entry {
 		}
 	}
 
-	// Must have at least Name and Exec to be valid
 	if ent.Name == "" || ent.Exec == "" {
 		return nil
 	}

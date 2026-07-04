@@ -10,9 +10,9 @@ import (
 	"sort"
 
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
-	"github.com/rlvelte/velinux/vlx/internal/core/notify"
-	"github.com/rlvelte/velinux/vlx/internal/core/picker"
-	"github.com/rlvelte/velinux/vlx/internal/core/printer"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/picker"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 	"github.com/spf13/cobra"
 )
 
@@ -63,6 +63,8 @@ func Command() *cobra.Command {
 }
 
 func cmdList(cmd *cobra.Command, _ []string) error {
+	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+
 	themesDir := fsys.ConfigPath("vlx", "themes")
 	store := fsys.NewStore(themesDir, decodeTheme, ".json")
 	active := current()
@@ -109,7 +111,6 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 		return nil
 	}
 
-	p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 	headers := []string{"ACTIVE", "ID", "Name"}
 	var rows [][]string
 	for _, t := range list {
@@ -126,6 +127,9 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 }
 
 func cmdApply(cmd *cobra.Command, args []string) error {
+	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+	n := cmd.Context().Value(notify.ContextKey).(*notify.Notify)
+
 	themesDir := fsys.ConfigPath("vlx", "themes")
 
 	store := fsys.NewStore(themesDir, decodeTheme, ".json")
@@ -223,40 +227,34 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 	}
 
 	if err := exec.Command("swaymsg", "reload").Run(); err != nil {
-		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 		if p != nil {
 			p.Warn("sway reload failed (sway may not be running)")
 		}
 	}
 
 	if err := exec.Command("hyprctl", "reload").Run(); err != nil {
-		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 		if p != nil {
 			p.Warn("hypr reload failed (Hyprland may not be running)")
 		}
 	}
 
 	if err := exec.Command("makoctl", "reload").Run(); err != nil {
-		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 		if p != nil {
 			p.Warn("mako reload failed (mako may not be running)")
 		}
 	}
 
 	if err := exec.Command("mmsg", "dispatch", "reload_config").Run(); err != nil {
-		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 		if p != nil {
 			p.Warn("mango reload failed (mango may not be running)")
 		}
 	}
 
-	n := notify.New()
 	_ = n.Send("Switched to theme "+theme.Name, &notify.Details{
 		Title:   "VLX Themes",
 		Urgency: "normal",
 	})
 
-	p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 	if p != nil {
 		p.Info("Applied theme " + theme.Name)
 	}
