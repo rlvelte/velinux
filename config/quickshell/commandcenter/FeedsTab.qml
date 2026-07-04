@@ -8,7 +8,7 @@ Item {
     property string filterText: ""
 
     property var feedsData: []
-    property string currentFeedCmd: "hackernews"
+    property string currentFeedCmd: "tagesschau"
 
     property var feedSources: [
         { name: "Tagesschau", cmd: "tagesschau" },
