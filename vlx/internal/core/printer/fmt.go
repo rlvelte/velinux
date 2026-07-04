@@ -27,9 +27,10 @@ func (b *FmtPrinter) Warn(msg string) {
 
 // Error prints an error message.
 func (b *FmtPrinter) Error(msg string) {
-	fmt.Fprintln(os.Stderr, "[ERR]", msg)
+	_, _ = fmt.Fprintln(os.Stderr, "[ERR]", msg)
 }
 
+// Table prints a table
 func (b *FmtPrinter) Table(headers []string, rows [][]string) {
 	if len(headers) > 0 {
 		for i, h := range headers {
@@ -66,18 +67,4 @@ func (b *FmtPrinter) Confirm(msg string, defaultYes bool) bool {
 
 	response := strings.TrimSpace(scanner.Text())
 	return response == "y" || response == "Y" || (defaultYes && response == "")
-}
-
-// Spinner shows a progress indicator.
-func (b *FmtPrinter) Spinner(label string, fn func() error) error {
-	fmt.Printf("%s...\n", label)
-	err := fn()
-
-	if err != nil {
-		fmt.Println("Failed")
-	} else {
-		fmt.Println("Done")
-	}
-
-	return err
 }

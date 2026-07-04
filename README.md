@@ -1,57 +1,43 @@
 # VeLinux - Opinionated openSUSE Configuration
-My very own opinionated openSUSE dotfiles featuring a curated selection of packages, system configurations, and the `vlx` utility suite for theme management and some other tasks.
 
-> This is not a plug-and-play setup! Some manual linking and configuration is still required.
+My very own opinionated openSUSE dotfiles featuring a curated selection of packages,
+system configurations, and the `vlx` utility suite for theme management and more.
+
+> [!IMPORTANT]  
+> This is not a plug-and-play setup! 
+> Some manual linking and configuration is still required. Most configurations also work on other Linux distributions, but I couldn't be bothered to validate this.
+
 
 ## Repository Structure
-The repository layout mirrors the target filesystem for clarity:
+
+The repository mirrors the target filesystem for clarity:
 
 ```
 velinux/
-├── config/          
-│   ├── hypr/        # Hyprland window manager
-│   ├── sway/        # Sway window manager
-│   ├── waybar/      # Waybar status bar
-│   ├── rofi/        # Application launcher
-│   ├── kitty/       # Terminal emulator
-│   ├── mako/        # Notification daemon
-│   ├── zsh/         # Shell configuration
-│   ├── eza/         # Fancy ls
-│   ├── git/         # Git configuration
-│   ├── keyd/        # Key remapping
-│   ├── systemd/
-│   │   └── user/
-│   │       ├── vlx-bl-tracker.service  # Bundesliga poll oneshot
-│   │       └── vlx-bl-tracker.timer    # 2-minute trigger
-│   └── vlx/         
-│       ├── bundles/ 		# Bundle definitions
-│       ├── themes/  		# Theme profiles and wallpapers
-│       └── bundesliga/  	# Bundesliga config
+├── config/              
+│   ├── environment.d/   # Environment variables
+│   ├── eza/             # Fancy ls
+│   ├── git/             # Git configuration
+│   ├── hypr/            # Hyprland window manager
+│   ├── kitty/           # Terminal emulator
+│   ├── mako/            # Notification daemon
+│   ├── mango/           # Mangowm window manager
+│   ├── quickshell/      # Desktop shell
+│   ├── sway/            # Sway window manager
+│   ├── systemd/		 # User scoped systemd services
+│   ├── vlx/			 # Configuration files for vlx
+│   └── zsh/             # Shell configuration
 │
-├── etc/             
-│   ├── greetd/      # Graphical greeter
-│   └── systemd/
-│       └── system/
-│           ├── zypper-refresh.service  # Zypper refresh oneshot
-│           └── zypper-refresh.timer    # Daily trigger
+├── etc/                 
+│   ├── greetd/          # Graphical greeter
+│   ├── keyd/            # Key remapping
+│   └── systemd/		 # System scoped systemd services
 │
-├── vlx/             
-│   ├── internal/
-│   │   ├── app/
-│   │   │   ├── bundesliga/  # Bundesliga match tracker
-│   │   │   ├── bundle/      # Bundle management
-│   │   │   ├── pkg/         # Package management
-│   │   │   └── themes/      # Theme management
-│   │   └── core/
-│   │       ├── fsys/     # Filesystem utilities
-│   │       ├── guard/    # Precondition checks
-│   │       ├── http/     # HTTP client
-│   │       ├── notify/   # Desktop notifications
-│   │       ├── picker/   # Interactive selection
-│   │       └── printer/  # Terminal output
-│   ├── main.go
-│   └── Makefile
+├── vlx/                 
+│   ├── ...
+│   └── Makefile		 # Build and install for vlx
 │
+├── LICENSE.md
 └── README.md
 ```
 

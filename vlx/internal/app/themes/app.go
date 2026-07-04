@@ -2,6 +2,7 @@ package themes
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -25,26 +26,29 @@ func setup(cmd *cobra.Command, _ []string) error {
 func Command() *cobra.Command {
 	root := &cobra.Command{
 		Use:               "themes",
-		Short:             "Horribly bad theming manager for velinux",
-		Long:              "Manage and switch between theme profiles for velinux.",
+		Short:             "Horribly bad theming manager",
+		Long:              "Manage and switch between theme profiles.",
 		PersistentPreRunE: setup,
 		Args:              cobra.NoArgs,
-		Aliases:           []string{"theme"}, // typo protection
+		Aliases:           []string{"theme"},
 		SilenceUsage:      true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
 	}
 
+	cmdListCmd := &cobra.Command{
+		Use:     "list",
+		Short:   "List available theme profiles",
+		Long:    "List all available theme profiles with their icons and IDs.",
+		Aliases: []string{"ls"},
+		Args:    cobra.NoArgs,
+		RunE:    cmdList,
+	}
+	cmdListCmd.Flags().BoolP("json", "j", false, "output as JSON")
+
 	root.AddCommand(
-		&cobra.Command{
-			Use:     "list",
-			Short:   "List available theme profiles",
-			Long:    "List all available theme profiles with their icons and IDs.",
-			Aliases: []string{"ls"},
-			Args:    cobra.NoArgs,
-			RunE:    cmdList,
-		},
+		cmdListCmd,
 		&cobra.Command{
 			Use:     "apply [theme]",
 			Short:   "Apply a theme",
@@ -53,24 +57,14 @@ func Command() *cobra.Command {
 			Args:    cobra.MaximumNArgs(1),
 			RunE:    cmdApply,
 		},
-		&cobra.Command{
-			Use:    "waybar",
-			Short:  "Show current theme for waybar",
-			Long:   "Output the current theme's icon in waybar-compatible format.",
-			Args:   cobra.NoArgs,
-			Hidden: true,
-			RunE:   cmdWaybar,
-		},
 	)
 
 	return root
 }
 
 func cmdList(cmd *cobra.Command, _ []string) error {
-	p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
-
 	themesDir := fsys.ConfigPath("vlx", "themes")
-	store := fsys.NewStore(themesDir, decodeTheme, ".conf")
+	store := fsys.NewStore(themesDir, decodeTheme, ".json")
 	active := current()
 
 	all, err := store.List()
@@ -84,6 +78,9 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 		if seen[t.Id] {
 			continue
 		}
+		if filepath.Base(t.Path) == "current.json" {
+			continue
+		}
 
 		seen[t.Id] = true
 		list = append(list, t)
@@ -93,6 +90,26 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 		return list[i].Name < list[j].Name
 	})
 
+	jsonFlag, _ := cmd.Flags().GetBool("json")
+	if jsonFlag {
+		var out []Theme
+		for _, t := range list {
+			th := *t
+			th.Logo = filepath.Join(themesDir, t.Logo)
+			th.Active = t.Id == active
+			out = append(out, th)
+		}
+
+		data, err := json.Marshal(out)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(string(data))
+		return nil
+	}
+
+	p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 	headers := []string{"ACTIVE", "ID", "Name"}
 	var rows [][]string
 	for _, t := range list {
@@ -111,7 +128,7 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 func cmdApply(cmd *cobra.Command, args []string) error {
 	themesDir := fsys.ConfigPath("vlx", "themes")
 
-	store := fsys.NewStore(themesDir, decodeTheme, ".conf")
+	store := fsys.NewStore(themesDir, decodeTheme, ".json")
 	all, err := store.List()
 	if err != nil {
 		return err
@@ -121,6 +138,9 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 	var themes []*Theme
 	for _, t := range all {
 		if seen[t.Id] {
+			continue
+		}
+		if filepath.Base(t.Path) == "current.json" {
 			continue
 		}
 		seen[t.Id] = true
@@ -138,18 +158,22 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 			return themes[i].Name < themes[j].Name
 		})
 
-		names := make([]string, len(themes))
+		items := make([]picker.Item, len(themes))
 		for i, t := range themes {
-			names[i] = t.Name
+			items[i] = picker.Item{
+				Icon:        filepath.Join(themesDir, t.Logo),
+				Header:      t.Name,
+				Description: t.Id,
+			}
 		}
 
-		selected, err := pkr.Select(cmd.Context(), names)
+		selected, err := pkr.Select(cmd.Context(), items)
 		if err != nil {
 			return err
 		}
 
 		for _, t := range themes {
-			if t.Name == selected {
+			if t.Name == selected.Header {
 				theme = t
 				break
 			}
@@ -178,7 +202,7 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	currentPath := filepath.Join(themesDir, "current.conf")
+	currentPath := filepath.Join(themesDir, "current.json")
 	if err := os.Remove(currentPath); err != nil && !os.IsNotExist(err) {
 		return err
 	}
@@ -198,10 +222,31 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	if err := exec.Command("swaymsg", "reload").Run(); err != nil {
+		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+		if p != nil {
+			p.Warn("sway reload failed (sway may not be running)")
+		}
+	}
+
+	if err := exec.Command("hyprctl", "reload").Run(); err != nil {
+		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+		if p != nil {
+			p.Warn("hypr reload failed (Hyprland may not be running)")
+		}
+	}
+
 	if err := exec.Command("makoctl", "reload").Run(); err != nil {
 		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 		if p != nil {
 			p.Warn("mako reload failed (mako may not be running)")
+		}
+	}
+
+	if err := exec.Command("mmsg", "dispatch", "reload_config").Run(); err != nil {
+		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+		if p != nil {
+			p.Warn("mango reload failed (mango may not be running)")
 		}
 	}
 
@@ -219,25 +264,10 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func cmdWaybar(_ *cobra.Command, _ []string) error {
-	data, err := os.ReadFile(filepath.Join(fsys.ConfigPath("vlx", "themes"), "current.conf"))
-	if err != nil {
-		return err
-	}
-
-	t, err := decodeTheme("current", "", data)
-	if err != nil {
-		return err
-	}
-
-	fmt.Print(t.Icon)
-	return nil
-}
-
 // current returns the currently active theme id.
 func current() string {
 	themes := fsys.ConfigPath("vlx", "themes")
-	data, err := os.ReadFile(filepath.Join(themes, "current.conf"))
+	data, err := os.ReadFile(filepath.Join(themes, "current.json"))
 	if err != nil {
 		return ""
 	}

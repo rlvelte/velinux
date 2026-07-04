@@ -2,18 +2,22 @@ package picker
 
 import (
 	"context"
-	"os"
-
-	"golang.org/x/term"
 )
 
 const ContextKey = "picker"
 
+// Item represents a selectable item in the picker.
+type Item struct {
+	Icon        string `json:"icon"`
+	Header      string `json:"header"`
+	Description string `json:"description"`
+}
+
 // Variant handles interactive item selection.
 type Variant interface {
-	Available() bool                                                   // Available reports whether this backend can be used.
-	Select(ctx context.Context, items []string) (string, error)        // Select prompts the user to choose one item.
-	SelectMulti(ctx context.Context, items []string) ([]string, error) // SelectMulti prompts the user to choose multiple items.
+	Available() bool                                               // Available reports whether this backend can be used.
+	Select(ctx context.Context, items []Item) (Item, error)        // Select prompts the user to choose one item.
+	SelectMulti(ctx context.Context, items []Item) ([]Item, error) // SelectMulti prompts the user to choose multiple items.
 }
 
 // Picker is the unified picking engine.
@@ -22,47 +26,47 @@ type Picker struct {
 }
 
 // New creates an engine with an auto-detected backend.
+// Returns nil if no backend is available.
 func New() *Picker {
-	return &Picker{
-		variant: auto(),
+	v := auto()
+	if v == nil {
+		return nil
 	}
+
+	return &Picker{variant: v}
 }
 
 // Select prompts the user to choose one item.
-func (e *Picker) Select(ctx context.Context, items []string) (string, error) {
-	return e.variant.Select(ctx, items)
+func (p *Picker) Select(ctx context.Context, items []Item) (Item, error) {
+	return p.variant.Select(ctx, items)
 }
 
 // SelectMulti prompts the user to choose multiple items.
-func (e *Picker) SelectMulti(ctx context.Context, items []string) ([]string, error) {
-	return e.variant.SelectMulti(ctx, items)
+func (p *Picker) SelectMulti(ctx context.Context, items []Item) ([]Item, error) {
+	return p.variant.SelectMulti(ctx, items)
 }
 
-// ForceRofi forces the rofi backend.
-func (e *Picker) ForceRofi() *Picker {
-	e.variant = &RofiPicker{}
-	return e
+// ForceQuickshell forces the quickshell IPC backend.
+func (p *Picker) ForceQuickshell() *Picker {
+	p.variant = &QuickshellPicker{}
+	return p
 }
 
 // ForceFzf forces the fzf backend.
-func (e *Picker) ForceFzf() *Picker {
-	e.variant = &FzfPicker{}
-	return e
+func (p *Picker) ForceFzf() *Picker {
+	p.variant = &FzfPicker{}
+	return p
 }
 
 func auto() Variant {
-	if term.IsTerminal(int(os.Stdout.Fd())) {
-		f := &FzfPicker{}
-		if f.Available() {
-			return f
-		}
+	q := &QuickshellPicker{}
+	if q.Available() {
+		return q
 	}
 
-	if os.Getenv("DISPLAY") != "" || os.Getenv("WAYLAND_DISPLAY") != "" {
-		r := &RofiPicker{}
-		if r.Available() {
-			return r
-		}
+	f := &FzfPicker{}
+	if f.Available() {
+		return f
 	}
 
 	return nil

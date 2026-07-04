@@ -1,0 +1,33 @@
+{
+  "$schema": "bundle.schema.json",
+  "zypper": [
+    "curl",
+    "libX11-6",
+    "libXext6",
+    "libXi6",
+    "libXtst6",
+    "libXrender1",
+    "libXss1",
+    "libxcb1",
+    "libxcb-keysyms1",
+    "libfontconfig1",
+    "libfreetype6",
+    "Mesa-libGL1",
+    "libxkbcommon0"
+  ],
+  "pre": [
+    "rm -rf /tmp/jetbrains-toolbox-download"
+  ],
+  "post": [
+    "mkdir -p /tmp/jetbrains-toolbox-download",
+    "curl -fsSL 'https://data.services.jetbrains.com/products/download?code=TBA&platform=linux' -o /tmp/jetbrains-toolbox-download/jetbrains-toolbox.tar.gz",
+    "sudo rm -rf /opt/jetbrains-toolbox",
+    "sudo mkdir -p /opt/jetbrains-toolbox",
+    "sudo tar -xzf /tmp/jetbrains-toolbox-download/jetbrains-toolbox.tar.gz -C /opt/jetbrains-toolbox --strip-components=1",
+    "sudo ln -sf /opt/jetbrains-toolbox/bin/jetbrains-toolbox /usr/local/bin/jetbrains-toolbox",
+    "sudo cp /opt/jetbrains-toolbox/bin/jetbrains-toolbox.desktop /usr/share/applications/jetbrains-toolbox.desktop",
+    "sudo sed -i 's|^Exec=jetbrains-toolbox$|Exec=/opt/jetbrains-toolbox/bin/jetbrains-toolbox|' /usr/share/applications/jetbrains-toolbox.desktop",
+    "sudo sed -i 's|^Icon=jetbrains-toolbox$|Icon=/opt/jetbrains-toolbox/bin/toolbox-tray-color.png|' /usr/share/applications/jetbrains-toolbox.desktop",
+    "rm -rf /tmp/jetbrains-toolbox-download"
+  ]
+}

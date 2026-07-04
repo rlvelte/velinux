@@ -1,16 +1,22 @@
 package printer
 
+import (
+	"encoding/json"
+	"os"
+
+	"golang.org/x/term"
+)
+
 const ContextKey = "printer"
 
 // Variant handles terminal out/inputs
 type Variant interface {
-	Available() bool                             // Available reports whether this backend can be used.
-	Print(msg string)                            // Print prints a simple message
-	Warn(msg string)                             // Warn prints a warning message
-	Error(msg string)                            // Error prints a error message
-	Table(headers []string, rows [][]string)     // Table prints data in a tabular format.
-	Confirm(msg string, defaultYes bool) bool    // Confirm shows a simple confirmation dialog.
-	Spinner(label string, fn func() error) error // Spinner shows a progress indicator.
+	Available() bool                          // Available reports whether this backend can be used.
+	Print(msg string)                         // Print prints a simple message
+	Warn(msg string)                          // Warn prints a warning message
+	Error(msg string)                         // Error prints a error message
+	Table(headers []string, rows [][]string)  // Table prints data in a tabular format.
+	Confirm(msg string, defaultYes bool) bool // Confirm shows a simple confirmation dialog.
 }
 
 // Printer is the unified printing engine.
@@ -48,9 +54,10 @@ func (p *Printer) Confirm(msg string, defaultYes bool) bool {
 	return p.variant.Confirm(msg, defaultYes)
 }
 
-// Spinner shows a progress indicator.
-func (p *Printer) Spinner(label string, fn func() error) error {
-	return p.variant.Spinner(label, fn)
+// Spinner runs a function and prints a spinner message (simplified).
+func (p *Printer) Spinner(msg string, fn func() error) error {
+	p.Info(msg)
+	return fn()
 }
 
 // ForceFmt forces the basic backend.
@@ -59,6 +66,16 @@ func (p *Printer) ForceFmt() *Printer {
 	return p
 }
 
+// ForceJSON forces the JSON backend.
+func (p *Printer) ForceJSON() *Printer {
+	p.variant = &JSONPrinter{encoder: json.NewEncoder(os.Stdout)}
+	return p
+}
+
 func auto() Variant {
-	return &FmtPrinter{}
+	if term.IsTerminal(int(os.Stdout.Fd())) {
+		return &FmtPrinter{}
+	}
+
+	return &JSONPrinter{encoder: json.NewEncoder(os.Stdout)}
 }

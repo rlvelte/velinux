@@ -1,124 +1,80 @@
 package themes
 
 import (
+	"encoding/json"
 	"fmt"
-
-	"gopkg.in/ini.v1"
 )
 
 type Theme struct {
-	Icon      string
-	Id        string
-	Name      string
-	Wallpaper string
+	Icon      string `json:"icon"`
+	Logo      string `json:"logo"`
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	Wallpaper string `json:"wallpaper"`
+	Active    bool   `json:"active"`
 	Path      string
 }
 
 func decodeTheme(_ string, path string, data []byte) (*Theme, error) {
-	cfg, err := ini.LoadSources(ini.LoadOptions{SpaceBeforeInlineComment: true}, data)
-	if err != nil {
+	var t Theme
+	if err := json.Unmarshal(data, &t); err != nil {
 		return nil, err
 	}
 
-	s := cfg.Section("theme")
-	t := &Theme{
-		Icon:      s.Key("icon").String(),
-		Id:        s.Key("id").String(),
-		Name:      s.Key("name").String(),
-		Wallpaper: s.Key("wallpaper").String(),
-		Path:      path,
-	}
+	t.Path = path
 	if t.Id == "" {
 		return nil, fmt.Errorf("theme %s has no id", path)
 	}
-	return t, nil
+
+	return &t, nil
 }
 
 type ThemeContent struct {
-	Primary         string
-	PrimaryDim      string
-	PrimarySubtle   string
-	PrimaryMuted    string
-	Secondary       string
-	SecondaryDim    string
-	SecondaryLight  string
-	Accent          string
-	AccentDim       string
-	AccentLight     string
-	Base            string
-	Mantle          string
-	Crust           string
-	Surface0        string
-	Surface1        string
-	Surface2        string
-	Text            string
-	Subtext         string
-	Overlay         string
-	Muted           string
-	Success         string
-	Warning         string
-	WarningSubtle   string
-	Error           string
-	ErrorSubtle     string
-	Info            string
-	InfoSubtle      string
-	OnPrimary       string
-	OnSecondary     string
-	OnAccent        string
-	OnSurface       string
-	FontName        string
-	FontNameHeading string
-	FontNameMono    string
-	FontSize        string
-	FontSizeSmall   string
-	FontSizeLarge   string
-	FontSizeHeading string
+	Primary         string `json:"color_primary"`
+	PrimaryDim      string `json:"color_primary_dim"`
+	PrimarySubtle   string `json:"color_primary_subtle"`
+	PrimaryMuted    string `json:"color_primary_muted"`
+	Secondary       string `json:"color_secondary"`
+	SecondaryDim    string `json:"color_secondary_dim"`
+	SecondaryLight  string `json:"color_secondary_light"`
+	Accent          string `json:"color_accent"`
+	AccentDim       string `json:"color_accent_dim"`
+	AccentLight     string `json:"color_accent_light"`
+	Base            string `json:"color_base"`
+	Mantle          string `json:"color_mantle"`
+	Crust           string `json:"color_crust"`
+	Surface0        string `json:"color_surface0"`
+	Surface1        string `json:"color_surface1"`
+	Surface2        string `json:"color_surface2"`
+	Text            string `json:"color_text"`
+	Subtext         string `json:"color_subtext"`
+	Overlay         string `json:"color_overlay"`
+	Muted           string `json:"color_muted"`
+	Success         string `json:"color_success"`
+	Warning         string `json:"color_warning"`
+	WarningSubtle   string `json:"color_warning_subtle"`
+	Error           string `json:"color_error"`
+	ErrorSubtle     string `json:"color_error_subtle"`
+	Info            string `json:"color_info"`
+	InfoSubtle      string `json:"color_info_subtle"`
+	OnPrimary       string `json:"color_on_primary"`
+	OnSecondary     string `json:"color_on_secondary"`
+	OnAccent        string `json:"color_on_accent"`
+	OnSurface       string `json:"color_on_surface"`
+	FontName        string `json:"font_name"`
+	FontNameHeading string `json:"font_name_heading"`
+	FontNameMono    string `json:"font_name_mono"`
+	FontSize        string `json:"font_size"`
+	FontSizeSmall   string `json:"font_size_small"`
+	FontSizeLarge   string `json:"font_size_large"`
+	FontSizeHeading string `json:"font_size_heading"`
 }
 
 func decodeThemeContent(_ string, _ string, data []byte) (*ThemeContent, error) {
-	cfg, err := ini.LoadSources(ini.LoadOptions{SpaceBeforeInlineComment: true}, data)
-	if err != nil {
+	var tc ThemeContent
+	if err := json.Unmarshal(data, &tc); err != nil {
 		return nil, err
 	}
-	s := cfg.Section("theme")
-	return &ThemeContent{
-		Primary:         s.Key("color_primary").String(),
-		PrimaryDim:      s.Key("color_primary_dim").String(),
-		PrimarySubtle:   s.Key("color_primary_subtle").String(),
-		PrimaryMuted:    s.Key("color_primary_muted").String(),
-		Secondary:       s.Key("color_secondary").String(),
-		SecondaryDim:    s.Key("color_secondary_dim").String(),
-		SecondaryLight:  s.Key("color_secondary_light").String(),
-		Accent:          s.Key("color_accent").String(),
-		AccentDim:       s.Key("color_accent_dim").String(),
-		AccentLight:     s.Key("color_accent_light").String(),
-		Base:            s.Key("color_base").String(),
-		Mantle:          s.Key("color_mantle").String(),
-		Crust:           s.Key("color_crust").String(),
-		Surface0:        s.Key("color_surface0").String(),
-		Surface1:        s.Key("color_surface1").String(),
-		Surface2:        s.Key("color_surface2").String(),
-		Text:            s.Key("color_text").String(),
-		Subtext:         s.Key("color_subtext").String(),
-		Overlay:         s.Key("color_overlay").String(),
-		Muted:           s.Key("color_muted").String(),
-		Success:         s.Key("color_success").String(),
-		Warning:         s.Key("color_warning").String(),
-		WarningSubtle:   s.Key("color_warning_subtle").String(),
-		Error:           s.Key("color_error").String(),
-		ErrorSubtle:     s.Key("color_error_subtle").String(),
-		Info:            s.Key("color_info").String(),
-		InfoSubtle:      s.Key("color_info_subtle").String(),
-		OnPrimary:       s.Key("color_on_primary").String(),
-		OnSecondary:     s.Key("color_on_secondary").String(),
-		OnAccent:        s.Key("color_on_accent").String(),
-		OnSurface:       s.Key("color_on_surface").String(),
-		FontName:        s.Key("font_name").String(),
-		FontNameHeading: s.Key("font_name_heading").String(),
-		FontNameMono:    s.Key("font_name_mono").String(),
-		FontSize:        s.Key("font_size").String(),
-		FontSizeSmall:   s.Key("font_size_small").String(),
-		FontSizeLarge:   s.Key("font_size_large").String(),
-		FontSizeHeading: s.Key("font_size_heading").String(),
-	}, nil
+
+	return &tc, nil
 }

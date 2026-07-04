@@ -6,10 +6,11 @@ import (
 	"os"
 
 	"github.com/rlvelte/velinux/vlx/internal/app/bundle"
-	"github.com/rlvelte/velinux/vlx/internal/app/bundesliga"
-	"github.com/rlvelte/velinux/vlx/internal/app/pkg"
+	"github.com/rlvelte/velinux/vlx/internal/app/commandcenter"
+	"github.com/rlvelte/velinux/vlx/internal/app/commandcenter/bundesliga"
+	"github.com/rlvelte/velinux/vlx/internal/app/launcher"
+	"github.com/rlvelte/velinux/vlx/internal/app/package"
 	"github.com/rlvelte/velinux/vlx/internal/app/themes"
-	"github.com/rlvelte/velinux/vlx/internal/core/guard"
 	"github.com/spf13/cobra"
 )
 
@@ -18,9 +19,6 @@ func main() {
 		Use:   "vlx",
 		Short: "Horribly bad utility application",
 		Long:  "VeLinux centered command utility by rvelte.",
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			return guard.OS()
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -28,10 +26,12 @@ func main() {
 
 	root.AddCommand(
 		completions(),
-		pkg.Command(),
+		_package.Command(),
 		themes.Command(),
 		bundle.Command(),
 		bundesliga.Command(),
+		commandcenter.Command(),
+		launcher.Command(),
 	)
 
 	if err := root.Execute(); err != nil {
@@ -44,7 +44,7 @@ func completions() *cobra.Command {
 		Use:    "completion [bash|zsh|fish]",
 		Short:  "Generate shell completion script",
 		Hidden: true,
-		Args:  cobra.ExactArgs(1),
+		Args:   cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			switch args[0] {
 			case "bash":

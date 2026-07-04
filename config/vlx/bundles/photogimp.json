@@ -1,0 +1,23 @@
+{
+  "$schema": "bundle.schema.json",
+  "flatpak": [
+    "org.gimp.GIMP"
+  ],
+  "pre": [
+    "rm -rf /tmp/photogimp-download"
+  ],
+  "post": [
+    "mkdir -p /tmp/photogimp-download",
+    "gimp_dir=\"\"",
+    "for d in ~/.config/GIMP/*/; do [ -d \"$d\" ] && gimp_dir=$(basename \"$d\") && break; done",
+    "if [ -z \"$gimp_dir\" ]; then echo 'Please run GIMP at least once first so the config folder exists'; exit 1; fi",
+    "echo \"Detected GIMP config version: $gimp_dir\"",
+    "curl -fsSL 'https://github.com/Diolinux/PhotoGIMP/releases/download/3.0/PhotoGIMP-linux.zip' -o /tmp/photogimp-download/PhotoGIMP-linux.zip",
+    "unzip -o /tmp/photogimp-download/PhotoGIMP-linux.zip -d /tmp/photogimp-download/extracted",
+    "cp -rf /tmp/photogimp-download/extracted/PhotoGIMP-linux/.config/GIMP/3.0/* \"$HOME/.config/GIMP/$gimp_dir/\"",
+    "cp -rf /tmp/photogimp-download/extracted/PhotoGIMP-linux/.local/share/* ~/.local/share/",
+    ": 'PhotoGIMP currently hardcodes gimp-3.0 but Flathub ships newer (3.2+) so sed it...'",
+    "sed -i \"s/--command=gimp-3.0/--command=gimp-$gimp_dir/\" \"$HOME/.local/share/applications/org.gimp.GIMP.desktop\"",
+    "rm -rf /tmp/photogimp-download"
+  ]
+}

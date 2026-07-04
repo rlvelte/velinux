@@ -9,7 +9,7 @@
 vt = 1
 
 [initial_session]
-command = "start-hyprland"
+command = "sway-run.sh"
 user = "rvelte"
 
 [default_session]
