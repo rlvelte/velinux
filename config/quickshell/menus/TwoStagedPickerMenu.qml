@@ -153,9 +153,9 @@ PanelWindow {
             hide()
             return
         }
+        picker.selectedSub = 0
         picker.selectedItem = src
         picker.stage = 1
-        picker.selectedSub = 0
         searchField.text = ""
         widenAnim.start()
     }
@@ -326,16 +326,20 @@ PanelWindow {
 
                 Keys.onDownPressed: {
                     if (picker.stage === 0) {
-                        picker.selected = Math.min(picker.selected + 1, filtered.values.length - 1)
+                        var len = filtered.values.length
+                        picker.selected = len > 0 ? (picker.selected + 1) % len : 0
                     } else {
-                        picker.selectedSub = Math.min(picker.selectedSub + 1, subFiltered.values.length - 1)
+                        var len = subFiltered.values.length
+                        picker.selectedSub = len > 0 ? (picker.selectedSub + 1) % len : 0
                     }
                 }
                 Keys.onUpPressed: {
                     if (picker.stage === 0) {
-                        picker.selected = Math.max(picker.selected - 1, 0)
+                        var len = filtered.values.length
+                        picker.selected = len > 0 ? (picker.selected - 1 + len) % len : 0
                     } else {
-                        picker.selectedSub = Math.max(picker.selectedSub - 1, 0)
+                        var len = subFiltered.values.length
+                        picker.selectedSub = len > 0 ? (picker.selectedSub - 1 + len) % len : 0
                     }
                 }
                 Keys.onReturnPressed: {
@@ -358,11 +362,9 @@ PanelWindow {
                 }
                 onTextChanged: {
                     if (picker.stage === 0) {
-                        if (picker.selected >= filtered.values.length)
-                            picker.selected = Math.max(0, filtered.values.length - 1)
+                        picker.selected = 0
                     } else {
-                        if (picker.selectedSub >= subFiltered.values.length)
-                            picker.selectedSub = Math.max(0, subFiltered.values.length - 1)
+                        picker.selectedSub = 0
                     }
                 }
             }

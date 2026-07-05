@@ -24,8 +24,8 @@ velinux/
 │   ├── mango/           # Mangowm window manager
 │   ├── quickshell/      # Desktop shell
 │   ├── sway/            # Sway window manager
-│   ├── systemd/		 # User scoped systemd services
-│   ├── vlx/			 # Configuration files for vlx
+│   ├── systemd/         # User scoped systemd services
+│   ├── vlx/             # Configuration files for vlx
 │   └── zsh/             # Shell configuration
 │
 ├── etc/                 
