@@ -1,4 +1,4 @@
-package _package
+package packages
 
 import (
 	"bytes"
@@ -34,7 +34,7 @@ func (z *Zypper) Search(ctx context.Context, query string) ([]Package, error) {
 	return parseXml(stdout.Bytes())
 }
 
-// Info retrieves detailed information about a package.
+// Info retrieves detailed information about a packages.
 func (z *Zypper) Info(ctx context.Context, pkgName string) (string, error) {
 	cmd := z.command(ctx, true, false, "info", pkgName)
 	out, err := cmd.Output()
@@ -49,7 +49,7 @@ func (z *Zypper) Info(ctx context.Context, pkgName string) (string, error) {
 	return strings.TrimLeft(string(out), " \t\n\r"), nil
 }
 
-// Install a package without confirmation.
+// Install a packages without confirmation.
 func (z *Zypper) Install(ctx context.Context, pkgNames []string) error {
 	args := []string{"install", "--no-confirm"}
 	args = append(args, pkgNames...)

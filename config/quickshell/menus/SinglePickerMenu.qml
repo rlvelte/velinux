@@ -24,17 +24,19 @@ PanelWindow {
 
     property var pickerItems: []
     property string pickerResultPath: ""
-    property bool pickerMulti: false
+
+    function iconPath(icon) {
+        if (!icon) return ""
+        if (icon.startsWith("/")) return "file://" + icon
+        return ""
+    }
 
     visible: shown || animatingOut
 
     IpcHandler {
-        target: "picker"
+        target: "singlepicker"
         function vlxOpen(filePath: string, resultPath: string): void {
-            picker.startPicker(filePath, resultPath, false)
-        }
-        function vlxOpenMulti(filePath: string, resultPath: string): void {
-            picker.startPicker(filePath, resultPath, true)
+            picker.startPicker(filePath, resultPath)
         }
     }
 
@@ -49,9 +51,8 @@ PanelWindow {
         }
     }
 
-    function startPicker(filePath, resultPath, multi) {
+    function startPicker(filePath, resultPath) {
         picker.pickerResultPath = resultPath
-        picker.pickerMulti = multi
         picker.selected = 0
         itemsReader.command = ["cat", filePath]
         itemsReader.running = true
@@ -59,14 +60,13 @@ PanelWindow {
     }
 
     function cancelPicker() {
-        picker.writeResult([])
+        picker.writeResult(null)
         picker.resetPicker()
     }
 
     function resetPicker() {
         picker.pickerResultPath = ""
         picker.pickerItems = []
-        picker.pickerMulti = false
     }
 
     Timer {
@@ -111,8 +111,8 @@ PanelWindow {
         id: resultWriter
     }
 
-    function writeResult(items) {
-        let json = JSON.stringify(items);
+    function writeResult(item) {
+        let json = JSON.stringify(item);
         resultWriter.command = ["sh", "-c", "printf '%s' " + picker.escapeShell(json) + " > " + picker.escapeShell(picker.pickerResultPath)]
         resultWriter.running = true
     }
@@ -130,13 +130,7 @@ PanelWindow {
 
     function launch(entry) {
         if (!entry) return
-        let items;
-        if (picker.pickerMulti) {
-            items = [entry._source]
-        } else {
-            items = entry._source
-        }
-        picker.writeResult(items)
+        picker.writeResult(entry._source)
         picker.resetPicker()
         hide()
     }
@@ -262,9 +256,24 @@ PanelWindow {
                 clip: true
                 model: filtered
                 currentIndex: picker.selected
+                highlightMoveDuration: 100
                 highlightFollowsCurrentItem: true
                 boundsBehavior: Flickable.StopAtBounds
                 spacing: 4
+
+                highlight: Rectangle {
+                    width: appList.width
+                    height: 64
+                    radius: 8
+                    color: Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.14)
+
+                    Rectangle {
+                        anchors { left: parent.left; top: parent.top; bottom: parent.bottom }
+                        width: 3
+                        radius: 1.5
+                        color: Theme.primary
+                    }
+                }
 
                 delegate: Rectangle {
                     required property var modelData
@@ -272,25 +281,12 @@ PanelWindow {
                     width: appList.width
                     height: 64
                     radius: 8
-                    color: index === picker.selected
-                        ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.14)
-                        : mouseArea.containsMouse
-                            ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.07)
-                            : "transparent"
-
-                    Rectangle {
-                        visible: index === picker.selected
-                        anchors { left: parent.left; top: parent.top; bottom: parent.bottom }
-                        width: 3
-                        radius: 1.5
-                        color: Theme.primary
-                    }
+                    color: "transparent"
 
                     Row {
                         anchors.fill: parent
                         anchors.margins: 8
                         spacing: 12
-                        anchors.verticalCenter: parent.verticalCenter
 
                         Rectangle {
                             width: 48
@@ -299,11 +295,22 @@ PanelWindow {
                             color: Theme.surface0
                             anchors.verticalCenter: parent.verticalCenter
 
-                            IconImage {
+                            Image {
+                                id: iconImg
                                 anchors.centerIn: parent
-                                width: 32
-                                height: 32
-                                source: Quickshell.iconPath(modelData.icon, true)
+                                source: picker.iconPath(modelData.icon)
+                                width: 28
+                                height: 28
+                                fillMode: Image.PreserveAspectFit
+                                visible: status === Image.Ready
+                            }
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: modelData.name.charAt(0).toUpperCase()
+                                font.pixelSize: 20
+                                color: Theme.subtext
+                                visible: iconImg.status !== Image.Ready
                             }
                         }
 
@@ -333,11 +340,8 @@ PanelWindow {
                     }
 
                     MouseArea {
-                        id: mouseArea
                         anchors.fill: parent
-                        hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onEntered: picker.selected = index
                         onClicked: picker.launch(modelData)
                     }
                 }

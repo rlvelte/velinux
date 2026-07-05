@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import qs.services
+import qs.commandcenter.tabs
 
 PanelWindow {
     id: panel
@@ -23,7 +24,7 @@ PanelWindow {
     property int screenWidth: screen?.geometry?.width ?? (Quickshell.screens.length > 0 ? Quickshell.screens[0].width : 1920)
     property int screenHeight: screen?.geometry?.height ?? (Quickshell.screens.length > 0 ? Quickshell.screens[0].height : 1080)
 
-    property var rightTabs: [feedsTab, bundesligaTab]
+    property var rightTabs: [miseTab, feedsTab, bundesligaTab]
 
     visible: shown || animatingOut
 
@@ -42,6 +43,7 @@ PanelWindow {
             contentRect.opacity = 0
             showAnim.restart()
             contentRect.forceActiveFocus()
+            miseTab.refresh()
             feedsTab.refresh()
             bundesligaTab.refresh()
         }
@@ -60,6 +62,7 @@ PanelWindow {
         repeat: true
         triggeredOnStart: false
         onTriggered: {
+            miseTab.refresh()
             feedsTab.refresh()
             bundesligaTab.refresh()
         }
@@ -124,7 +127,7 @@ PanelWindow {
         focus: true
         Keys.onEscapePressed: panel.hide()
         Keys.onTabPressed: {
-            panel.currentTab = (panel.currentTab + 1) % 2
+            panel.currentTab = (panel.currentTab + 1) % 3
         }
         Keys.onUpPressed: rightTabs[panel.currentTab].moveUp()
         Keys.onDownPressed: rightTabs[panel.currentTab].moveDown()
@@ -154,14 +157,15 @@ PanelWindow {
 
                             Repeater {
                                 model: [
+                                    { label: "Mise" },
                                     { label: "Feeds" },
-                                    { label: "Bundesliga" }
+                                    { label: "Bundesliga" },
                                 ]
 
                                 delegate: Rectangle {
                                     required property var modelData
                                     required property int index
-                                    width: (parent.width - parent.spacing) / 2
+                                    width: (parent.width - parent.spacing * 2) / 3
                                     height: parent.height
                                     radius: 6
                                     color: index === panel.currentTab
@@ -202,16 +206,23 @@ PanelWindow {
                             width: parent.width
                             height: parent.height - 32 - 8
 
+                            MiseTab {
+                                id: miseTab
+                                visible: panel.currentTab === 0
+                                anchors.fill: parent
+                                filterText: ""
+                            }
+
                             FeedsTab {
                                 id: feedsTab
-                                visible: panel.currentTab === 0
+                                visible: panel.currentTab === 1
                                 anchors.fill: parent
                                 filterText: ""
                             }
 
                             BundesligaTab {
                                 id: bundesligaTab
-                                visible: panel.currentTab === 1
+                                visible: panel.currentTab === 2
                                 anchors.fill: parent
                                 filterText: ""
                             }

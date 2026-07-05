@@ -14,18 +14,20 @@ type Item struct {
 	Icon        string `json:"icon"`
 	Header      string `json:"header"`
 	Description string `json:"description"`
+	Subitems    []Item `json:"subitem"`
 }
 
 // Variant handles interactive item selection.
 type Variant interface {
-	Available() bool                                               // Available reports whether this backend can be used.
-	Select(ctx context.Context, items []Item) (Item, error)        // Select prompts the user to choose one item.
-	SelectMulti(ctx context.Context, items []Item) ([]Item, error) // SelectMulti prompts the user to choose multiple items.
+	Available() bool
+	Select(ctx context.Context, items []Item) (Item, error)
+	SelectMulti(ctx context.Context, items []Item) ([]Item, error)
+	SelectTwoStage(ctx context.Context, items []Item) (Item, error)
 }
 
 // Picker is the unified picking engine.
 type Picker struct {
-	variant Variant // The selected Variant for this picker.
+	variant Variant
 }
 
 // New creates an engine with an auto-detected backend.
@@ -44,30 +46,35 @@ func (p *Picker) Select(ctx context.Context, items []Item) (Item, error) {
 	return p.variant.Select(ctx, items)
 }
 
-// SelectMulti prompts the user to choose multiple items.
+// SelectMulti prompts the user to choose multiple items via quickshell multi.
 func (p *Picker) SelectMulti(ctx context.Context, items []Item) ([]Item, error) {
 	return p.variant.SelectMulti(ctx, items)
 }
 
+// SelectTwoStage prompts the user to choose an item and then a subcommand.
+func (p *Picker) SelectTwoStage(ctx context.Context, items []Item) (Item, error) {
+	return p.variant.SelectTwoStage(ctx, items)
+}
+
 // ForceQuickshell forces the quickshell IPC backend.
 func (p *Picker) ForceQuickshell() *Picker {
-	p.variant = &QuickshellPicker{}
+	p.variant = &Quickshell{}
 	return p
 }
 
 // ForceFzf forces the fzf backend.
 func (p *Picker) ForceFzf() *Picker {
-	p.variant = &FzfPicker{}
+	p.variant = &Fzf{}
 	return p
 }
 
 func auto() Variant {
-	f := &FzfPicker{}
+	f := &Fzf{}
 	if f.Available() && isatty.IsTerminal(os.Stdout.Fd()) {
 		return f
 	}
 
-	q := &QuickshellPicker{}
+	q := &Quickshell{}
 	if q.Available() {
 		return q
 	}

@@ -12,8 +12,8 @@ type Details struct {
 
 // Variant handles notification delivery.
 type Variant interface {
-	Available() bool                             // Available reports whether this backend can be used.
-	Send(message string, details *Details) error // Send delivers a notification with optional details.
+	Available() bool
+	Send(message string, details *Details) error
 }
 
 // Notify is the unified notification engine.

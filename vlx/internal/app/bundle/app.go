@@ -17,6 +17,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// TODO: REWORK FOR - quickshell, notify, progress, codestyle
+
 // setup validates all requirements for further processing.
 func setup(cmd *cobra.Command, _ []string) error {
 	if err := errors.Join(guard.Network(), guard.Binaries("bash", "fzf")); err != nil {

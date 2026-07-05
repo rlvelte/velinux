@@ -1,11 +1,11 @@
-package commandcenter
+package fetch
 
 import (
 	"context"
 
-	"github.com/rlvelte/velinux/vlx/internal/app/commandcenter/bundesliga"
-	"github.com/rlvelte/velinux/vlx/internal/app/commandcenter/feeds"
-	"github.com/rlvelte/velinux/vlx/internal/app/commandcenter/hardware"
+	"github.com/rlvelte/velinux/vlx/internal/app/fetch/bundesliga"
+	"github.com/rlvelte/velinux/vlx/internal/app/fetch/feeds"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 	"github.com/spf13/cobra"
 )
@@ -18,16 +18,17 @@ func setup(cmd *cobra.Command, _ []string) error {
 	}
 
 	cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, p))
+	cmd.SetContext(context.WithValue(cmd.Context(), notify.ContextKey, notify.New()))
 	return nil
 }
 
-// Command returns the cobra command tree for vlx commandcenter.
+// Command returns the cobra command tree for vlx info.
 func Command() *cobra.Command {
 	root := &cobra.Command{
-		Use:               "commandcenter",
-		Short:             "Horribly bad command center",
-		Long:              "System command center with hardware monitoring and more.",
-		Aliases:           []string{"cc"},
+		Use:               "fetch",
+		Short:             "Horribly bad information fetching",
+		Long:              "Fetches information from web sources.",
+		Aliases:           []string{"f", "info", "cc"},
 		PersistentPreRunE: setup,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
@@ -37,7 +38,6 @@ func Command() *cobra.Command {
 	root.PersistentFlags().BoolP("json", "j", false, "output as JSON")
 
 	root.AddCommand(
-		hardware.Command(),
 		bundesliga.Command(),
 		feeds.Command(),
 	)

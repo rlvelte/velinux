@@ -1,4 +1,4 @@
-package _package
+package packages
 
 import (
 	"encoding/xml"
@@ -11,7 +11,7 @@ import (
 type PackageType string
 
 const (
-	PackageTypePackage PackageType = "package"
+	PackageTypePackage PackageType = "packages"
 	PackageTypePattern PackageType = "pattern"
 	PackageTypePatch   PackageType = "patch"
 	PackageTypeProduct PackageType = "product"
@@ -81,8 +81,8 @@ func parseXml(data []byte) ([]Package, error) {
 
 		kind := s.Kind
 		switch strings.ToLower(kind) {
-		case "paket", "package":
-			kind = "package"
+		case "paket", "packages":
+			kind = "packages"
 		case "muster", "pattern":
 			kind = "pattern"
 		case "patch":

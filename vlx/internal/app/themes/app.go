@@ -2,7 +2,6 @@ package themes
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -18,8 +17,13 @@ import (
 
 // setup configures all requirements and guards against wrong usage.
 func setup(cmd *cobra.Command, _ []string) error {
+	p := printer.New()
+	if jsonFlag, _ := cmd.Flags().GetBool("json"); jsonFlag {
+		p = p.ForceJSON()
+	}
+
+	cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, p))
 	cmd.SetContext(context.WithValue(cmd.Context(), notify.ContextKey, notify.New()))
-	cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, printer.New()))
 	return nil
 }
 
@@ -28,10 +32,9 @@ func Command() *cobra.Command {
 		Use:               "themes",
 		Short:             "Horribly bad theming manager",
 		Long:              "Manage and switch between theme profiles.",
-		PersistentPreRunE: setup,
 		Args:              cobra.NoArgs,
 		Aliases:           []string{"theme"},
-		SilenceUsage:      true,
+		PersistentPreRunE: setup,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -45,7 +48,6 @@ func Command() *cobra.Command {
 		Args:    cobra.NoArgs,
 		RunE:    cmdList,
 	}
-	cmdListCmd.Flags().BoolP("json", "j", false, "output as JSON")
 
 	root.AddCommand(
 		cmdListCmd,
@@ -91,25 +93,6 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 	sort.Slice(list, func(i, j int) bool {
 		return list[i].Name < list[j].Name
 	})
-
-	jsonFlag, _ := cmd.Flags().GetBool("json")
-	if jsonFlag {
-		var out []Theme
-		for _, t := range list {
-			th := *t
-			th.Logo = filepath.Join(themesDir, t.Logo)
-			th.Active = t.Id == active
-			out = append(out, th)
-		}
-
-		data, err := json.Marshal(out)
-		if err != nil {
-			return err
-		}
-
-		fmt.Println(string(data))
-		return nil
-	}
 
 	headers := []string{"ACTIVE", "ID", "Name"}
 	var rows [][]string

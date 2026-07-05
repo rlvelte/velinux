@@ -1,4 +1,4 @@
-package _package
+package packages
 
 import (
 	"context"
@@ -12,6 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// TODO: REWORK FOR - quickshell, cache?, notify, progress, codestyle
+
 // setup validates all requirements for further processing.
 func setup(cmd *cobra.Command, _ []string) error {
 	if err := errors.Join(guard.Network(), guard.Binaries("zypper", "fzf")); err != nil {
@@ -19,14 +21,15 @@ func setup(cmd *cobra.Command, _ []string) error {
 	}
 
 	cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, printer.New()))
+	cmd.SetContext(context.WithValue(cmd.Context(), picker.ContextKey, picker.New()))
 	return nil
 }
 
-// Command returns the cobra command tree for vlx package.
+// Command returns the cobra command tree for vlx packages.
 func Command() *cobra.Command {
 	root := &cobra.Command{
-		Use:               "package",
-		Short:             "Horribly bad package installer",
+		Use:               "packages",
+		Short:             "Horribly bad packages installer",
 		Long:              "Package install wrapper around zypper with interactive search.",
 		PersistentPreRunE: setup,
 		Args:              cobra.ArbitraryArgs,
@@ -41,6 +44,7 @@ func Command() *cobra.Command {
 
 // cmdInstall runs a search and then an info + install on the selection
 func cmdInstall(cmd *cobra.Command, query string) error {
+	pi := cmd.Context().Value(picker.ContextKey).(*picker.Picker)
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 
 	client := &Zypper{}
@@ -69,8 +73,7 @@ func cmdInstall(cmd *cobra.Command, query string) error {
 		}
 	}
 
-	fzf := picker.New().ForceFzf()
-	selected, err := fzf.Select(cmd.Context(), items)
+	selected, err := pi.Select(cmd.Context(), items)
 	if err != nil {
 		return fmt.Errorf("fzf selection failed: %w", err)
 	}
@@ -83,14 +86,14 @@ func cmdInstall(cmd *cobra.Command, query string) error {
 		p.Info(info)
 	}
 
-	if !p.Confirm("Install selected package?", true) {
+	if !p.Confirm("Install selected packages?", true) {
 		return nil
 	}
 
 	return client.Install(cmd.Context(), []string{pkgName})
 }
 
-// latest returns the current version of a package.
+// latest returns the current version of a packages.
 func latest(pkgs []Package) []Package {
 	latest := make(map[string]Package)
 	for _, pkg := range pkgs {

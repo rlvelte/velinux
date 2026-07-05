@@ -13,22 +13,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// setup validates all requirements for further processing.
-func setup(_ *cobra.Command, _ []string) error {
-	if err := errors.Join(guard.Network()); err != nil {
-		return err
-	}
-
-	return nil
+// subSetup validates all requirements for further processing.
+func subSetup(_ *cobra.Command, _ []string) error {
+	return errors.Join(guard.Network())
 }
 
-// Command returns the cobra command tree for vlx commandcenter feeds.
+// Command returns the cobra command tree for vlx fetch feeds.
 func Command() *cobra.Command {
 	root := &cobra.Command{
 		Use:     "feeds",
 		Short:   "Horribly bad RSS/Atom feed reader",
 		Aliases: []string{"feed", "rss"},
-		PreRunE: setup,
+		PreRunE: subSetup,
 		RunE:    cmdPoll,
 	}
 
@@ -47,7 +43,7 @@ func Command() *cobra.Command {
 func cmdList(cmd *cobra.Command, _ []string) error {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 
-	dir := fsys.ConfigPath("vlx", "commandcenter")
+	dir := fsys.ConfigPath("vlx", "fetch")
 	store := fsys.NewStore(dir, decodeFeedsConfig, ".json")
 	sources, _ := store.Get("config")
 
@@ -63,7 +59,7 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 func cmdPoll(cmd *cobra.Command, args []string) error {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 
-	dir := fsys.ConfigPath("vlx", "commandcenter")
+	dir := fsys.ConfigPath("vlx", "fetch")
 	store := fsys.NewStore(dir, decodeFeedsConfig, ".json")
 	sources, _ := store.Get("config")
 

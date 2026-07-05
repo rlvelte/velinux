@@ -19,22 +19,18 @@ import (
 
 const apiBase = "https://api.openligadb.de"
 
-// setup validates all requirements for further processing.
-func setup(_ *cobra.Command, _ []string) error {
-	if err := errors.Join(guard.Network()); err != nil {
-		return err
-	}
-
-	return nil
+// subSetup validates all requirements for further processing.
+func subSetup(_ *cobra.Command, _ []string) error {
+	return errors.Join(guard.Network())
 }
 
-// Command returns the cobra command tree for vlx commandcenter bundesliga.
+// Command returns the cobra command tree for vlx fetch bundesliga.
 func Command() *cobra.Command {
 	root := &cobra.Command{
-		Use:               "bundesliga",
-		Short:             "Horribly bad bundesliga tracker",
-		Aliases:           []string{"bl"},
-		PersistentPreRunE: setup,
+		Use:     "bundesliga",
+		Short:   "Horribly bad bundesliga tracker",
+		Aliases: []string{"bl"},
+		PreRunE: subSetup,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -53,8 +49,9 @@ func Command() *cobra.Command {
 }
 
 func cmdTable(cmd *cobra.Command, _ []string) error {
-	league, _ := cmd.Flags().GetString("league")
+	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 
+	league, _ := cmd.Flags().GetString("league")
 	url := fmt.Sprintf("%s/getbltable/%s/%d", apiBase, league, season())
 	body, err := get(url)
 	if err != nil {
@@ -81,7 +78,6 @@ func cmdTable(cmd *cobra.Command, _ []string) error {
 		})
 	}
 
-	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 	headers := []string{"#", "Team", "Pts", "Goals", "W/D/L"}
 	var stringRows [][]string
 	for _, r := range rows {
@@ -93,6 +89,7 @@ func cmdTable(cmd *cobra.Command, _ []string) error {
 			fmt.Sprintf("%d/%d/%d", r.Wins, r.Draws, r.Losses),
 		})
 	}
+
 	p.Table(headers, stringRows)
 	return nil
 }
@@ -102,6 +99,7 @@ func season() int {
 	if now.Month() >= time.August {
 		return now.Year()
 	}
+
 	return now.Year() - 1
 }
 

@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import qs.services
 
 Item {
@@ -10,6 +11,11 @@ Item {
     SystemClock {
         id: clock
         precision: SystemClock.Seconds
+    }
+
+    Process {
+        id: calendarProcess
+        command: ["gnome-calendar"]
     }
 
     Row {
@@ -40,6 +46,14 @@ Item {
             font.family: Theme.fontName
             font.pixelSize: Theme.fontSizeHeading
             font.weight: Font.Bold
+        }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: {
+            calendarProcess.running = true
         }
     }
 }

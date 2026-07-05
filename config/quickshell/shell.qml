@@ -9,9 +9,11 @@ import qs.menus
 import qs.services
 
 ShellRoot {
-    PickerMenu {}
+    SinglePickerMenu {}
+    MultiPickerMenu {}
+    TwoStagedPickerMenu {}
     PowerMenu {}
-    CommandCenterPanel {}
+    CommandCenter {}
 
     LockContext {
         id: lockContext

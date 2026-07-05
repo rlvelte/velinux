@@ -21,26 +21,26 @@ type JSONPrinter struct {
 }
 
 // Print returns a message.
-func (b *JSONPrinter) Print(msg string) {
-	_ = b.encoder.Encode(jsonMessage{Message: msg})
+func (j *JSONPrinter) Print(msg string) {
+	_ = j.encoder.Encode(jsonMessage{Message: msg})
 }
 
 // Warn returns a warning message.
-func (b *JSONPrinter) Warn(msg string) {
-	_ = b.encoder.Encode(jsonMessage{Level: "warn", Message: msg})
+func (j *JSONPrinter) Warn(msg string) {
+	_ = j.encoder.Encode(jsonMessage{Level: "warn", Message: msg})
 }
 
 // Error returns an error message.
-func (b *JSONPrinter) Error(msg string) {
+func (j *JSONPrinter) Error(msg string) {
 	_ = json.NewEncoder(os.Stderr).Encode(jsonMessage{Level: "error", Message: msg})
 }
 
 // Table returns a table.
-func (b *JSONPrinter) Table(headers []string, rows [][]string) {
-	_ = b.encoder.Encode(jsonTable{Headers: headers, Rows: rows})
+func (j *JSONPrinter) Table(headers []string, rows [][]string) {
+	_ = j.encoder.Encode(jsonTable{Headers: headers, Rows: rows})
 }
 
 // Confirm does not work in JSON mode.
-func (b *JSONPrinter) Confirm(_ string, _ bool) bool {
+func (j *JSONPrinter) Confirm(_ string, _ bool) bool {
 	return false
 }

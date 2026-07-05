@@ -11,11 +11,11 @@ const ContextKey = "printer"
 
 // Variant handles terminal out/inputs
 type Variant interface {
-	Print(msg string)                         // Print prints a simple message
-	Warn(msg string)                          // Warn prints a warning message
-	Error(msg string)                         // Error prints a error message
-	Table(headers []string, rows [][]string)  // Table prints data in a tabular format.
-	Confirm(msg string, defaultYes bool) bool // Confirm shows a simple confirmation dialog.
+	Print(msg string)
+	Warn(msg string)
+	Error(msg string)
+	Table(headers []string, rows [][]string)
+	Confirm(msg string, defaultYes bool) bool
 }
 
 // Printer is the unified printing engine.

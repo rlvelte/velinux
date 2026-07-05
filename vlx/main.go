@@ -6,10 +6,10 @@ import (
 	"os"
 
 	"github.com/rlvelte/velinux/vlx/internal/app/bundle"
-	"github.com/rlvelte/velinux/vlx/internal/app/commandcenter"
-	"github.com/rlvelte/velinux/vlx/internal/app/commandcenter/bundesliga"
+	"github.com/rlvelte/velinux/vlx/internal/app/fetch"
 	"github.com/rlvelte/velinux/vlx/internal/app/launcher"
-	"github.com/rlvelte/velinux/vlx/internal/app/package"
+	"github.com/rlvelte/velinux/vlx/internal/app/mise"
+	"github.com/rlvelte/velinux/vlx/internal/app/packages"
 	"github.com/rlvelte/velinux/vlx/internal/app/themes"
 	"github.com/spf13/cobra"
 )
@@ -26,11 +26,11 @@ func main() {
 
 	root.AddCommand(
 		completions(),
-		_package.Command(),
+		packages.Command(),
 		themes.Command(),
 		bundle.Command(),
-		bundesliga.Command(),
-		commandcenter.Command(),
+		fetch.Command(),
+		mise.Command(),
 		launcher.Command(),
 	)
 

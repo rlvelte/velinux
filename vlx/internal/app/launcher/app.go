@@ -13,6 +13,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// TODO: REWORK FOR - quickshell performance, cache?, codestyle
+
 // setup validates all requirements for further processing.
 func setup(cmd *cobra.Command, _ []string) error {
 	cmd.SetContext(context.WithValue(cmd.Context(), notify.ContextKey, notify.New()))
@@ -22,7 +24,7 @@ func setup(cmd *cobra.Command, _ []string) error {
 func Command() *cobra.Command {
 	return &cobra.Command{
 		Use:               "launcher",
-		Short:             "Launch applications via the picker",
+		Short:             "Horribly bad application launcher",
 		Long:              "Scan desktop entries and launch via the quickshell/fzf picker.",
 		PersistentPreRunE: setup,
 		Aliases:           []string{"run", "app"},
@@ -62,7 +64,7 @@ func cmdLaunch(cmd *cobra.Command, _ []string) error {
 	items := make([]picker.Item, len(ranked))
 	for i, e := range ranked {
 		items[i] = picker.Item{
-			Icon:        e.Icon,
+			Icon:        resolveIcon(e.Icon),
 			Header:      e.Name,
 			Description: e.Comment,
 		}
@@ -89,6 +91,7 @@ func cmdLaunch(cmd *cobra.Command, _ []string) error {
 			break
 		}
 	}
+
 	if chosen == nil {
 		fmtErr := fmt.Errorf("selected app not found")
 		_ = n.Send(fmtErr.Error(), &notify.Details{

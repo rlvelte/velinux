@@ -7,6 +7,64 @@ import (
 	"strings"
 )
 
+var iconSizes = []string{"scalable", "48x48", "64x64", "32x32", "128x128", "256x256", "24x24", "16x16", "symbolic"}
+var iconExts = []string{".png", ".svg", ".xpm"}
+
+// iconThemeDirs lazily builds the list of icon theme root directories.
+func iconThemeDirs() []string {
+	home, _ := os.UserHomeDir()
+	dirs := []string{"/usr/share/icons"}
+	if home != "" {
+		dirs = append([]string{filepath.Join(home, ".local/share/icons")}, dirs...)
+	}
+	return dirs
+}
+
+// resolveIcon resolves an XDG icon name to an absolute path by scanning
+// all available icon theme directories. Returns the original string if
+// no matching file is found.
+func resolveIcon(icon string) string {
+	if icon == "" || filepath.IsAbs(icon) {
+		return icon
+	}
+
+	for _, root := range iconThemeDirs() {
+		entries, err := os.ReadDir(root)
+		if err != nil {
+			continue
+		}
+		for _, e := range entries {
+			if !e.IsDir() {
+				continue
+			}
+			themeDir := filepath.Join(root, e.Name())
+			for _, size := range iconSizes {
+				for _, ext := range iconExts {
+					path := filepath.Join(themeDir, size, "apps", icon+ext)
+					if _, err := os.Stat(path); err == nil {
+						return path
+					}
+				}
+			}
+		}
+	}
+
+	for _, ext := range iconExts {
+		path := filepath.Join("/usr/share/pixmaps", icon+ext)
+		if _, err := os.Stat(path); err == nil {
+			return path
+		}
+	}
+
+	if _, err := os.Stat(icon); err == nil {
+		if abs, err := filepath.Abs(icon); err == nil {
+			return abs
+		}
+	}
+
+	return icon
+}
+
 // Entry represents a parsed desktop entry.
 type Entry struct {
 	ID        string // File basename without .desktop
