@@ -1,15 +1,16 @@
 {
   "$schema": "bundle.schema.json",
   "zypper": [
-    "docker",
-    "containerd",
+    "podman",
+    "podman-docker",
     "k3s-selinux",
     "k9s",
     "helm"
   ],
   "post": [
-    "sudo systemctl enable --now docker",
-    "sudo usermod -aG docker $USER",
+    "sudo systemctl enable --now podman.socket",
+    "systemctl --user enable --now podman.socket",
     "curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC=\"--write-kubeconfig-mode 644\" sh -s -"
   ]
 }
+
