@@ -9,15 +9,15 @@ You can initiate a picking process either through an interactive terminal sessio
 
 If you initiated the command through your terminal, a simple `fzf` selection is shown in that same instance.
 
-<img src="assets/term.png" height="500"/>
+<img src="../assets/term.png" height="500"/>
 
 If you initiated the command through other means (most likely a Wayland WM), the data is redirected to a quickshell QML template file.
 
-<img src="assets/single.png" height="500"/>
+<img src="../assets/single.png" height="500"/>
 
 There are other picker options that include a two staged selection which is either a sequential select with `fzf` but comes with its own picker in the quickshell version.
 
-<img src="assets/staged.png" height="500"/>
+<img src="../assets/staged.png" height="500"/>
 
 
 ## What can I pick?
@@ -28,4 +28,4 @@ There is no technical limitation on what the picker can/cannot serve. However it
 
 There is the exception of the `PowerPicker.qml` which uses hardcoded commands to either logout, shutdown etc.
 
-<img src="assets/power.png" width="800"/>
+<img src="../assets/power.png" width="800"/>
