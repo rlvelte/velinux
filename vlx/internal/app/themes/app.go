@@ -127,9 +127,11 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 		if seen[t.Id] {
 			continue
 		}
+
 		if filepath.Base(t.Path) == "current.json" {
 			continue
 		}
+
 		seen[t.Id] = true
 		themes = append(themes, t)
 	}
@@ -197,13 +199,23 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	wallpaperPath := filepath.Join(themesDir, "current.png")
+	wallpaperPath := filepath.Join(themesDir, "wallpaper.png")
 	if err := os.Remove(wallpaperPath); err != nil && !os.IsNotExist(err) {
 		return err
 	}
 	if err := os.Symlink(theme.Wallpaper, wallpaperPath); err != nil {
 		return err
 	}
+
+	logoPath := filepath.Join(themesDir, "logo.png")
+	if err := os.Remove(logoPath); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	if err := os.Symlink(theme.Logo, logoPath); err != nil {
+		return err
+	}
+
+	content.LogoPath = "file://" + filepath.Join(themesDir, theme.Logo)
 
 	if err := GenerateAll(*content); err != nil {
 		return err

@@ -68,6 +68,8 @@ type ThemeContent struct {
 	FontSizeSmall   string `json:"font_size_small"`
 	FontSizeLarge   string `json:"font_size_large"`
 	FontSizeHeading string `json:"font_size_heading"`
+
+	LogoPath string `json:"-"`
 }
 
 func decodeThemeContent(_ string, _ string, data []byte) (*ThemeContent, error) {

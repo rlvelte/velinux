@@ -5,54 +5,57 @@ import Quickshell
 
 Singleton {
     // --- Identity ---
-    readonly property color primary: "#30ba78"
-    readonly property color primaryDim: "#0e7e3c"
-    readonly property color primarySubtle: "#1d8a54"
-    readonly property color primaryMuted: "#c4ecda"
+    readonly property color primary: "#fd7803"
+    readonly property color primaryDim: "#ac5323"
+    readonly property color primarySubtle: "#d46202"
+    readonly property color primaryMuted: "#fcd4a8"
 
-    readonly property color secondary: "#0c322c"
-    readonly property color secondaryDim: "#0a2924"
-    readonly property color secondaryLight: "#1a3d35"
+    readonly property color secondary: "#003562"
+    readonly property color secondaryDim: "#021b2f"
+    readonly property color secondaryLight: "#0a4a7a"
 
-    readonly property color accent: "#fe7c3f"
-    readonly property color accentDim: "#bd3314"
-    readonly property color accentLight: "#ffb184"
+    readonly property color accent: "#00aaff"
+    readonly property color accentDim: "#0077cc"
+    readonly property color accentLight: "#66ccff"
 
     // --- Backgrounds (darkest -> lightest) ---
-    readonly property color base: "#080f0e"
-    readonly property color mantle: "#0c1a17"
-    readonly property color crust: "#0f2822"
-    readonly property color surface0: "#1a3d35"
-    readonly property color surface1: "#254d43"
-    readonly property color surface2: "#3d6b60"
+    readonly property color base: "#010d18"
+    readonly property color mantle: "#021b2f"
+    readonly property color crust: "#032238"
+    readonly property color surface0: "#003562"
+    readonly property color surface1: "#0a4a7a"
+    readonly property color surface2: "#1a5a8a"
 
     // --- Foregrounds ---
-    readonly property color text: "#e0f0ee"
-    readonly property color subtext: "#a8c8c2"
-    readonly property color overlay: "#7daca2"
-    readonly property color muted: "#5a8c80"
+    readonly property color text: "#e0eaf0"
+    readonly property color subtext: "#a0b8c8"
+    readonly property color overlay: "#608090"
+    readonly property color muted: "#405060"
 
     // --- Semantic states ---
-    readonly property color success: "#30ba78"
-    readonly property color warning: "#f0ab00"
-    readonly property color warningSubtle: "#ffecb5"
-    readonly property color error: "#e85b4a"
-    readonly property color errorSubtle: "#fcd4cf"
-    readonly property color info: "#00b2e2"
-    readonly property color infoSubtle: "#b3e8f6"
+    readonly property color success: "#00a651"
+    readonly property color warning: "#fd7803"
+    readonly property color warningSubtle: "#fcd4a8"
+    readonly property color error: "#ed1c24"
+    readonly property color errorSubtle: "#f8d7da"
+    readonly property color info: "#0099ff"
+    readonly property color infoSubtle: "#b3e0ff"
 
     // --- On-color ---
-    readonly property color textOnPrimary: "#060f0d"
-    readonly property color textOnSecondary: "#e0f0ee"
-    readonly property color textOnAccent: "#060f0d"
-    readonly property color textOnSurface: "#e0f0ee"
+    readonly property color textOnPrimary: "#010d18"
+    readonly property color textOnSecondary: "#e0eaf0"
+    readonly property color textOnAccent: "#000000"
+    readonly property color textOnSurface: "#e0eaf0"
 
     // --- Typography ---
-    readonly property string fontName: "SUSE"
-    readonly property string fontNameHeading: "SUSE"
-    readonly property string fontNameMono: "SUSE Mono"
+    readonly property string fontName: "Montserrat"
+    readonly property string fontNameHeading: "Montserrat"
+    readonly property string fontNameMono: "JetBrainsMono Nerd Font"
     readonly property int fontSize: 16
     readonly property int fontSizeSmall: 14
     readonly property int fontSizeLarge: 18
     readonly property int fontSizeHeading: 20
+
+    // --- Assets ---
+    readonly property string logoPath: "file:///home/rvelte/.config/vlx/themes/logos/vt.png"
 }

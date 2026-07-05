@@ -13,12 +13,8 @@ Item {
         anchors.centerIn: parent
         height: 28
         fillMode: Image.PreserveAspectFit
-        source: {
-            for (let i = 0; i < Vlx.themes.length; i++) {
-                if (Vlx.themes[i].active) return Vlx.themes[i].logo
-            }
-            return ""
-        }
+        source: Theme.logoPath
+
     }
 
     MouseArea {

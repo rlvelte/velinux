@@ -13,7 +13,7 @@ Rectangle {
     Image {
         id: bgImage
         anchors.fill: parent
-        source: Quickshell.env("HOME") + "/.config/vlx/themes/current.png"
+        source: Quickshell.env("HOME") + "/.config/vlx/themes/wallpaper.png"
         fillMode: Image.PreserveAspectCrop
         opacity: 0.15
     }
