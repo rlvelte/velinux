@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import qs.services
 import qs.bar.widgets
+import qs.bar.widgets.interactable
 import qs.bar.widgets.hardware
 import qs.bar.widgets.design
 import qs.bar.widgets.info

@@ -39,8 +39,3 @@ func (j *JSONPrinter) Error(msg string) {
 func (j *JSONPrinter) Table(headers []string, rows [][]string) {
 	_ = j.encoder.Encode(jsonTable{Headers: headers, Rows: rows})
 }
-
-// Confirm does not work in JSON mode.
-func (j *JSONPrinter) Confirm(_ string, _ bool) bool {
-	return false
-}

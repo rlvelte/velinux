@@ -1,5 +1,10 @@
 {
   "$schema": "bundle.schema.json",
+  "info": {
+    "name": "SwayFX",
+    "desc": "Compiles swayfx from source for openSUSE.",
+    "icon": "\uF35D"
+  },
   "zypper": [
     "git",
     "gcc",

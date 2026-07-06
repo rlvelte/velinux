@@ -12,11 +12,6 @@ type TableRow struct {
 	MatchesPlayed int    `json:"matches_played"`
 }
 
-type Config struct {
-	Team          TeamInfo `json:"team"`
-	Notifications bool     `json:"notifications"`
-}
-
 type Group struct {
 	GroupName    string `json:"groupName"`
 	GroupOrderID int    `json:"groupOrderID"`

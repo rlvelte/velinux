@@ -1,5 +1,10 @@
 {
   "$schema": "bundle.schema.json",
+  "info": {
+    "name": "k3s",
+    "desc": "Installs k3s with podman backend + k9s and helm.",
+    "icon": "\uE811"
+  },
   "zypper": [
     "podman",
     "podman-docker",

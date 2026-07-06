@@ -2,6 +2,7 @@ package picker
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/mattn/go-isatty"
@@ -32,13 +33,13 @@ type Picker struct {
 
 // New creates an engine with an auto-detected backend.
 // Returns nil if no backend is available.
-func New() *Picker {
-	v := auto()
-	if v == nil {
-		return nil
+func New() (*Picker, error) {
+	v, err := auto()
+	if err != nil {
+		return nil, err
 	}
 
-	return &Picker{variant: v}
+	return &Picker{variant: v}, nil
 }
 
 // Select prompts the user to choose one item.
@@ -68,16 +69,16 @@ func (p *Picker) ForceFzf() *Picker {
 	return p
 }
 
-func auto() Variant {
+func auto() (Variant, error) {
 	f := &Fzf{}
 	if f.Available() && isatty.IsTerminal(os.Stdout.Fd()) {
-		return f
+		return f, nil
 	}
 
 	q := &Quickshell{}
 	if q.Available() {
-		return q
+		return q, nil
 	}
 
-	return nil
+	return nil, fmt.Errorf("no picker available")
 }

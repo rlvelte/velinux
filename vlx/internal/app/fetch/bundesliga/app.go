@@ -2,7 +2,6 @@ package bundesliga
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -19,9 +18,9 @@ import (
 
 const apiBase = "https://api.openligadb.de"
 
-// subSetup validates all requirements for further processing.
-func subSetup(_ *cobra.Command, _ []string) error {
-	return errors.Join(guard.Network())
+// setup validates all requirements for further processing.
+func setup(_ *cobra.Command, _ []string) error {
+	return guard.Network()
 }
 
 // Command returns the cobra command tree for vlx fetch bundesliga.
@@ -30,7 +29,7 @@ func Command() *cobra.Command {
 		Use:     "bundesliga",
 		Short:   "Horribly bad bundesliga tracker",
 		Aliases: []string{"bl"},
-		PreRunE: subSetup,
+		PreRunE: setup,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -43,7 +42,6 @@ func Command() *cobra.Command {
 	}
 
 	tableCmd.Flags().String("league", "bl1", "league shortcut (bl1, bl2)")
-
 	root.AddCommand(tableCmd)
 	return root
 }

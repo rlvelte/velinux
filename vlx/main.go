@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -9,29 +10,42 @@ import (
 	"github.com/rlvelte/velinux/vlx/internal/app/fetch"
 	"github.com/rlvelte/velinux/vlx/internal/app/launcher"
 	"github.com/rlvelte/velinux/vlx/internal/app/mise"
-	"github.com/rlvelte/velinux/vlx/internal/app/packages"
 	"github.com/rlvelte/velinux/vlx/internal/app/themes"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 	"github.com/spf13/cobra"
 )
 
+func setup(cmd *cobra.Command, args []string) error {
+	p := printer.New()
+	if jsonFlag, _ := cmd.Flags().GetBool("json"); jsonFlag {
+		p = p.ForceJSON()
+	}
+
+	cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, p))
+	cmd.SetContext(context.WithValue(cmd.Context(), notify.ContextKey, notify.New()))
+}
+
 func main() {
 	root := &cobra.Command{
-		Use:   "vlx",
-		Short: "Horribly bad utility application",
-		Long:  "VeLinux centered command utility by rvelte.",
+		Use:               "vlx",
+		Short:             "Horribly bad utilities",
+		Long:              "VeLinux centered command utility application.",
+		PersistentPreRunE: setup,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
 	}
 
+	root.PersistentFlags().BoolP("json", "j", false, "output as JSON")
+
 	root.AddCommand(
 		completions(),
-		packages.Command(),
 		themes.Command(),
+		launcher.Command(),
+		mise.Command(),
 		bundle.Command(),
 		fetch.Command(),
-		mise.Command(),
-		launcher.Command(),
 	)
 
 	if err := root.Execute(); err != nil {

@@ -1,39 +1,24 @@
 package hardware
 
 import (
-	"context"
 	"fmt"
 
-	"github.com/rlvelte/velinux/vlx/internal/app/hardware/sources"
-	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
+	"github.com/rlvelte/velinux/vlx/internal/app/fetch/hardware/sources"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 	"github.com/spf13/cobra"
 )
 
 // TODO: REWORK FOR - quickshell, notify, codestyle
 
-// setup validates all requirements for further processing.
-func setup(cmd *cobra.Command, _ []string) error {
-	p := printer.New()
-	if jsonFlag, _ := cmd.Flags().GetBool("json"); jsonFlag {
-		p = p.ForceJSON()
-	}
-
-	cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, p))
-	cmd.SetContext(context.WithValue(cmd.Context(), notify.ContextKey, notify.New()))
-	return nil
-}
-
 // Command returns the cobra command tree for vlx hardware.
 func Command() *cobra.Command {
 	root := &cobra.Command{
-		Use:               "hardware [source]",
-		Short:             "Horribly bad hardware monitor",
-		Long:              "Query hardware information by source.",
-		Aliases:           []string{"hw"},
-		Args:              cobra.MaximumNArgs(1),
-		PersistentPreRunE: setup,
-		RunE:              cmdRun,
+		Use:     "hardware [source]",
+		Short:   "Horribly bad hardware monitor",
+		Long:    "Query hardware information by source.",
+		Aliases: []string{"hw"},
+		Args:    cobra.MaximumNArgs(1),
+		RunE:    cmdRun,
 	}
 
 	listCmd := &cobra.Command{
@@ -44,7 +29,6 @@ func Command() *cobra.Command {
 		RunE:    cmdList,
 	}
 
-	root.PersistentFlags().BoolP("json", "j", false, "output as JSON")
 	root.AddCommand(listCmd)
 	return root
 }

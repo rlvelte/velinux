@@ -1,7 +1,6 @@
 package launcher
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -15,21 +14,14 @@ import (
 
 // TODO: REWORK FOR - quickshell performance, cache?, codestyle
 
-// setup validates all requirements for further processing.
-func setup(cmd *cobra.Command, _ []string) error {
-	cmd.SetContext(context.WithValue(cmd.Context(), notify.ContextKey, notify.New()))
-	return nil
-}
-
 func Command() *cobra.Command {
 	return &cobra.Command{
-		Use:               "launcher",
-		Short:             "Horribly bad application launcher",
-		Long:              "Scan desktop entries and launch via the quickshell/fzf picker.",
-		PersistentPreRunE: setup,
-		Aliases:           []string{"run", "app"},
-		Args:              cobra.NoArgs,
-		RunE:              cmdLaunch,
+		Use:     "launcher",
+		Short:   "Horribly bad application launcher",
+		Long:    "Scan desktop entries and launch via the quickshell/fzf picker.",
+		Aliases: []string{"run", "app"},
+		Args:    cobra.NoArgs,
+		RunE:    cmdLaunch,
 	}
 }
 
@@ -70,9 +62,9 @@ func cmdLaunch(cmd *cobra.Command, _ []string) error {
 		}
 	}
 
-	pkr := picker.New()
-	if pkr == nil {
-		return fmt.Errorf("no picker available")
+	pkr, err := picker.New()
+	if err != nil {
+		return err
 	}
 
 	selected, err := pkr.Select(cmd.Context(), items)

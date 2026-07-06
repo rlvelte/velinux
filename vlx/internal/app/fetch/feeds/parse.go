@@ -2,35 +2,9 @@ package feeds
 
 import (
 	"encoding/xml"
-	"fmt"
 	"strings"
 	"time"
 )
-
-func ParseFeed(name string, data []byte) (*Feed, error) {
-	data = trimXMLPrefix(data)
-
-	var rss RSS
-	if err := xml.Unmarshal(data, &rss); err == nil && rss.Channel.Title != "" {
-		return rssToFeed(name, &rss), nil
-	}
-
-	var atom AtomFeed
-	if err := xml.Unmarshal(data, &atom); err == nil && atom.Title != "" {
-		return atomToFeed(name, &atom), nil
-	}
-
-	return nil, fmt.Errorf("unrecognized feed format from %s", name)
-}
-
-func trimXMLPrefix(data []byte) []byte {
-	s := strings.TrimSpace(string(data))
-	idx := strings.Index(s, "<?xml")
-	if idx > 0 {
-		s = s[idx:]
-	}
-	return []byte(s)
-}
 
 type RSS struct {
 	XMLName xml.Name `xml:"rss"`

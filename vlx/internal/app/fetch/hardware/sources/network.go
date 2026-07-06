@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/rlvelte/velinux/vlx/internal/core/format"
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 )
@@ -44,7 +43,7 @@ func (s *network) Run(p *printer.Printer) error {
 	}
 
 	if len(info.Interfaces) == 0 {
-		p.Info("No network interfaces found")
+		p.Print("No network interfaces found")
 		return nil
 	}
 
@@ -57,8 +56,8 @@ func (s *network) Run(p *printer.Printer) error {
 		rows = append(rows, []string{
 			iface.Name,
 			status,
-			format.Bytes(iface.RxBytes),
-			format.Bytes(iface.TxBytes),
+			FormatBytes(iface.RxBytes),
+			FormatBytes(iface.TxBytes),
 		})
 	}
 

@@ -1,10 +1,11 @@
 package feeds
 
 import (
-	"errors"
+	"encoding/xml"
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"sync"
 
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
@@ -13,9 +14,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// subSetup validates all requirements for further processing.
-func subSetup(_ *cobra.Command, _ []string) error {
-	return errors.Join(guard.Network())
+// setup validates all requirements for further processing.
+func setup(_ *cobra.Command, _ []string) error {
+	return guard.Network()
 }
 
 // Command returns the cobra command tree for vlx fetch feeds.
@@ -24,7 +25,7 @@ func Command() *cobra.Command {
 		Use:     "feeds",
 		Short:   "Horribly bad RSS/Atom feed reader",
 		Aliases: []string{"feed", "rss"},
-		PreRunE: subSetup,
+		PreRunE: setup,
 		RunE:    cmdPoll,
 	}
 
@@ -99,7 +100,7 @@ func cmdPoll(cmd *cobra.Command, args []string) error {
 				return
 			}
 
-			feed, err := ParseFeed(s.Name, data)
+			feed, err := parseFeed(s.Name, data)
 			if err != nil {
 				results[i] = result{err: fmt.Errorf("%s: parse failed: %w", s.Name, err)}
 				return
@@ -117,7 +118,7 @@ func cmdPoll(cmd *cobra.Command, args []string) error {
 			continue
 		}
 
-		p.Info(fmt.Sprintf("\n%s — %s", r.feed.SourceName, r.feed.Title))
+		p.Print(fmt.Sprintf("\n%s — %s", r.feed.SourceName, r.feed.Title))
 
 		rows := make([][]string, 0, len(r.feed.Items))
 		for _, item := range r.feed.Items {
@@ -132,6 +133,26 @@ func cmdPoll(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+func parseFeed(name string, data []byte) (*Feed, error) {
+	s := strings.TrimSpace(string(data))
+	idx := strings.Index(s, "<?xml")
+	if idx > 0 {
+		s = s[idx:]
+	}
+
+	var rss RSS
+	if err := xml.Unmarshal([]byte(s), &rss); err == nil && rss.Channel.Title != "" {
+		return rssToFeed(name, &rss), nil
+	}
+
+	var atom AtomFeed
+	if err := xml.Unmarshal([]byte(s), &atom); err == nil && atom.Title != "" {
+		return atomToFeed(name, &atom), nil
+	}
+
+	return nil, fmt.Errorf("unrecognized feed format from %s", name)
 }
 
 func get(url string) ([]byte, error) {

@@ -1,5 +1,10 @@
 {
   "$schema": "bundle.schema.json",
+  "info": {
+    "name": "PhotoGIMP",
+    "desc": "Installs GIMP from flathub and apply the photogimp pack.",
+    "icon": "\uE7E7"
+  },
   "flatpak": [
     "org.gimp.GIMP"
   ],
@@ -17,6 +22,7 @@
     "unzip -o /tmp/photogimp-download/PhotoGIMP-linux.zip -d /tmp/photogimp-download/extracted",
     "cp -rf /tmp/photogimp-download/extracted/PhotoGIMP-linux/.config/GIMP/3.0/* \"$HOME/.config/GIMP/$gimp_dir/\"",
     "cp -rf /tmp/photogimp-download/extracted/PhotoGIMP-linux/.local/share/* ~/.local/share/",
+
     ": 'PhotoGIMP desktop file hardcodes gimp-3.0 but Flathub ships newer (3.2+) — fix it'",
     "sed -i \"s/--command=gimp-3.0/--command=gimp-$gimp_dir/\" \"$HOME/.local/share/applications/org.gimp.GIMP.desktop\"",
     "rm -rf /tmp/photogimp-download"

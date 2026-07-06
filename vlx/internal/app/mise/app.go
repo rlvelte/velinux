@@ -19,38 +19,17 @@ import (
 
 // setup validates all requirements for further processing.
 func setup(cmd *cobra.Command, _ []string) error {
-	if err := errors.Join(guard.Network(), guard.Binaries("mise")); err != nil {
-		return err
-	}
-
-	if cmd.Context().Value(printer.ContextKey) == nil {
-		p := printer.New()
-		if jsonFlag, _ := cmd.Flags().GetBool("json"); jsonFlag {
-			p = p.ForceJSON()
-		}
-		cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, p))
-	}
-	if cmd.Context().Value(notify.ContextKey) == nil {
-		cmd.SetContext(context.WithValue(cmd.Context(), notify.ContextKey, notify.New()))
-	}
-	if cmd.Context().Value(picker.ContextKey) == nil {
-		pi := picker.New()
-		if pi == nil {
-			return fmt.Errorf("no picker backend available (needs quickshell or fzf)")
-		}
-		cmd.SetContext(context.WithValue(cmd.Context(), picker.ContextKey, pi))
-	}
-	return nil
+	return errors.Join(guard.Network(), guard.Binaries("mise"))
 }
 
 func Command() *cobra.Command {
 	root := &cobra.Command{
-		Use:               "mise",
-		Short:             "Horribly bad mise wrapper",
-		Long:              "Manage mise language runtime versions.",
-		Args:              cobra.NoArgs,
-		Aliases:           []string{"lang", "rt"},
-		PersistentPreRunE: setup,
+		Use:     "mise",
+		Short:   "Horribly bad mise wrapper",
+		Long:    "Manage mise language runtime versions.",
+		Args:    cobra.NoArgs,
+		Aliases: []string{"lang", "rt"},
+		PreRunE: setup,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -88,7 +67,6 @@ func Command() *cobra.Command {
 		RunE:    cmdUse,
 	})
 
-	root.PersistentFlags().BoolP("json", "j", false, "output as JSON")
 	return root
 }
 
@@ -195,7 +173,7 @@ func cmdUse(cmd *cobra.Command, args []string) error {
 		Urgency: "normal",
 	})
 
-	p.Info(fmt.Sprintf("%s %s → %s", iconFor(tool), tool, version))
+	p.Print(fmt.Sprintf("%s %s → %s", iconFor(tool), tool, version))
 	return nil
 }
 
@@ -265,7 +243,7 @@ func runInstall(ctx context.Context, p *printer.Printer, n *notify.Notify, tool,
 		Urgency: "normal",
 	})
 
-	p.Info(fmt.Sprintf("%s %s installed", iconFor(tool), resolved))
+	p.Print(fmt.Sprintf("%s %s installed", iconFor(tool), resolved))
 	return nil
 }
 

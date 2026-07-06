@@ -1,5 +1,10 @@
 {
   "$schema": "bundle.schema.json",
+  "info": {
+    "name": "JetBrains Toolbox",
+    "desc": "Downloads the latest toolbox archive and install in ~/.local/share.",
+    "icon": "\uE808"
+  },
   "zypper": [
     "curl",
     "libX11-6",

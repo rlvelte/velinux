@@ -15,7 +15,6 @@ type Variant interface {
 	Warn(msg string)
 	Error(msg string)
 	Table(headers []string, rows [][]string)
-	Confirm(msg string, defaultYes bool) bool
 }
 
 // Printer is the unified printing engine.
@@ -28,8 +27,8 @@ func New() *Printer {
 	return &Printer{variant: auto()}
 }
 
-// Info prints an info message.
-func (p *Printer) Info(msg string) {
+// Print prints an info message.
+func (p *Printer) Print(msg string) {
 	p.variant.Print(msg)
 }
 
@@ -46,17 +45,6 @@ func (p *Printer) Error(msg string) {
 // Table prints data in a tabular format.
 func (p *Printer) Table(headers []string, rows [][]string) {
 	p.variant.Table(headers, rows)
-}
-
-// Confirm shows a simple confirmation dialog.
-func (p *Printer) Confirm(msg string, defaultYes bool) bool {
-	return p.variant.Confirm(msg, defaultYes)
-}
-
-// Spinner runs a function and prints a spinner message (simplified).
-func (p *Printer) Spinner(msg string, fn func() error) error {
-	p.Info(msg)
-	return fn()
 }
 
 // ForceFmt forces the basic backend.

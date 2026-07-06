@@ -57,5 +57,5 @@ Singleton {
     readonly property int fontSizeHeading: 20
 
     // --- Assets ---
-    readonly property string logoPath: "file:///home/rvelte/.config/vlx/themes/logos/vt.png"
+    readonly property string logoPath: "file:///home/rvelte/.config/vlx/themes/logos/suse.png"
 }

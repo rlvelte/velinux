@@ -7,7 +7,6 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/rlvelte/velinux/vlx/internal/core/format"
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 )
@@ -62,7 +61,7 @@ func (s *disk) Run(p *printer.Printer) error {
 	}
 
 	if len(info.Mounts) == 0 {
-		p.Info("No mounted filesystems found")
+		p.Print("No mounted filesystems found")
 		return nil
 	}
 
@@ -71,9 +70,9 @@ func (s *disk) Run(p *printer.Printer) error {
 		rows = append(rows, []string{
 			m.Filesystem,
 			m.MountPoint,
-			format.Bytes(m.Size),
-			format.Bytes(m.Used),
-			format.Bytes(m.Available),
+			FormatBytes(m.Size),
+			FormatBytes(m.Used),
+			FormatBytes(m.Available),
 			fmt.Sprintf("%.1f%%", m.Usage),
 		})
 	}

@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/rlvelte/velinux/vlx/internal/core/format"
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 )
@@ -42,7 +41,7 @@ func (s *gpu) Run(p *printer.Printer) error {
 		{"Model", info.Model},
 	}
 	if info.Memory > 0 {
-		rows = append(rows, []string{"Memory", format.Bytes(info.Memory)})
+		rows = append(rows, []string{"Memory", FormatBytes(info.Memory)})
 	}
 	if info.Temp > 0 {
 		rows = append(rows, []string{"Temperature", fmt.Sprintf("%.0f°C", info.Temp)})

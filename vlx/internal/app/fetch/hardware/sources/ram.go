@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/rlvelte/velinux/vlx/internal/core/format"
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 )
@@ -44,13 +43,13 @@ func (s *ram) Run(p *printer.Printer) error {
 	}
 
 	p.Table([]string{"Property", "Value"}, [][]string{
-		{"Total", format.Bytes(info.Total)},
-		{"Used", format.Bytes(info.Used)},
-		{"Free", format.Bytes(info.Free)},
-		{"Available", format.Bytes(info.Available)},
-		{"Swap Total", format.Bytes(info.SwapTotal)},
-		{"Swap Used", format.Bytes(info.SwapUsed)},
-		{"Swap Free", format.Bytes(info.SwapFree)},
+		{"Total", FormatBytes(info.Total)},
+		{"Used", FormatBytes(info.Used)},
+		{"Free", FormatBytes(info.Free)},
+		{"Available", FormatBytes(info.Available)},
+		{"Swap Total", FormatBytes(info.SwapTotal)},
+		{"Swap Used", FormatBytes(info.SwapUsed)},
+		{"Swap Free", FormatBytes(info.SwapFree)},
 	})
 	return nil
 }

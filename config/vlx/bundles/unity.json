@@ -1,5 +1,10 @@
 {
   "$schema": "bundle.schema.json",
+  "info": {
+    "name": "Unity",
+    "desc": "Creates a ubuntu distrobox with unity.",
+    "icon": "\uE721"
+  },
   "zypper": [
     "distrobox"
   ],

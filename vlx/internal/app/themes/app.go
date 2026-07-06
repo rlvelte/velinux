@@ -1,7 +1,6 @@
 package themes
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -15,26 +14,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// setup configures all requirements and guards against wrong usage.
-func setup(cmd *cobra.Command, _ []string) error {
-	p := printer.New()
-	if jsonFlag, _ := cmd.Flags().GetBool("json"); jsonFlag {
-		p = p.ForceJSON()
-	}
-
-	cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, p))
-	cmd.SetContext(context.WithValue(cmd.Context(), notify.ContextKey, notify.New()))
-	return nil
-}
-
 func Command() *cobra.Command {
 	root := &cobra.Command{
-		Use:               "themes",
-		Short:             "Horribly bad theming manager",
-		Long:              "Manage and switch between theme profiles.",
-		Args:              cobra.NoArgs,
-		Aliases:           []string{"theme"},
-		PersistentPreRunE: setup,
+		Use:     "themes",
+		Short:   "Horribly bad theming manager",
+		Long:    "Manage and switch between theme profiles.",
+		Args:    cobra.NoArgs,
+		Aliases: []string{"theme"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -138,9 +124,9 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 
 	var theme *Theme
 	if len(args) == 0 {
-		pkr := picker.New()
-		if pkr == nil {
-			return fmt.Errorf("no picker available")
+		pkr, err := picker.New()
+		if err != nil {
+			return err
 		}
 
 		sort.Slice(themes, func(i, j int) bool {
@@ -207,14 +193,6 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	logoPath := filepath.Join(themesDir, "logo.png")
-	if err := os.Remove(logoPath); err != nil && !os.IsNotExist(err) {
-		return err
-	}
-	if err := os.Symlink(theme.Logo, logoPath); err != nil {
-		return err
-	}
-
 	content.LogoPath = "file://" + filepath.Join(themesDir, theme.Logo)
 
 	if err := GenerateAll(*content); err != nil {
@@ -251,7 +229,7 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 	})
 
 	if p != nil {
-		p.Info("Applied theme " + theme.Name)
+		p.Print("Applied theme " + theme.Name)
 	}
 
 	return nil

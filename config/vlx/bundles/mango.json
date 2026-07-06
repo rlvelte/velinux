@@ -1,5 +1,10 @@
 {
   "$schema": "bundle.schema.json",
+  "info": {
+    "name": "MangoWM",
+    "desc": "Compiles MangoWM from source for openSUSE",
+    "icon": "\uF2D2"
+  },
   "zypper": [
     "git",
     "meson",
