@@ -27,20 +27,20 @@ type Source interface {
 }
 
 // Find looks up a source by name or alias.
-func Find(name string) Source {
+func Find(name string) (Source, error) {
 	for _, s := range sources {
 		if s.Name() == name {
-			return s
+			return s, nil
 		}
 
 		for _, a := range s.Aliases() {
 			if a == name {
-				return s
+				return s, nil
 			}
 		}
 	}
 
-	return nil
+	return nil, fmt.Errorf("unknown hardware source: %s", name)
 }
 
 // List prints all registered sources.

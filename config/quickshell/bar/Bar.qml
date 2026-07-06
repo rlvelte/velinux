@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import qs.services
-import qs.bar.widgets
 import qs.bar.widgets.interactable
 import qs.bar.widgets.hardware
 import qs.bar.widgets.design
@@ -54,7 +53,7 @@ PanelWindow {
         Item { Layout.preferredWidth: 8 }
         BarWidget {
             Layout.alignment: Qt.AlignVCenter
-            Workspaces { }
+            WorkspacesInfo { }
         }
 
         Item { Layout.fillWidth: true }

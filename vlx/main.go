@@ -24,6 +24,7 @@ func setup(cmd *cobra.Command, args []string) error {
 
 	cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, p))
 	cmd.SetContext(context.WithValue(cmd.Context(), notify.ContextKey, notify.New()))
+	return nil
 }
 
 func main() {

@@ -10,7 +10,7 @@ import (
 
 // Store is a generic file-backed entity store.
 type Store[T any] struct {
-	dir    string
+	Dir    string
 	exts   []string
 	decode DecodeFunc[T]
 }
@@ -24,12 +24,12 @@ func NewStore[T any](baseDir string, decode DecodeFunc[T], exts ...string) *Stor
 		exts = []string{""}
 	}
 
-	return &Store[T]{dir: baseDir, exts: exts, decode: decode}
+	return &Store[T]{Dir: baseDir, exts: exts, decode: decode}
 }
 
 // List returns all decoded entities in the store.
 func (s *Store[T]) List() ([]T, error) {
-	entries, err := os.ReadDir(s.dir)
+	entries, err := os.ReadDir(s.Dir)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return nil, nil
@@ -48,7 +48,7 @@ func (s *Store[T]) List() ([]T, error) {
 			continue
 		}
 
-		path := filepath.Join(s.dir, entry.Name())
+		path := filepath.Join(s.Dir, entry.Name())
 		data, err := os.ReadFile(path)
 		if err != nil {
 			continue
@@ -68,7 +68,7 @@ func (s *Store[T]) List() ([]T, error) {
 // Get retrieves a single entity by name.
 func (s *Store[T]) Get(name string) (T, error) {
 	for _, ext := range s.exts {
-		path := filepath.Join(s.dir, name+ext)
+		path := filepath.Join(s.Dir, name+ext)
 		data, err := os.ReadFile(path)
 
 		if err != nil {

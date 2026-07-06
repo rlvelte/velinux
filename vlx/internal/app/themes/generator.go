@@ -30,10 +30,9 @@ var targets = []target{
 }
 
 // GenerateAll takes all target definitions and generate a new theme file.
-func GenerateAll(from ThemeContent) error {
+func GenerateAll(from Theme) error {
 	for _, g := range targets {
 		targetPath := g.output(fsys.ConfigPath())
-
 		if err := render(targetPath, g.template, from); err != nil {
 			return fmt.Errorf("failed to generate %s config: %w", g.template, err)
 		}
@@ -42,7 +41,7 @@ func GenerateAll(from ThemeContent) error {
 	return nil
 }
 
-func render(target, tmplName string, content ThemeContent) error {
+func render(target, tmplName string, content Theme) error {
 	tmplStr, err := load(tmplName)
 	if err != nil {
 		return err

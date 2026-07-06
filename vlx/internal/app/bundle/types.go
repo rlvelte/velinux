@@ -7,7 +7,8 @@ import (
 
 // Bundle is a bundle file.
 type Bundle struct {
-	FileName string
+	path     string
+	filename string
 	Info     Info     `json:"info"`
 	Repos    []Repo   `json:"repos"`
 	Zypper   []string `json:"zypper"`
@@ -30,7 +31,7 @@ type Info struct {
 }
 
 // decodeBundle decodes a bundle file.
-func decodeBundle(name, _ string, data []byte) (Bundle, error) {
+func decodeBundle(name, path string, data []byte) (Bundle, error) {
 	if name == "bundle.schema" {
 		return Bundle{}, errors.New("skip schema file")
 	}
@@ -40,6 +41,7 @@ func decodeBundle(name, _ string, data []byte) (Bundle, error) {
 		return Bundle{}, err
 	}
 
-	s.FileName = name
+	s.path = path
+	s.filename = name
 	return s, nil
 }

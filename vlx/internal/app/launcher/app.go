@@ -19,7 +19,7 @@ func Command() *cobra.Command {
 		Use:     "launcher",
 		Short:   "Horribly bad application launcher",
 		Long:    "Scan desktop entries and launch via the quickshell/fzf picker.",
-		Aliases: []string{"run", "app"},
+		Aliases: []string{"launch"},
 		Args:    cobra.NoArgs,
 		RunE:    cmdLaunch,
 	}

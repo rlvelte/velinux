@@ -1,8 +1,6 @@
 package hardware
 
 import (
-	"fmt"
-
 	"github.com/rlvelte/velinux/vlx/internal/app/fetch/hardware/sources"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 	"github.com/spf13/cobra"
@@ -21,15 +19,15 @@ func Command() *cobra.Command {
 		RunE:    cmdRun,
 	}
 
-	listCmd := &cobra.Command{
-		Use:     "list",
-		Short:   "List available feed sources",
-		Aliases: []string{"ls"},
-		Args:    cobra.NoArgs,
-		RunE:    cmdList,
-	}
+	root.AddCommand(
+		&cobra.Command{
+			Use:     "list",
+			Short:   "List available feed sources",
+			Aliases: []string{"l", "ls"},
+			Args:    cobra.NoArgs,
+			RunE:    cmdList,
+		})
 
-	root.AddCommand(listCmd)
 	return root
 }
 
@@ -45,9 +43,10 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 func cmdRun(cmd *cobra.Command, args []string) error {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 
-	s := sources.Find(args[0])
-	if s == nil {
-		return fmt.Errorf("unknown hardware source: %s", args[0])
+	s, err := sources.Find(args[0])
+	if err != nil {
+		p.Error(err.Error())
+		return err
 	}
 
 	return s.Run(p)

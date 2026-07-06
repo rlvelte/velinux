@@ -37,7 +37,6 @@ func Command() *cobra.Command {
 			Args:    cobra.NoArgs,
 			RunE:    cmdList,
 		},
-
 		&cobra.Command{
 			Use:     "install [bundle]",
 			Short:   "Install a bundle",
@@ -55,8 +54,7 @@ func Command() *cobra.Command {
 func cmdList(cmd *cobra.Command, _ []string) error {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 
-	bundlesDir := fsys.ConfigPath("vlx", "bundles")
-	store := fsys.NewStore(bundlesDir, decodeBundle, ".json")
+	store := fsys.NewStore(fsys.ConfigPath("vlx", "bundles"), decodeBundle, ".json")
 
 	bundles, err := store.List()
 	if err != nil {
@@ -93,8 +91,7 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 func cmdInstall(cmd *cobra.Command, args []string) error {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 
-	bundlesDir := fsys.ConfigPath("vlx", "bundles")
-	store := fsys.NewStore(bundlesDir, decodeBundle, ".json")
+	store := fsys.NewStore(fsys.ConfigPath("vlx", "bundles"), decodeBundle, ".json")
 
 	var fileName string
 	if len(args) == 0 {
@@ -161,7 +158,7 @@ func pick(cmd *cobra.Command, store *fsys.Store[Bundle]) (string, error) {
 			Description: b.Info.Description,
 		}
 
-		lookup[b.Info.Name] = b.FileName
+		lookup[b.Info.Name] = b.filename
 	}
 
 	selected, err := pkr.Select(cmd.Context(), items)
@@ -172,7 +169,7 @@ func pick(cmd *cobra.Command, store *fsys.Store[Bundle]) (string, error) {
 	return lookup[selected.Header], nil
 }
 
-// sh executes a cmd with basic shell
+// sh executes a cmd with basic shell.
 func sh(cmdStr string) error {
 	cmd := exec.Command("sh", "-c", cmdStr)
 
@@ -182,7 +179,7 @@ func sh(cmdStr string) error {
 	return cmd.Run()
 }
 
-// zypper runs a simple install
+// zypper runs a simple install.
 func zypper(pkgs []string) error {
 	args := append([]string{"zypper", "install", "-y"}, pkgs...)
 	cmd := exec.Command("sudo", args...)
@@ -193,7 +190,7 @@ func zypper(pkgs []string) error {
 	return cmd.Run()
 }
 
-// flatpak runs a simple install
+// flatpak runs a simple install.
 func flatpak(pkgs []string) error {
 	args := append([]string{"flatpak", "install", "-y"}, pkgs...)
 	cmd := exec.Command("sudo", args...)
@@ -204,7 +201,7 @@ func flatpak(pkgs []string) error {
 	return cmd.Run()
 }
 
-// repo adds a repository to zypper
+// repo adds a repository to zypper.
 func repo(repos []Repo) error {
 	for _, repo := range repos {
 		cmd := exec.Command("sudo", "zypper", "ar", repo.URL, repo.Alias)

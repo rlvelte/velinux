@@ -25,12 +25,6 @@ PanelWindow {
     property var pickerItems: []
     property string pickerResultPath: ""
 
-    function iconPath(icon) {
-        if (!icon) return ""
-        if (icon.startsWith("/")) return "file://" + icon
-        return ""
-    }
-
     visible: shown || animatingOut
 
     IpcHandler {
@@ -289,28 +283,34 @@ PanelWindow {
                         spacing: 12
 
                         Rectangle {
+                            id: iconRect
                             width: 48
                             height: 48
                             radius: 10
                             color: Theme.surface0
                             anchors.verticalCenter: parent.verticalCenter
 
+                            property bool isFileIcon: modelData.icon && modelData.icon.startsWith("/")
+
                             Image {
                                 id: iconImg
                                 anchors.centerIn: parent
-                                source: picker.iconPath(modelData.icon)
+                                source: iconRect.isFileIcon ? modelData.icon : ""
                                 width: 28
                                 height: 28
                                 fillMode: Image.PreserveAspectFit
-                                visible: status === Image.Ready
+                                visible: iconRect.isFileIcon && status === Image.Ready
                             }
 
                             Text {
                                 anchors.centerIn: parent
-                                text: modelData.name.charAt(0).toUpperCase()
-                                font.pixelSize: 20
+                                text: iconRect.isFileIcon || !modelData.icon || /^[\w.-]+$/.test(modelData.icon)
+                                    ? modelData.name.charAt(0).toUpperCase()
+                                    : modelData.icon
+                                font.family: Theme.fontNameMono
+                                font.pixelSize: iconRect.isFileIcon ? 20 : 28
                                 color: Theme.subtext
-                                visible: iconImg.status !== Image.Ready
+                                visible: !iconRect.isFileIcon || iconImg.status !== Image.Ready
                             }
                         }
 

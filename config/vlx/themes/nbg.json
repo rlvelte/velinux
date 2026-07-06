@@ -1,7 +1,6 @@
 {
-  "icon": "󰄚",
   "logo": "logos/nbg.png",
-  "id": "nbg",
+  "desc": "Getting back to the old days...",
   "name": "Nürnberg",
   "wallpaper": "wallpapers/nbg.png",
   "color_primary": "#e8b400",

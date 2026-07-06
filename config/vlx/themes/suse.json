@@ -1,8 +1,7 @@
 {
-  "icon": "",
   "logo": "logos/suse.png",
-  "id": "sus",
   "name": "SUSE",
+  "desc": "The Linux distribution that changed the world.",
   "wallpaper": "wallpapers/suse.png",
   "color_primary": "#30ba78",
   "color_primary_dim": "#0e7e3c",

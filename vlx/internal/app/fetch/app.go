@@ -13,7 +13,7 @@ func Command() *cobra.Command {
 		Use:     "fetch",
 		Short:   "Horribly bad information fetching",
 		Long:    "Fetches information from web and local sources.",
-		Aliases: []string{"f"},
+		Aliases: []string{"fe"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},

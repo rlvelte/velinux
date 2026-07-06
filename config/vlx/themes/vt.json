@@ -1,8 +1,7 @@
 {
-  "icon": "",
   "logo": "logos/vt.png",
-  "id": "vt",
   "name": "VTraffic",
+  "desc": "The best software for the best traffic.",
   "wallpaper": "wallpapers/vt.png",
   "color_primary": "#fd7803",
   "color_primary_dim": "#ac5323",

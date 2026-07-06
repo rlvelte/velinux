@@ -180,7 +180,6 @@ func cmdUse(cmd *cobra.Command, args []string) error {
 func cmdInstall(cmd *cobra.Command, args []string) error {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 	n := cmd.Context().Value(notify.ContextKey).(*notify.Notify)
-	pi := cmd.Context().Value(picker.ContextKey).(*picker.Picker)
 
 	if len(args) > 0 {
 		tool := args[0]
@@ -202,7 +201,12 @@ func cmdInstall(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	selected, err := pi.SelectTwoStage(cmd.Context(), items)
+	pkr, err := picker.New()
+	if err != nil {
+		return err
+	}
+
+	selected, err := pkr.SelectTwoStage(cmd.Context(), items)
 	if err != nil {
 		return fmt.Errorf("picker: %w", err)
 	}
