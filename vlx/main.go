@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 
+	"github.com/mattn/go-isatty"
 	"github.com/rlvelte/velinux/vlx/internal/app/bundle"
 	"github.com/rlvelte/velinux/vlx/internal/app/fetch"
 	"github.com/rlvelte/velinux/vlx/internal/app/launcher"
@@ -16,30 +16,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func setup(cmd *cobra.Command, args []string) error {
+func setup(cmd *cobra.Command, _ []string) {
 	p := printer.New()
 	if jsonFlag, _ := cmd.Flags().GetBool("json"); jsonFlag {
-		p = p.ForceJSON()
+		p.ForceJSON()
 	}
 
 	cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, p))
 	cmd.SetContext(context.WithValue(cmd.Context(), notify.ContextKey, notify.New()))
-	return nil
 }
 
 func main() {
 	root := &cobra.Command{
-		Use:               "vlx",
-		Short:             "Horribly bad utilities",
-		Long:              "VeLinux centered command utility application.",
-		PersistentPreRunE: setup,
+		Use:              "vlx",
+		Short:            "Horribly bad utilities",
+		Long:             "VeLinux centered command utility application.",
+		SilenceUsage:     !isatty.IsTerminal(os.Stdout.Fd()),
+		PersistentPreRun: setup,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
 	}
 
 	root.PersistentFlags().BoolP("json", "j", false, "output as JSON")
-
 	root.AddCommand(
 		completions(),
 		themes.Command(),
@@ -49,9 +48,7 @@ func main() {
 		fetch.Command(),
 	)
 
-	if err := root.Execute(); err != nil {
-		log.Fatal(err)
-	}
+	_ = root.Execute()
 }
 
 func completions() *cobra.Command {
