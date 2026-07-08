@@ -6,7 +6,7 @@ import (
 )
 
 type jsonMessage struct {
-	Level   string `json:"level,omitempty"`
+	Status  string `json:"status"`
 	Message string `json:"message"`
 }
 
@@ -15,27 +15,22 @@ type jsonTable struct {
 	Rows    [][]string `json:"rows"`
 }
 
-// JSONPrinter primarily for consumption by other tools.
-type JSONPrinter struct {
+// JsonPrinter primarily for consumption by other tools.
+type JsonPrinter struct {
 	encoder *json.Encoder
 }
 
-// Print returns a message.
-func (j *JSONPrinter) Print(msg string) {
-	_ = j.encoder.Encode(jsonMessage{Message: msg})
-}
-
-// Warn returns a warning message.
-func (j *JSONPrinter) Warn(msg string) {
-	_ = j.encoder.Encode(jsonMessage{Level: "warn", Message: msg})
+// Success returns a message.
+func (j *JsonPrinter) Success(msg string) {
+	_ = j.encoder.Encode(jsonMessage{Status: "success", Message: msg})
 }
 
 // Error returns an error message.
-func (j *JSONPrinter) Error(msg string) {
-	_ = json.NewEncoder(os.Stderr).Encode(jsonMessage{Level: "error", Message: msg})
+func (j *JsonPrinter) Error(err error) {
+	_ = json.NewEncoder(os.Stderr).Encode(jsonMessage{Status: "error", Message: err.Error()})
 }
 
 // Table returns a table.
-func (j *JSONPrinter) Table(headers []string, rows [][]string) {
+func (j *JsonPrinter) Table(headers []string, rows [][]string) {
 	_ = j.encoder.Encode(jsonTable{Headers: headers, Rows: rows})
 }

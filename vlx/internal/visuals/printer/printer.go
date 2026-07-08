@@ -11,9 +11,8 @@ const ContextKey = "printer"
 
 // Variant handles terminal out/inputs
 type Variant interface {
-	Print(msg string)
-	Warn(msg string)
-	Error(msg string)
+	Success(msg string)
+	Error(err error)
 	Table(headers []string, rows [][]string)
 }
 
@@ -27,19 +26,14 @@ func New() *Printer {
 	return &Printer{variant: auto()}
 }
 
-// Print prints an info message.
-func (p *Printer) Print(msg string) {
-	p.variant.Print(msg)
-}
-
-// Warn prints a warning message.
-func (p *Printer) Warn(msg string) {
-	p.variant.Warn(msg)
+// Success prints an info message.
+func (p *Printer) Success(msg string) {
+	p.variant.Success(msg)
 }
 
 // Error prints an error message.
-func (p *Printer) Error(msg string) {
-	p.variant.Error(msg)
+func (p *Printer) Error(err error) {
+	p.variant.Error(err)
 }
 
 // Table prints data in a tabular format.
@@ -48,15 +42,13 @@ func (p *Printer) Table(headers []string, rows [][]string) {
 }
 
 // ForceFmt forces the basic backend.
-func (p *Printer) ForceFmt() *Printer {
+func (p *Printer) ForceFmt() {
 	p.variant = &FmtPrinter{}
-	return p
 }
 
 // ForceJSON forces the JSON backend.
-func (p *Printer) ForceJSON() *Printer {
-	p.variant = &JSONPrinter{encoder: json.NewEncoder(os.Stdout)}
-	return p
+func (p *Printer) ForceJSON() {
+	p.variant = &JsonPrinter{encoder: json.NewEncoder(os.Stdout)}
 }
 
 func auto() Variant {
@@ -64,5 +56,5 @@ func auto() Variant {
 		return &FmtPrinter{}
 	}
 
-	return &JSONPrinter{encoder: json.NewEncoder(os.Stdout)}
+	return &JsonPrinter{encoder: json.NewEncoder(os.Stdout)}
 }

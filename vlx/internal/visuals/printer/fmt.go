@@ -10,19 +10,14 @@ const tabWidth = 8
 // FmtPrinter is a fallback backend that uses plain fmt and os operations.
 type FmtPrinter struct{}
 
-// Print prints a message.
-func (f *FmtPrinter) Print(msg string) {
+// Success prints a message.
+func (f *FmtPrinter) Success(msg string) {
 	fmt.Println(msg)
 }
 
-// Warn prints a warning message.
-func (f *FmtPrinter) Warn(msg string) {
-	fmt.Println("[WARN]", msg)
-}
-
 // Error prints an error message.
-func (f *FmtPrinter) Error(msg string) {
-	_, _ = fmt.Fprintln(os.Stderr, "[ERR]", msg)
+func (f *FmtPrinter) Error(err error) {
+	_, _ = fmt.Fprintln(os.Stderr, "[ERR]", err.Error())
 }
 
 // Table prints a table

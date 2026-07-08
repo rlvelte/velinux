@@ -2,12 +2,12 @@ package notify
 
 const ContextKey = "notify"
 
-// Details describes the context for sending a notification.
+// Details describe the context for sending a notification.
 type Details struct {
-	Title   string // Title of the notification
-	Urgency string // Level of Urgency for this notification
-	Icon    string // Path to an Icon
-	Timeout int    // When the notification will time out
+	Title   string
+	Urgency string
+	Icon    string
+	Timeout int
 }
 
 // Variant handles notification delivery.
@@ -18,7 +18,7 @@ type Variant interface {
 
 // Notify is the unified notification engine.
 type Notify struct {
-	variant Variant // The selected Variant for this engine.
+	variant Variant
 }
 
 // New creates an engine with an auto-detected backend.
