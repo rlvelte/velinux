@@ -43,7 +43,7 @@ func (s *network) Run(p *printer.Printer) error {
 	}
 
 	if len(info.Interfaces) == 0 {
-		p.Print("No network interfaces found")
+		p.Success("No network interfaces found")
 		return nil
 	}
 

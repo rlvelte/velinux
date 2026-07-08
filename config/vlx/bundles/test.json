@@ -1,0 +1,15 @@
+{
+  "$schema": "bundle.schema.json",
+  "info": {
+    "name": "Test",
+    "desc": "Tests the bundle progress system. Reverses all changes.",
+    "icon": "\uDB80"
+  },
+  "pre": [
+    "echo 'Testing progress system...'",
+    "sleep 2"
+  ],
+  "post": [
+    "echo 'Test complete - no persistent changes made'"
+  ]
+}

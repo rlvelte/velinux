@@ -61,7 +61,7 @@ func (s *disk) Run(p *printer.Printer) error {
 	}
 
 	if len(info.Mounts) == 0 {
-		p.Print("No mounted filesystems found")
+		p.Success("No mounted filesystems found")
 		return nil
 	}
 
