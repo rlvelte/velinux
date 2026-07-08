@@ -6,12 +6,15 @@ import qs.bar
 import qs.commandcenter
 import qs.lock
 import qs.menus
+import qs.popups
 import qs.services
 
 ShellRoot {
     SinglePickerMenu {}
     MultiPickerMenu {}
     TwoStagedPickerMenu {}
+    ProgressPopup {}
+    PasswordPopup {}
     PowerMenu {}
     CommandCenter {}
 
