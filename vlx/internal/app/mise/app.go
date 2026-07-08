@@ -258,8 +258,37 @@ func install(ctx context.Context, p *printer.Printer, n *notify.Notify, tool, ta
 	return nil
 }
 
+// installedSet reports which tool versions are already installed. It returns
+// the set of "tool@version" keys and the set of tools that have at least one
+// installed version.
+func installedSet() (versions map[string]bool, tools map[string]bool) {
+	versions, tools = map[string]bool{}, map[string]bool{}
+
+	data, err := exec.Command("mise", "ls", "--json").Output()
+	if err != nil {
+		return
+	}
+
+	var all miseToolVersions
+	if err := json.Unmarshal(data, &all); err != nil {
+		return
+	}
+
+	for tool, vers := range all {
+		for _, v := range vers {
+			if v.Installed {
+				versions[tool+"@"+v.Version] = true
+				tools[tool] = true
+			}
+		}
+	}
+
+	return
+}
+
 func buildInstallItems() ([]picker.Item, error) {
 	regDesc := fetchRegistryDescriptions()
+	installedVersions, installedTools := installedSet()
 
 	tools := make([]string, len(toolOrder))
 	copy(tools, toolOrder)
@@ -298,6 +327,7 @@ func buildInstallItems() ([]picker.Item, error) {
 			Header:      t,
 			Description: desc,
 			Icon:        toolIcons[t],
+			Installed:   installedTools[t],
 		}
 	}
 
@@ -321,10 +351,12 @@ func buildInstallItems() ([]picker.Item, error) {
 				desc = v.CreatedAt[0:10]
 			}
 
+			header := r.tool + "@" + v.Version
 			subitems = append(subitems, picker.Item{
-				Header:      r.tool + "@" + v.Version,
+				Header:      header,
 				Description: desc,
 				Icon:        iconFor(r.tool),
+				Installed:   installedVersions[header],
 			})
 		}
 

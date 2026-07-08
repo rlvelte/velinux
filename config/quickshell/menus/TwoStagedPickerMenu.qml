@@ -153,10 +153,15 @@ PanelWindow {
             hide()
             return
         }
-        picker.selectedSub = 0
         picker.selectedItem = src
         picker.stage = 1
         searchField.text = ""
+        // Land on the first version that isn't already installed.
+        var firstSel = 0
+        for (var i = 0; i < subs.length; i++) {
+            if (subs[i].installed !== true) { firstSel = i; break }
+        }
+        picker.selectedSub = firstSel
         widenAnim.start()
     }
 
@@ -168,9 +173,9 @@ PanelWindow {
         narrowAnim.start()
     }
 
-    // Stage 1: launch the chosen subitem.
+    // Stage 1: launch the chosen subitem. Installed subitems are not pickable.
     function launchSub(entry) {
-        if (!entry) return
+        if (!entry || entry.installed) return
         picker.writeResult({ item: picker.selectedItem, subcommand: entry._source })
         picker.resetPicker()
         hide()
@@ -235,6 +240,7 @@ PanelWindow {
                     icon: e.icon,
                     name: e.header,
                     comment: e.description || "",
+                    installed: e.installed === true,
                     _source: e,
                     keywords: []
                 }
@@ -260,6 +266,7 @@ PanelWindow {
                     icon: s.icon,
                     name: s.header,
                     comment: s.description || "",
+                    installed: s.installed === true,
                     _source: s,
                     keywords: []
                 }
@@ -329,8 +336,8 @@ PanelWindow {
                         var len = filtered.values.length
                         picker.selected = len > 0 ? (picker.selected + 1) % len : 0
                     } else {
-                        var len = subFiltered.values.length
-                        picker.selectedSub = len > 0 ? (picker.selectedSub + 1) % len : 0
+                        var subLen = subFiltered.values.length
+                        picker.selectedSub = subLen > 0 ? (picker.selectedSub + 1) % subLen : 0
                     }
                 }
                 Keys.onUpPressed: {
@@ -338,8 +345,8 @@ PanelWindow {
                         var len = filtered.values.length
                         picker.selected = len > 0 ? (picker.selected - 1 + len) % len : 0
                     } else {
-                        var len = subFiltered.values.length
-                        picker.selectedSub = len > 0 ? (picker.selectedSub - 1 + len) % len : 0
+                        var subLen = subFiltered.values.length
+                        picker.selectedSub = subLen > 0 ? (picker.selectedSub - 1 + subLen) % subLen : 0
                     }
                 }
                 Keys.onReturnPressed: {
@@ -443,7 +450,7 @@ PanelWindow {
                                     font.pixelSize: Theme.fontSizeLarge
                                     color: index === picker.selected ? Theme.text : Theme.subtext
                                     elide: Text.ElideRight
-                                    width: appList.width - 110
+                                    width: appList.width - (modelData.installed ? 150 : 110)
                                 }
 
                                 Text {
@@ -453,8 +460,27 @@ PanelWindow {
                                     font.pixelSize: Theme.fontSize
                                     color: Theme.muted
                                     elide: Text.ElideRight
-                                    width: appList.width - 110
+                                    width: appList.width - (modelData.installed ? 150 : 110)
                                 }
+                            }
+                        }
+
+                        // Tools with an installed version stay pickable so other
+                        // versions can be added; the check is informational only.
+                        Rectangle {
+                            visible: modelData.installed
+                            anchors { right: parent.right; rightMargin: 12; verticalCenter: parent.verticalCenter }
+                            width: 24
+                            height: 24
+                            radius: 12
+                            color: Theme.surface1
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: ""
+                                font.family: Theme.fontName
+                                font.pixelSize: Theme.fontSizeSmall
+                                color: Theme.primary
                             }
                         }
 
@@ -521,6 +547,7 @@ PanelWindow {
                             height: 64
                             radius: 8
                             color: "transparent"
+                            opacity: modelData.installed ? 0.45 : 1
 
                             Row {
                                 anchors.fill: parent
@@ -552,7 +579,7 @@ PanelWindow {
                                         font.pixelSize: Theme.fontSizeLarge
                                         color: index === picker.selectedSub ? Theme.text : Theme.subtext
                                         elide: Text.ElideRight
-                                        width: subList.width - 110
+                                        width: subList.width - (modelData.installed ? 200 : 110)
                                     }
 
                                     Text {
@@ -562,15 +589,46 @@ PanelWindow {
                                         font.pixelSize: Theme.fontSize
                                         color: Theme.muted
                                         elide: Text.ElideRight
-                                        width: subList.width - 110
+                                        width: subList.width - (modelData.installed ? 200 : 110)
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                visible: modelData.installed
+                                anchors { right: parent.right; rightMargin: 12; verticalCenter: parent.verticalCenter }
+                                width: installedRow.width + 16
+                                height: 24
+                                radius: 12
+                                color: Theme.surface1
+
+                                Row {
+                                    id: installedRow
+                                    anchors.centerIn: parent
+                                    spacing: 5
+
+                                    Text {
+                                        text: ""
+                                        font.family: Theme.fontName
+                                        font.pixelSize: Theme.fontSizeSmall
+                                        color: Theme.primary
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+
+                                    Text {
+                                        text: "installed"
+                                        font.family: Theme.fontName
+                                        font.pixelSize: Theme.fontSizeSmall
+                                        color: Theme.subtext
+                                        anchors.verticalCenter: parent.verticalCenter
                                     }
                                 }
                             }
 
                             MouseArea {
                                 anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                enabled: picker.stage === 1
+                                cursorShape: modelData.installed ? Qt.ArrowCursor : Qt.PointingHandCursor
+                                enabled: picker.stage === 1 && !modelData.installed
                                 onClicked: picker.launchSub(modelData)
                             }
                         }

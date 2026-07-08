@@ -15,6 +15,7 @@ type Item struct {
 	Icon        string `json:"icon"`
 	Header      string `json:"header"`
 	Description string `json:"description"`
+	Installed   bool   `json:"installed,omitempty"`
 	Subitems    []Item `json:"subitem"`
 }
 
