@@ -1,6 +1,5 @@
 .idea/
 vlx/build/
-AGENTS.md
 .opencode/
 
 *.hist_zsh
