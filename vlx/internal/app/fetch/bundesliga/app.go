@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"time"
 
+	"github.com/mattn/go-isatty"
 	"github.com/rlvelte/velinux/vlx/internal/core/guard"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 	"github.com/spf13/cobra"
@@ -26,10 +28,11 @@ func setup(_ *cobra.Command, _ []string) error {
 // Command returns the cobra command tree for vlx fetch bundesliga.
 func Command() *cobra.Command {
 	root := &cobra.Command{
-		Use:     "bundesliga",
-		Short:   "Horribly bad bundesliga tracker",
-		Aliases: []string{"bl"},
-		PreRunE: setup,
+		Use:          "bundesliga",
+		Short:        "Horribly bad bundesliga tracker",
+		Aliases:      []string{"bl"},
+		SilenceUsage: !isatty.IsTerminal(os.Stdout.Fd()),
+		PreRunE:      setup,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},

@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 
+	"github.com/mattn/go-isatty"
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
 	"github.com/rlvelte/velinux/vlx/internal/core/guard"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
@@ -22,11 +24,12 @@ func setup(_ *cobra.Command, _ []string) error {
 // Command returns the cobra command tree for vlx fetch feeds.
 func Command() *cobra.Command {
 	root := &cobra.Command{
-		Use:     "feeds",
-		Short:   "Horribly bad RSS/Atom feed reader",
-		Aliases: []string{"feed", "rss"},
-		PreRunE: setup,
-		RunE:    cmdPoll,
+		Use:          "feeds",
+		Short:        "Horribly bad RSS/Atom feed reader",
+		Aliases:      []string{"feed", "rss"},
+		SilenceUsage: !isatty.IsTerminal(os.Stdout.Fd()),
+		PreRunE:      setup,
+		RunE:         cmdPoll,
 	}
 
 	listCmd := &cobra.Command{
@@ -45,8 +48,7 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 
 	dir := fsys.ConfigPath("vlx", "fetch")
-	store := fsys.NewStore(dir, decodeFeedsConfig, ".json")
-	sources, _ := store.Get("config")
+	sources, _ := fsys.GetJSON(dir, "config", decodeFeedsConfig)
 
 	rows := make([][]string, 0, len(sources))
 	for _, s := range sources {
@@ -61,8 +63,7 @@ func cmdPoll(cmd *cobra.Command, args []string) error {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 
 	dir := fsys.ConfigPath("vlx", "fetch")
-	store := fsys.NewStore(dir, decodeFeedsConfig, ".json")
-	sources, _ := store.Get("config")
+	sources, _ := fsys.GetJSON(dir, "config", decodeFeedsConfig)
 
 	if len(args) > 0 {
 		name := args[0]
@@ -114,11 +115,11 @@ func cmdPoll(cmd *cobra.Command, args []string) error {
 
 	for _, r := range results {
 		if r.err != nil {
-			p.Warn(r.err.Error())
+			p.Error(r.err)
 			continue
 		}
 
-		p.Print(fmt.Sprintf("\n%s — %s", r.feed.SourceName, r.feed.Title))
+		p.Success(fmt.Sprintf("\n%s — %s", r.feed.SourceName, r.feed.Title))
 
 		rows := make([][]string, 0, len(r.feed.Items))
 		for _, item := range r.feed.Items {

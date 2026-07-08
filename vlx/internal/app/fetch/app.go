@@ -1,6 +1,9 @@
 package fetch
 
 import (
+	"os"
+
+	"github.com/mattn/go-isatty"
 	"github.com/rlvelte/velinux/vlx/internal/app/fetch/bundesliga"
 	"github.com/rlvelte/velinux/vlx/internal/app/fetch/feeds"
 	"github.com/rlvelte/velinux/vlx/internal/app/fetch/hardware"
@@ -10,10 +13,11 @@ import (
 // Command returns the cobra command tree for vlx info.
 func Command() *cobra.Command {
 	root := &cobra.Command{
-		Use:     "fetch",
-		Short:   "Horribly bad information fetching",
-		Long:    "Fetches information from web and local sources.",
-		Aliases: []string{"fe"},
+		Use:          "fetch",
+		Short:        "Horribly bad information fetching",
+		Long:         "Fetches information from web and local sources.",
+		Aliases:      []string{"fe"},
+		SilenceUsage: !isatty.IsTerminal(os.Stdout.Fd()),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
