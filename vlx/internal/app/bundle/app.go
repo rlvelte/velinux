@@ -3,26 +3,28 @@ package bundle
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 
+	"github.com/mattn/go-isatty"
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
+	"github.com/rlvelte/velinux/vlx/internal/core/pass"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/picker"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/progress"
 	"github.com/spf13/cobra"
 )
-
-// TODO: REWORK FOR - notify, progress
 
 // Command returns the cobra command tree for vlx bundle.
 func Command() *cobra.Command {
 	root := &cobra.Command{
-		Use:     "bundle",
-		Short:   "Horribly bad bundle installer",
-		Long:    "Install/Compile predefined recipes with shell hooks.",
-		Aliases: []string{"bun"},
-		Args:    cobra.NoArgs,
+		Use:          "bundle",
+		Short:        "Horribly bad bundle installer",
+		Long:         "Install/Compile predefined recipes with shell hooks.",
+		Aliases:      []string{"bun"},
+		Args:         cobra.NoArgs,
+		SilenceUsage: !isatty.IsTerminal(os.Stdout.Fd()),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -35,15 +37,16 @@ func Command() *cobra.Command {
 			Long:    "List all available bundles with their segments.",
 			Aliases: []string{"l", "ls"},
 			Args:    cobra.NoArgs,
-			RunE:    cmdList,
+			Run:     cmdList,
 		},
 		&cobra.Command{
-			Use:     "install [bundle]",
-			Short:   "Install a bundle",
-			Long:    "Install a bundle by name or interactively select from a list.",
-			Aliases: []string{"i", "in"},
-			Args:    cobra.MaximumNArgs(1),
-			RunE:    cmdInstall,
+			Use:          "install [bundle]",
+			Short:        "Install a bundle",
+			Long:         "Install a bundle by name or interactively select from a list.",
+			Aliases:      []string{"i", "in"},
+			Args:         cobra.MaximumNArgs(1),
+			SilenceUsage: true,
+			Run:          cmdInstall,
 		},
 	)
 
@@ -51,20 +54,19 @@ func Command() *cobra.Command {
 }
 
 // cmdList lists out all bundles and peek at its contents.
-func cmdList(cmd *cobra.Command, _ []string) error {
+func cmdList(cmd *cobra.Command, _ []string) {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 
-	store := fsys.NewStore(fsys.ConfigPath("vlx", "bundles"), decodeBundle, ".json")
-
-	bundles, err := store.List()
+	dir := fsys.ConfigPath("vlx", "bundles")
+	bundles, err := fsys.ListJSON(dir, decodeBundle)
 	if err != nil {
-		p.Error(err.Error())
-		return err
+		p.Error(err)
+		return
 	}
 
 	if len(bundles) == 0 {
-		p.Print("No bundles found")
-		return nil
+		p.Success("No bundles found")
+		return
 	}
 
 	headers := []string{"Name", "Zypper", "Flatpak", "Hooks"}
@@ -84,21 +86,22 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 	}
 
 	p.Table(headers, rows)
-	return nil
+	return
 }
 
 // cmdInstall installs a selected bundle.
-func cmdInstall(cmd *cobra.Command, args []string) error {
+func cmdInstall(cmd *cobra.Command, args []string) {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+	n := cmd.Context().Value(notify.ContextKey).(*notify.Notify)
 
-	store := fsys.NewStore(fsys.ConfigPath("vlx", "bundles"), decodeBundle, ".json")
+	dir := fsys.ConfigPath("vlx", "bundles")
 
 	var fileName string
 	if len(args) == 0 {
-		fn, err := pick(cmd, store)
+		fn, err := pick(cmd, dir)
 		if err != nil {
-			p.Error(err.Error())
-			return err
+			p.Error(err)
+			return
 		}
 
 		fileName = fn
@@ -106,21 +109,35 @@ func cmdInstall(cmd *cobra.Command, args []string) error {
 		fileName = args[0]
 	}
 
-	bundle, err := store.Get(fileName)
+	bundle, err := fsys.GetJSON(dir, fileName, decodeBundle)
 	if err != nil {
-		p.Error(err.Error())
-		return err
+		p.Error(err)
+		return
 	}
 
 	steps := []struct {
 		enabled bool
+		name    string
 		run     func() error
 	}{
-		{len(bundle.Repos) > 0, func() error { return repo(bundle.Repos) }},
-		{len(bundle.PreHook) > 0, func() error { return sh(strings.Join(bundle.PreHook, " && ")) }},
-		{len(bundle.Zypper) > 0, func() error { return zypper(bundle.Zypper) }},
-		{len(bundle.Flatpak) > 0, func() error { return flatpak(bundle.Flatpak) }},
-		{len(bundle.PostHook) > 0, func() error { return sh(strings.Join(bundle.PostHook, " && ")) }},
+		{len(bundle.Repos) > 0, "Adding repos", func() error { return repo(bundle.Repos) }},
+		{len(bundle.PreHook) > 0, "Running pre-install hook", func() error { return sh(strings.Join(bundle.PreHook, " && ")) }},
+		{len(bundle.Zypper) > 0, "Installing packages", func() error { return zypper(bundle.Zypper) }},
+		{len(bundle.Flatpak) > 0, "Installing flatpaks", func() error { return flatpak(bundle.Flatpak) }},
+		{len(bundle.PostHook) > 0, "Running post-install hook", func() error { return sh(strings.Join(bundle.PostHook, " && ")) }},
+	}
+
+	totalSteps := 0
+	for _, step := range steps {
+		if step.enabled {
+			totalSteps++
+		}
+	}
+
+	prog, progErr := progress.New()
+	if progErr == nil && totalSteps > 0 {
+		prog.Start("Installing "+bundle.Info.Name, totalSteps)
+		defer prog.Stop()
 	}
 
 	for _, step := range steps {
@@ -128,23 +145,34 @@ func cmdInstall(cmd *cobra.Command, args []string) error {
 			continue
 		}
 
+		if prog != nil {
+			prog.SetLabel(step.name)
+		}
+
 		if err := step.run(); err != nil {
-			p.Error(err.Error())
-			return err
+			p.Error(err)
+			return
+		}
+
+		if prog != nil {
+			prog.Advance(1)
 		}
 	}
 
-	return nil
+	_ = n.Send("Successfully installed bundle "+bundle.Info.Name, &notify.Details{
+		Title:   "VLX Bundle",
+		Urgency: "normal",
+	})
 }
 
 // pick selects a bundle via an interactive picker.
-func pick(cmd *cobra.Command, store *fsys.Store[Bundle]) (string, error) {
+func pick(cmd *cobra.Command, dir string) (string, error) {
 	pkr, err := picker.New()
 	if err != nil {
 		return "", err
 	}
 
-	bundles, err := store.List()
+	bundles, err := fsys.ListJSON(dir, decodeBundle)
 	if err != nil {
 		return "", err
 	}
@@ -169,47 +197,27 @@ func pick(cmd *cobra.Command, store *fsys.Store[Bundle]) (string, error) {
 	return lookup[selected.Header], nil
 }
 
-// sh executes a cmd with basic shell.
+// sh executes a cmd with a shell via pass.Run for privilege escalation.
 func sh(cmdStr string) error {
-	cmd := exec.Command("sh", "-c", cmdStr)
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
+	return pass.Run("sh", "-c", cmdStr)
 }
 
 // zypper runs a simple install.
 func zypper(pkgs []string) error {
 	args := append([]string{"zypper", "install", "-y"}, pkgs...)
-	cmd := exec.Command("sudo", args...)
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
+	return pass.Run(args...)
 }
 
 // flatpak runs a simple install.
 func flatpak(pkgs []string) error {
 	args := append([]string{"flatpak", "install", "-y"}, pkgs...)
-	cmd := exec.Command("sudo", args...)
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
+	return pass.Run(args...)
 }
 
 // repo adds a repository to zypper.
 func repo(repos []Repo) error {
 	for _, repo := range repos {
-		cmd := exec.Command("sudo", "zypper", "ar", repo.URL, repo.Alias)
-
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		if err := cmd.Run(); err != nil {
+		if err := pass.Run("zypper", "ar", repo.URL, repo.Alias); err != nil {
 			return fmt.Errorf("failed to add repo %q: %w", repo.Alias, err)
 		}
 	}
