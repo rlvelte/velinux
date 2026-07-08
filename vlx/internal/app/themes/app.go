@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/mattn/go-isatty"
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/picker"
@@ -16,11 +17,12 @@ import (
 
 func Command() *cobra.Command {
 	root := &cobra.Command{
-		Use:     "themes",
-		Short:   "Horribly bad theming manager",
-		Long:    "Manage and switch between theme profiles.",
-		Aliases: []string{"theme"},
-		Args:    cobra.NoArgs,
+		Use:          "themes",
+		Short:        "Horribly bad theming manager",
+		Long:         "Manage and switch between theme profiles.",
+		Aliases:      []string{"theme"},
+		Args:         cobra.NoArgs,
+		SilenceUsage: !isatty.IsTerminal(os.Stdout.Fd()),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -33,15 +35,16 @@ func Command() *cobra.Command {
 			Long:    "List all available theme profiles with their icons and IDs.",
 			Aliases: []string{"l", "ls"},
 			Args:    cobra.NoArgs,
-			RunE:    cmdList,
+			Run:     cmdList,
 		},
 		&cobra.Command{
-			Use:     "apply [theme]",
-			Short:   "Apply a theme",
-			Long:    "Apply a theme by name or interactively select from a list.",
-			Aliases: []string{"a", "ap"},
-			Args:    cobra.MaximumNArgs(1),
-			RunE:    cmdApply,
+			Use:          "apply [theme]",
+			Short:        "Apply a theme",
+			Long:         "Apply a theme by name or interactively select from a list.",
+			Aliases:      []string{"a", "ap"},
+			Args:         cobra.MaximumNArgs(1),
+			SilenceUsage: true,
+			Run:          cmdApply,
 		},
 	)
 
@@ -49,21 +52,20 @@ func Command() *cobra.Command {
 }
 
 // cmdList lists all available themes.
-func cmdList(cmd *cobra.Command, _ []string) error {
+func cmdList(cmd *cobra.Command, _ []string) {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 
-	store := fsys.NewStore(fsys.ConfigPath("vlx", "themes"), decodeTheme, ".json")
-
+	dir := fsys.ConfigPath("vlx", "themes")
 	active := current()
-	themes, err := store.List()
+	themes, err := fsys.ListJSON(dir, decodeTheme)
 	if err != nil {
-		p.Error(err.Error())
-		return err
+		p.Error(err)
+		return
 	}
 
 	if len(themes) == 0 {
-		p.Print("No themes found")
-		return nil
+		p.Success("No themes found")
+		return
 	}
 
 	headers := []string{"Name", "Description", "Active"}
@@ -82,22 +84,21 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 	}
 
 	p.Table(headers, rows)
-	return nil
 }
 
 // cmdApply applies a selected theme.
-func cmdApply(cmd *cobra.Command, args []string) error {
+func cmdApply(cmd *cobra.Command, args []string) {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 	n := cmd.Context().Value(notify.ContextKey).(*notify.Notify)
 
-	store := fsys.NewStore(fsys.ConfigPath("vlx", "themes"), decodeTheme, ".json")
+	dir := fsys.ConfigPath("vlx", "themes")
 
 	var fileName string
 	if len(args) == 0 {
-		fn, err := pick(cmd, store)
+		fn, err := pick(cmd, dir)
 		if err != nil {
-			p.Error(err.Error())
-			return err
+			p.Error(err)
+			return
 		}
 
 		fileName = fn
@@ -105,67 +106,61 @@ func cmdApply(cmd *cobra.Command, args []string) error {
 		fileName = args[0]
 	}
 
-	theme, err := store.Get(fileName)
+	theme, err := fsys.GetJSON(dir, fileName, decodeTheme)
 	if err != nil {
-		p.Error(err.Error())
-		return err
+		p.Error(err)
+		return
 	}
 
-	currentPath := filepath.Join(store.Dir, "current.json")
+	currentPath := filepath.Join(dir, "current.json")
 	if err := os.Remove(currentPath); err != nil && !os.IsNotExist(err) {
-		return err
+		p.Error(err)
+		return
 	}
 
 	if err := os.Symlink(theme.filename+".json", currentPath); err != nil {
-		return err
+		p.Error(err)
+		return
 	}
 
-	wallpaperPath := filepath.Join(store.Dir, "wallpaper.png")
+	wallpaperPath := filepath.Join(dir, "wallpaper.png")
 	if err := os.Remove(wallpaperPath); err != nil && !os.IsNotExist(err) {
-		return err
+		p.Error(err)
+		return
 	}
 
 	if err := os.Symlink(theme.Wallpaper, wallpaperPath); err != nil {
-		return err
+		p.Error(err)
+		return
 	}
 
 	if err := GenerateAll(*theme); err != nil {
-		return err
+		p.Error(err)
+		return
 	}
 
-	if err := exec.Command("swaymsg", "reload").Run(); err != nil {
-		p.Warn("sway reload failed (sway may not be running)")
-	}
-
-	if err := exec.Command("hyprctl", "reload").Run(); err != nil {
-		p.Warn("hypr reload failed (Hyprland may not be running)")
-	}
-
-	if err := exec.Command("makoctl", "reload").Run(); err != nil {
-		p.Warn("mako reload failed (mako may not be running)")
-	}
-
-	if err := exec.Command("mmsg", "dispatch", "reload_config").Run(); err != nil {
-		p.Warn("mango reload failed (mango may not be running)")
-	}
+	_ = exec.Command("swaymsg", "reload").Run()
+	_ = exec.Command("hyprctl", "reload").Run()
+	_ = exec.Command("makoctl", "reload").Run()
+	_ = exec.Command("mmsg", "dispatch", "reload_config").Run()
 
 	_ = n.Send("Switched to theme "+theme.Name, &notify.Details{
 		Title:   "VLX Themes",
 		Urgency: "normal",
 	})
 
-	p.Print("Applied theme " + theme.Name)
-	return nil
+	p.Success("Applied theme " + theme.Name)
+	return
 }
 
 // pick selects a theme via an interactive picker.
-func pick(cmd *cobra.Command, store *fsys.Store[*Theme]) (string, error) {
+func pick(cmd *cobra.Command, dir string) (string, error) {
 	pkr, err := picker.New()
 	if err != nil {
 		return "", err
 	}
 
-	themes, err := store.List()
+	themes, err := fsys.ListJSON(dir, decodeTheme)
 	if err != nil {
 		return "", err
 	}
@@ -177,7 +172,7 @@ func pick(cmd *cobra.Command, store *fsys.Store[*Theme]) (string, error) {
 			continue
 		}
 		items = append(items, picker.Item{
-			Icon:        filepath.Join(store.Dir, t.Logo),
+			Icon:        filepath.Join(dir, t.Logo),
 			Header:      t.Name,
 			Description: t.Description,
 		})
@@ -195,12 +190,7 @@ func pick(cmd *cobra.Command, store *fsys.Store[*Theme]) (string, error) {
 
 // current returns the currently active theme id.
 func current() string {
-	data, err := os.ReadFile(filepath.Join(fsys.ConfigPath("vlx", "themes"), "current.json"))
-	if err != nil {
-		return ""
-	}
-
-	t, err := decodeTheme("current", "", data)
+	t, err := fsys.GetJSON(fsys.ConfigPath("vlx", "themes"), "current", decodeTheme)
 	if err != nil {
 		return ""
 	}
