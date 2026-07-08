@@ -16,6 +16,7 @@ import (
 	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/picker"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/progress"
 	"github.com/spf13/cobra"
 )
 
@@ -229,10 +230,11 @@ func cmdInstall(cmd *cobra.Command, args []string) error {
 }
 
 func install(ctx context.Context, p *printer.Printer, n *notify.Notify, tool, target string) error {
-	_ = n.Send(fmt.Sprintf("Installing %s...", target), &notify.Details{
-		Title:   "mise",
-		Urgency: "normal",
-	})
+	prog, progErr := progress.New()
+	if progErr == nil {
+		prog.Start("Installing "+target, 0)
+		defer prog.Stop()
+	}
 
 	out, err := exec.CommandContext(ctx, "mise", "install", target).CombinedOutput()
 	if err != nil {
