@@ -12,16 +12,16 @@ import (
 	"github.com/rlvelte/velinux/vlx/internal/core/guard"
 )
 
-// Quickshell is a backend that uses quickshell picker.
-type Quickshell struct{}
+// QuickshellPicker is a backend that uses quickshell picker.
+type QuickshellPicker struct{}
 
 // Available reports whether quickshell is installed.
-func (q *Quickshell) Available() bool {
+func (q *QuickshellPicker) Available() bool {
 	return guard.Binaries("quickshell") == nil
 }
 
 // Select prompts the user to choose one item via quickshell.
-func (q *Quickshell) Select(ctx context.Context, items []Item) (Item, error) {
+func (q *QuickshellPicker) Select(ctx context.Context, items []Item) (Item, error) {
 	result, err := q.pick(ctx, items, "singlepicker")
 	if err != nil {
 		return Item{}, err
@@ -35,12 +35,12 @@ func (q *Quickshell) Select(ctx context.Context, items []Item) (Item, error) {
 }
 
 // SelectMulti prompts the user to choose multiple items via quickshell multi.
-func (q *Quickshell) SelectMulti(ctx context.Context, items []Item) ([]Item, error) {
+func (q *QuickshellPicker) SelectMulti(ctx context.Context, items []Item) ([]Item, error) {
 	return q.pick(ctx, items, "multipicker")
 }
 
 // SelectTwoStage prompts the user to choose an item and then a subitem via quickshell.
-func (q *Quickshell) SelectTwoStage(ctx context.Context, items []Item) (Item, error) {
+func (q *QuickshellPicker) SelectTwoStage(ctx context.Context, items []Item) (Item, error) {
 	ts := fmt.Sprintf("%d", time.Now().UnixNano())
 	itemsFile := filepath.Join("/dev/shm", "vlx-picker-"+ts+"-items")
 	resultFile := filepath.Join("/dev/shm", "vlx-picker-"+ts+"-result")
@@ -83,7 +83,7 @@ func (q *Quickshell) SelectTwoStage(ctx context.Context, items []Item) (Item, er
 	return result.Item, nil
 }
 
-func (q *Quickshell) pick(ctx context.Context, items []Item, target string) ([]Item, error) {
+func (q *QuickshellPicker) pick(ctx context.Context, items []Item, target string) ([]Item, error) {
 	ts := fmt.Sprintf("%d", time.Now().UnixNano())
 	itemsFile := filepath.Join("/dev/shm", "vlx-picker-"+ts+"-items")
 	resultFile := filepath.Join("/dev/shm", "vlx-picker-"+ts+"-result")
@@ -125,7 +125,7 @@ func (q *Quickshell) pick(ctx context.Context, items []Item, target string) ([]I
 	return result, nil
 }
 
-func (q *Quickshell) waitForResult(ctx context.Context, resultFile string) error {
+func (q *QuickshellPicker) waitForResult(ctx context.Context, resultFile string) error {
 	ticker := time.NewTicker(50 * time.Millisecond)
 	defer ticker.Stop()
 

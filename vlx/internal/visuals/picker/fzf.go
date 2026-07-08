@@ -9,16 +9,16 @@ import (
 	"github.com/rlvelte/velinux/vlx/internal/core/guard"
 )
 
-// Fzf is a backend that uses fzf command line picker.
-type Fzf struct{}
+// FzfPicker is a backend that uses fzf command line picker.
+type FzfPicker struct{}
 
 // Available reports whether fzf is installed.
-func (f *Fzf) Available() bool {
+func (f *FzfPicker) Available() bool {
 	return guard.Binaries("fzf") == nil
 }
 
 // Select prompts the user to choose one item via fzf.
-func (f *Fzf) Select(ctx context.Context, items []Item) (Item, error) {
+func (f *FzfPicker) Select(ctx context.Context, items []Item) (Item, error) {
 	selected, err := f.pick(ctx, items, false)
 	if err != nil {
 		return Item{}, err
@@ -32,12 +32,12 @@ func (f *Fzf) Select(ctx context.Context, items []Item) (Item, error) {
 }
 
 // SelectMulti prompts the user to choose multiple items via fzf --multi.
-func (f *Fzf) SelectMulti(ctx context.Context, items []Item) ([]Item, error) {
+func (f *FzfPicker) SelectMulti(ctx context.Context, items []Item) ([]Item, error) {
 	return f.pick(ctx, items, true)
 }
 
 // SelectTwoStage prompts the user to choose an item and then a subitem via fzf.
-func (f *Fzf) SelectTwoStage(ctx context.Context, items []Item) (Item, error) {
+func (f *FzfPicker) SelectTwoStage(ctx context.Context, items []Item) (Item, error) {
 	selected, err := f.pick(ctx, items, false)
 	if err != nil {
 		return Item{}, err
@@ -62,7 +62,7 @@ func (f *Fzf) SelectTwoStage(ctx context.Context, items []Item) (Item, error) {
 	return sub[0], nil
 }
 
-func (f *Fzf) pick(ctx context.Context, items []Item, multi bool) ([]Item, error) {
+func (f *FzfPicker) pick(ctx context.Context, items []Item, multi bool) ([]Item, error) {
 	lines := make([]string, len(items))
 	for i, item := range items {
 		s := item.Header

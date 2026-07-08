@@ -59,26 +59,26 @@ func (p *Picker) SelectTwoStage(ctx context.Context, items []Item) (Item, error)
 
 // ForceQuickshell forces the quickshell IPC backend.
 func (p *Picker) ForceQuickshell() *Picker {
-	p.variant = &Quickshell{}
+	p.variant = &QuickshellPicker{}
 	return p
 }
 
 // ForceFzf forces the fzf backend.
 func (p *Picker) ForceFzf() *Picker {
-	p.variant = &Fzf{}
+	p.variant = &FzfPicker{}
 	return p
 }
 
 func auto() (Variant, error) {
-	f := &Fzf{}
+	f := &FzfPicker{}
 	if f.Available() && isatty.IsTerminal(os.Stdout.Fd()) {
 		return f, nil
 	}
 
-	q := &Quickshell{}
+	q := &QuickshellPicker{}
 	if q.Available() {
 		return q, nil
 	}
 
-	return nil, fmt.Errorf("no picker available")
+	return nil, fmt.Errorf("picker: no backend available")
 }
