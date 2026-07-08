@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 	"sort"
 	"strings"
 	"sync"
 
+	"github.com/mattn/go-isatty"
 	"github.com/rlvelte/velinux/vlx/internal/core/guard"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/picker"
@@ -18,18 +20,19 @@ import (
 )
 
 // setup validates all requirements for further processing.
-func setup(cmd *cobra.Command, _ []string) error {
+func setup(_ *cobra.Command, _ []string) error {
 	return errors.Join(guard.Network(), guard.Binaries("mise"))
 }
 
 func Command() *cobra.Command {
 	root := &cobra.Command{
-		Use:     "mise",
-		Short:   "Horribly bad mise wrapper",
-		Long:    "Manage mise language runtime versions.",
-		Args:    cobra.NoArgs,
-		Aliases: []string{"lang", "rt"},
-		PreRunE: setup,
+		Use:          "mise",
+		Short:        "Horribly bad mise wrapper",
+		Long:         "Manage mise language runtime versions.",
+		Args:         cobra.NoArgs,
+		Aliases:      []string{"lang", "rt"},
+		SilenceUsage: !isatty.IsTerminal(os.Stdout.Fd()),
+		PreRunE:      setup,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -70,6 +73,7 @@ func Command() *cobra.Command {
 	return root
 }
 
+// cmdList lists all installed tool versions.
 func cmdList(cmd *cobra.Command, _ []string) error {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 
@@ -122,6 +126,7 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 	return nil
 }
 
+// cmdRemote lists all available remote versions for a tool.
 func cmdRemote(cmd *cobra.Command, args []string) error {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 
@@ -151,6 +156,7 @@ func cmdRemote(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// cmdUse sets a global version for a tool.
 func cmdUse(cmd *cobra.Command, args []string) error {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 	n := cmd.Context().Value(notify.ContextKey).(*notify.Notify)
@@ -173,10 +179,11 @@ func cmdUse(cmd *cobra.Command, args []string) error {
 		Urgency: "normal",
 	})
 
-	p.Print(fmt.Sprintf("%s %s → %s", iconFor(tool), tool, version))
+	p.Success(fmt.Sprintf("%s %s → %s", iconFor(tool), tool, version))
 	return nil
 }
 
+// cmdInstall installs a tool version.
 func cmdInstall(cmd *cobra.Command, args []string) error {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 	n := cmd.Context().Value(notify.ContextKey).(*notify.Notify)
@@ -188,7 +195,7 @@ func cmdInstall(cmd *cobra.Command, args []string) error {
 			target = tool + "@" + args[1]
 		}
 
-		return runInstall(cmd.Context(), p, n, tool, target)
+		return install(cmd.Context(), p, n, tool, target)
 	}
 
 	items, err := buildInstallItems()
@@ -197,7 +204,7 @@ func cmdInstall(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(items) == 0 {
-		p.Warn("No tools available for installation")
+		p.Success("No tools available for installation")
 		return nil
 	}
 
@@ -218,10 +225,10 @@ func cmdInstall(cmd *cobra.Command, args []string) error {
 	}
 	tool := parts[0]
 
-	return runInstall(cmd.Context(), p, n, tool, target)
+	return install(cmd.Context(), p, n, tool, target)
 }
 
-func runInstall(ctx context.Context, p *printer.Printer, n *notify.Notify, tool, target string) error {
+func install(ctx context.Context, p *printer.Printer, n *notify.Notify, tool, target string) error {
 	_ = n.Send(fmt.Sprintf("Installing %s...", target), &notify.Details{
 		Title:   "mise",
 		Urgency: "normal",
@@ -247,7 +254,7 @@ func runInstall(ctx context.Context, p *printer.Printer, n *notify.Notify, tool,
 		Urgency: "normal",
 	})
 
-	p.Print(fmt.Sprintf("%s %s installed", iconFor(tool), resolved))
+	p.Success(fmt.Sprintf("%s %s installed", iconFor(tool), resolved))
 	return nil
 }
 
