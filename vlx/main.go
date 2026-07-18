@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/mattn/go-isatty"
@@ -11,12 +12,20 @@ import (
 	"github.com/rlvelte/velinux/vlx/internal/app/launcher"
 	"github.com/rlvelte/velinux/vlx/internal/app/mise"
 	"github.com/rlvelte/velinux/vlx/internal/app/themes"
+	"github.com/rlvelte/velinux/vlx/internal/core/logs"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 	"github.com/spf13/cobra"
 )
 
+var session *logs.Session
+
 func setup(cmd *cobra.Command, _ []string) {
+	if s, err := logs.Open(); err == nil {
+		session = s
+		slog.SetDefault(s.Logger())
+	}
+
 	p := printer.New()
 	if jsonFlag, _ := cmd.Flags().GetBool("json"); jsonFlag {
 		p.ForceJSON()
@@ -49,6 +58,7 @@ func main() {
 	)
 
 	_ = root.Execute()
+	_ = session.Close()
 }
 
 func completions() *cobra.Command {

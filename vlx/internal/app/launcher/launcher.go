@@ -10,6 +10,7 @@ import (
 
 	"github.com/mattn/go-isatty"
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
+	"github.com/rlvelte/velinux/vlx/internal/core/logs"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/picker"
 	"github.com/spf13/cobra"
@@ -92,8 +93,8 @@ func cmdLaunch(cmd *cobra.Command, _ []string) error {
 
 	cmdStr := stripExecCodes(chosen.Exec)
 	execCmd := exec.CommandContext(cmd.Context(), "sh", "-c", cmdStr)
-	execCmd.Stdout = os.Stdout
-	execCmd.Stderr = os.Stderr
+	execCmd.Stdout = logs.Stdout()
+	execCmd.Stderr = logs.Stderr()
 
 	if err := execCmd.Start(); err != nil {
 		return notifyLaunchError(n, fmt.Sprintf("failed to launch %s", chosen.Name))

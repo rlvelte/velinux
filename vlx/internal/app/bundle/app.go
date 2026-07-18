@@ -3,11 +3,13 @@ package bundle
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 
 	"github.com/mattn/go-isatty"
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
+	"github.com/rlvelte/velinux/vlx/internal/core/logs"
 	"github.com/rlvelte/velinux/vlx/internal/core/pass"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/picker"
@@ -135,7 +137,7 @@ func cmdInstall(cmd *cobra.Command, args []string) {
 	}
 
 	prog, progErr := progress.New()
-	if progErr == nil && totalSteps > 0 {
+	if progErr == nil && totalSteps > 0 && !isatty.IsTerminal(os.Stdout.Fd()) {
 		prog.Start("Installing "+bundle.Info.Name, totalSteps)
 		defer prog.Stop()
 	}
@@ -197,9 +199,13 @@ func pick(cmd *cobra.Command, dir string) (string, error) {
 	return lookup[selected.Header], nil
 }
 
-// sh executes a cmd with a shell via pass.Run for privilege escalation.
+// sh executes a cmd with a shell as the current user. Escalation is expected
+// to be handled per-command inside the bundle hooks (e.g. `sudo apt update`).
 func sh(cmdStr string) error {
-	return pass.Run("sh", "-c", cmdStr)
+	cmd := exec.Command("sh", "-c", cmdStr)
+	cmd.Stdout = logs.Stdout()
+	cmd.Stderr = logs.Stderr()
+	return cmd.Run()
 }
 
 // zypper runs a simple install.

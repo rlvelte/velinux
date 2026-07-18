@@ -33,6 +33,12 @@ func CachePath(rel ...string) string {
 	return filepath.Join(parts...)
 }
 
+// StatePath returns a path under XDG_STATE_HOME.
+func StatePath(rel ...string) string {
+	parts := append([]string{env("XDG_STATE_HOME", ".local/state")}, rel...)
+	return filepath.Join(parts...)
+}
+
 // env look for existing variable and construct fallback if not found.
 func env(key, fallback string) string {
 	if v := os.Getenv(key); v != "" {

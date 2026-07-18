@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/rlvelte/velinux/vlx/internal/core/logs"
 )
 
 // Run executes a command with privilege escalation.
@@ -13,13 +15,13 @@ func Run(args ...string) error {
 		return nil
 	}
 
-	if askpassPath := siblingBinary("vlxpass"); askpassPath != "" {
+	if path := siblingBinary("vlxpass"); path != "" {
 		sudoArgs := append([]string{"-A", "--preserve-env=WAYLAND_DISPLAY,HOME,XDG_RUNTIME_DIR"}, args...)
 		cmd := exec.Command("sudo", sudoArgs...)
-		cmd.Env = append(os.Environ(), "SUDO_ASKPASS="+askpassPath)
+		cmd.Env = append(os.Environ(), "SUDO_ASKPASS="+path)
 
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
+		cmd.Stdout = logs.Stdout()
+		cmd.Stderr = logs.Stderr()
 
 		if err := cmd.Run(); err == nil {
 			return nil
@@ -35,8 +37,8 @@ func Run(args ...string) error {
 
 func run(bin string, args ...string) error {
 	cmd := exec.Command(bin, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = logs.Stdout()
+	cmd.Stderr = logs.Stderr()
 	return cmd.Run()
 }
 
