@@ -59,15 +59,13 @@ func (p *Picker) SelectTwoStage(ctx context.Context, items []Item) (Item, error)
 }
 
 // ForceQuickshell forces the quickshell IPC backend.
-func (p *Picker) ForceQuickshell() *Picker {
+func (p *Picker) ForceQuickshell() {
 	p.variant = &QuickshellPicker{}
-	return p
 }
 
 // ForceFzf forces the fzf backend.
-func (p *Picker) ForceFzf() *Picker {
+func (p *Picker) ForceFzf() {
 	p.variant = &FzfPicker{}
-	return p
 }
 
 func auto() (Variant, error) {

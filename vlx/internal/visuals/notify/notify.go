@@ -34,9 +34,8 @@ func (n *Notify) Send(message string, details *Details) error {
 }
 
 // ForceLibnotify forces the libnotify backend.
-func (n *Notify) ForceLibnotify() *Notify {
+func (n *Notify) ForceLibnotify() {
 	n.variant = &LibNotify{}
-	return n
 }
 
 func auto() Variant {

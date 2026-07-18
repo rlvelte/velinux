@@ -84,15 +84,13 @@ func (p *Progress) Stop() {
 }
 
 // ForceFmt forces the basic fmt backend.
-func (p *Progress) ForceFmt() *Progress {
+func (p *Progress) ForceFmt() {
 	p.variant = &FmtProgress{}
-	return p
 }
 
 // ForceQuickshell forces the quickshell IPC backend.
-func (p *Progress) ForceQuickshell() *Progress {
+func (p *Progress) ForceQuickshell() {
 	p.variant = &QuickshellProgress{}
-	return p
 }
 
 func auto() (Variant, error) {
