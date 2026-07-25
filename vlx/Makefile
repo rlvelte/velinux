@@ -1,10 +1,4 @@
 # This Makefile is for local development purposes only
-# Use at your own risk...
-
-# Executables
-GO := go
-
-# Directories
 INSTALL_DIR         := /usr/local/bin
 BASH_COMPLETION_DIR := /usr/share/bash-completion/completions
 ZSH_COMPLETION_DIR  := /usr/share/zsh/site-functions
@@ -20,8 +14,8 @@ install: build
 ## build: Compile the vlx and vlxpass binaries and generate shell completions
 build: restore
 	@mkdir -p build
-	$(GO) build -o build/vlx .
-	$(GO) build -o build/vlxpass ./cmd/vlxpass/
+	go build -o build/vlx ./cmd/vlx/
+	go build -o build/vlxpass ./cmd/vlxpass/
 
 	@mkdir -p build/completions
 	./build/vlx completion bash > build/completions/vlx.bash
@@ -29,6 +23,6 @@ build: restore
 
 ## restore: Download all Go module dependencies
 restore:
-	$(GO) mod download
-	$(GO) mod tidy
-	$(GO) vet ./...
+	go mod download
+	go mod tidy
+	go vet ./...
