@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/mattn/go-isatty"
 	"github.com/rlvelte/velinux/vlx/internal/app/bundle"
@@ -13,6 +14,7 @@ import (
 	"github.com/rlvelte/velinux/vlx/internal/app/mise"
 	"github.com/rlvelte/velinux/vlx/internal/app/themes"
 	"github.com/rlvelte/velinux/vlx/internal/core/logs"
+	"github.com/rlvelte/velinux/vlx/internal/core/pass"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 	"github.com/spf13/cobra"
@@ -21,7 +23,8 @@ import (
 var session *logs.Session
 
 func setup(cmd *cobra.Command, _ []string) {
-	if s, err := logs.Open(); err == nil {
+	cmdName := strings.ReplaceAll(cmd.CommandPath(), " ", "-")
+	if s, err := logs.Open(cmdName); err == nil {
 		session = s
 		slog.SetDefault(s.Logger())
 	}
@@ -30,9 +33,13 @@ func setup(cmd *cobra.Command, _ []string) {
 	if jsonFlag, _ := cmd.Flags().GetBool("json"); jsonFlag {
 		p.ForceJSON()
 	}
+	ctx := context.WithValue(cmd.Context(), printer.ContextKey, p)
 
-	cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, p))
-	cmd.SetContext(context.WithValue(cmd.Context(), notify.ContextKey, notify.New()))
+	escalation, _ := cmd.Flags().GetBool("escalation")
+	ctx = context.WithValue(ctx, pass.ContextKey, escalation)
+
+	ctx = context.WithValue(ctx, notify.ContextKey, notify.New())
+	cmd.SetContext(ctx)
 }
 
 func main() {
@@ -48,6 +55,8 @@ func main() {
 	}
 
 	root.PersistentFlags().BoolP("json", "j", false, "output as JSON")
+	root.PersistentFlags().BoolP("escalation", "e", true, "enable global privilege escalation")
+
 	root.AddCommand(
 		completions(),
 		themes.Command(),

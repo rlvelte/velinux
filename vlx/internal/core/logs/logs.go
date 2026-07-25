@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
@@ -46,13 +47,14 @@ func Stderr() io.Writer {
 }
 
 // Open creates a timestamped log file under XDG_STATE_HOME/vlx/logs/.
-func Open() (*Session, error) {
+// The command name is included in the filename for easier identification.
+func Open(cmd string) (*Session, error) {
 	dir := fsys.StatePath("vlx", "logs")
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return nil, fmt.Errorf("logs: %w", err)
 	}
 
-	name := time.Now().Format("2006-01-02T15-04-05") + ".log"
+	name := time.Now().Format("2006-01-02T15-04-05") + "_" + cmd + ".log"
 	path := filepath.Join(dir, name)
 
 	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
@@ -67,8 +69,40 @@ func Open() (*Session, error) {
 		err:    io.MultiWriter(os.Stderr, file),
 	}
 
+	_ = truncate(dir, 50)
+
 	current = s
 	return s, nil
+}
+
+// truncate keeps only the latest n log files in the directory,
+// deleting older ones. Files are sorted by name (timestamp prefix).
+func truncate(dir string, max int) error {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+
+	var logs []os.DirEntry
+	for _, e := range entries {
+		if !e.IsDir() && filepath.Ext(e.Name()) == ".log" {
+			logs = append(logs, e)
+		}
+	}
+
+	if len(logs) <= max {
+		return nil
+	}
+
+	sort.Slice(logs, func(i, j int) bool {
+		return logs[i].Name() < logs[j].Name()
+	})
+
+	for _, e := range logs[:len(logs)-max] {
+		_ = os.Remove(filepath.Join(dir, e.Name()))
+	}
+
+	return nil
 }
 
 // Close closes the log file and clears the active session.

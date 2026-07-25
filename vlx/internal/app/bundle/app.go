@@ -1,15 +1,14 @@
 package bundle
 
 import (
+	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 
 	"github.com/mattn/go-isatty"
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
-	"github.com/rlvelte/velinux/vlx/internal/core/logs"
 	"github.com/rlvelte/velinux/vlx/internal/core/pass"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/picker"
@@ -122,11 +121,11 @@ func cmdInstall(cmd *cobra.Command, args []string) {
 		name    string
 		run     func() error
 	}{
-		{len(bundle.Repos) > 0, "Adding repos", func() error { return repo(bundle.Repos) }},
-		{len(bundle.PreHook) > 0, "Running pre-install hook", func() error { return sh(strings.Join(bundle.PreHook, " && ")) }},
-		{len(bundle.Zypper) > 0, "Installing packages", func() error { return zypper(bundle.Zypper) }},
-		{len(bundle.Flatpak) > 0, "Installing flatpaks", func() error { return flatpak(bundle.Flatpak) }},
-		{len(bundle.PostHook) > 0, "Running post-install hook", func() error { return sh(strings.Join(bundle.PostHook, " && ")) }},
+		{len(bundle.Repos) > 0, "Adding repos", func() error { return repo(cmd.Context(), bundle.Repos) }},
+		{len(bundle.PreHook) > 0, "Running pre-install hook", func() error { return sh(cmd.Context(), strings.Join(bundle.PreHook, " && ")) }},
+		{len(bundle.Zypper) > 0, "Installing packages", func() error { return zypper(cmd.Context(), bundle.Zypper) }},
+		{len(bundle.Flatpak) > 0, "Installing flatpaks", func() error { return flatpak(cmd.Context(), bundle.Flatpak) }},
+		{len(bundle.PostHook) > 0, "Running post-install hook", func() error { return sh(cmd.Context(), strings.Join(bundle.PostHook, " && ")) }},
 	}
 
 	totalSteps := 0
@@ -199,31 +198,27 @@ func pick(cmd *cobra.Command, dir string) (string, error) {
 	return lookup[selected.Header], nil
 }
 
-// sh executes a cmd with a shell as the current user. Escalation is expected
-// to be handled per-command inside the bundle hooks (e.g. `sudo apt update`).
-func sh(cmdStr string) error {
-	cmd := exec.Command("sh", "-c", cmdStr)
-	cmd.Stdout = logs.Stdout()
-	cmd.Stderr = logs.Stderr()
-	return cmd.Run()
+// sh executes a cmd through a shell, respecting the global escalation flag.
+func sh(ctx context.Context, cmdStr string) error {
+	return pass.RunContext(ctx, "sh", "-c", cmdStr)
 }
 
-// zypper runs a simple install.
-func zypper(pkgs []string) error {
+// zypper runs a simple install, respecting the global escalation flag.
+func zypper(ctx context.Context, pkgs []string) error {
 	args := append([]string{"zypper", "install", "-y"}, pkgs...)
-	return pass.Run(args...)
+	return pass.RunContext(ctx, args...)
 }
 
-// flatpak runs a simple install.
-func flatpak(pkgs []string) error {
+// flatpak runs a simple install, respecting the global escalation flag.
+func flatpak(ctx context.Context, pkgs []string) error {
 	args := append([]string{"flatpak", "install", "-y"}, pkgs...)
-	return pass.Run(args...)
+	return pass.RunContext(ctx, args...)
 }
 
-// repo adds a repository to zypper.
-func repo(repos []Repo) error {
+// repo adds a repository to zypper, respecting the global escalation flag.
+func repo(ctx context.Context, repos []Repo) error {
 	for _, repo := range repos {
-		if err := pass.Run("zypper", "ar", repo.URL, repo.Alias); err != nil {
+		if err := pass.RunContext(ctx, "zypper", "ar", repo.URL, repo.Alias); err != nil {
 			return fmt.Errorf("failed to add repo %q: %w", repo.Alias, err)
 		}
 	}

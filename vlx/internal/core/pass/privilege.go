@@ -1,21 +1,36 @@
 package pass
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 
 	"github.com/rlvelte/velinux/vlx/internal/core/logs"
 )
 
-// Run executes a command with privilege escalation.
+const ContextKey = "escalation"
+
+// RunContext executes a command with privilege escalation when escalation is enabled.
+func RunContext(ctx context.Context, args ...string) error {
+	if ctx.Value(ContextKey).(bool) {
+		return Run(args...)
+	}
+
+	if len(args) == 0 {
+		return fmt.Errorf("pass: no command provided")
+	}
+
+	return run(args[0], args[1:]...)
+}
+
+// Run executes a command with privilege escalation unconditionally.
 func Run(args ...string) error {
 	if err := run("sudo", append([]string{"-n"}, args...)...); err == nil {
 		return nil
 	}
 
-	if path := siblingBinary("vlxpass"); path != "" {
+	if path, err := exec.LookPath("vlxpass"); err == nil {
 		sudoArgs := append([]string{"-A", "--preserve-env=WAYLAND_DISPLAY,HOME,XDG_RUNTIME_DIR"}, args...)
 		cmd := exec.Command("sudo", sudoArgs...)
 		cmd.Env = append(os.Environ(), "SUDO_ASKPASS="+path)
@@ -40,20 +55,4 @@ func run(bin string, args ...string) error {
 	cmd.Stdout = logs.Stdout()
 	cmd.Stderr = logs.Stderr()
 	return cmd.Run()
-}
-
-func siblingBinary(name string) string {
-	exe, err := os.Executable()
-	if err == nil {
-		path := filepath.Join(filepath.Dir(exe), name)
-		if _, err := os.Stat(path); err == nil {
-			return path
-		}
-	}
-
-	if p, err := exec.LookPath(name); err == nil {
-		return p
-	}
-
-	return ""
 }

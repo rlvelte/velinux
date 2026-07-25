@@ -73,21 +73,28 @@ PanelWindow {
     }
 
     function executeCommand(cmd) {
-        if (cmd[1] === "$XDG_SESSION_ID") {
-            cmd[1] = Quickshell.env("XDG_SESSION_ID")
+        for (var i = 0; i < cmd.length; i++) {
+            if (cmd[i] === "$XDG_SESSION_ID") {
+                cmd[i] = Quickshell.env("XDG_SESSION_ID")
+            }
         }
         processRunner.command = cmd
         processRunner.running = true
         powerMenu.hide()
     }
 
+    function elevated(cmd) {
+        var joined = cmd.map(function (arg) { return "'" + arg.replace(/'/g, "'\\''") + "'" }).join(" ")
+        return ["sh", "-c", "SUDO_ASKPASS=$(command -v vlxpass) exec sudo -A --preserve-env=WAYLAND_DISPLAY,HOME,XDG_RUNTIME_DIR " + joined]
+    }
+
     function launch(index) {
         var model = [
             { command: ["quickshell", "ipc", "call", "lock", "lock"] },
             { command: ["loginctl", "terminate-session", "$XDG_SESSION_ID"] },
-            { command: ["systemctl", "poweroff"] },
-            { command: ["systemctl", "reboot"] },
-            { command: ["systemctl", "reboot", "--firmware-setup"] }
+            { command: elevated(["systemctl", "poweroff"]) },
+            { command: elevated(["systemctl", "reboot"]) },
+            { command: elevated(["systemctl", "reboot", "--firmware-setup"]) }
         ]
         executeCommand(model[index].command)
     }

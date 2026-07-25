@@ -43,7 +43,12 @@ func cmdLaunch(cmd *cobra.Command, _ []string) error {
 
 	state, err := fsys.GetJSON(fsys.DataPath("vlx", "launcher"), "state", decodeState)
 	if err != nil {
-		return fmt.Errorf("launcher state: %w", err)
+		if !os.IsNotExist(err) {
+			return fmt.Errorf("launcher state: %w", err)
+		}
+
+		state = &State{Usage: make(map[string]UsageEntry)}
+		_ = fsys.SetJSON(fsys.DataPath("vlx", "launcher"), "state", state)
 	}
 
 	entries := Scan()
