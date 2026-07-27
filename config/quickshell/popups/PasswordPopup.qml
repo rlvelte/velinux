@@ -26,7 +26,7 @@ PanelWindow {
     visible: shown || animatingOut
 
     IpcHandler {
-        target: "pass"
+        target: "su"
         function vlxOpen(dirPath: string): void {
             passwordPopup.startPrompt(dirPath)
         }

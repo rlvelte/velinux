@@ -1,7 +1,6 @@
-package pass
+package su
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -9,23 +8,8 @@ import (
 	"github.com/rlvelte/velinux/vlx/internal/core/logs"
 )
 
-const ContextKey = "escalation"
-
-// RunContext executes a command with privilege escalation when escalation is enabled.
-func RunContext(ctx context.Context, args ...string) error {
-	if ctx.Value(ContextKey).(bool) {
-		return Run(args...)
-	}
-
-	if len(args) == 0 {
-		return fmt.Errorf("pass: no command provided")
-	}
-
-	return run(args[0], args[1:]...)
-}
-
-// Run executes a command with privilege escalation unconditionally.
-func Run(args ...string) error {
+// RunPrivileged executes a command with privilege escalation unconditionally.
+func RunPrivileged(args ...string) error {
 	if err := run("sudo", append([]string{"-n"}, args...)...); err == nil {
 		return nil
 	}
