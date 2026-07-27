@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Zsh
+Comment=Zhe zsh
+Exec=zsh
+Type=Application
+DesktopNames=shell,zsh

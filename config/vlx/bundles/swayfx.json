@@ -3,7 +3,8 @@
   "info": {
     "name": "SwayFX",
     "desc": "Compiles swayfx from source for openSUSE.",
-    "icon": "\uF35D"
+    "icon": "\uF35D",
+    "group": "wm"
   },
   "zypper": [
     "git",
@@ -39,12 +40,12 @@
     "libliftoff-devel"
   ],
   "pre": [
-    "rm -rf /tmp/wlroots-build /tmp/scenefx-build /tmp/swayfx-build"
+    "sudo rm -rf /tmp/wlroots-build /tmp/scenefx-build /tmp/swayfx-build"
   ],
   "post": [
     "git clone -b 0.19.3 https://gitlab.freedesktop.org/wlroots/wlroots.git /tmp/wlroots-build",
     "cd /tmp/wlroots-build",
-    "meson setup build --prefix=/usr",
+    "meson setup build --prefix=/usr -Dbackends=drm,libinput",
     "sudo ninja -C build install",
     "git clone -b 0.4.1 https://github.com/wlrfx/scenefx.git /tmp/scenefx-build",
     "cd /tmp/scenefx-build",

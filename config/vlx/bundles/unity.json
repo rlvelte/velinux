@@ -3,7 +3,8 @@
   "info": {
     "name": "Unity",
     "desc": "Creates a ubuntu distrobox with unity.",
-    "icon": "\uE721"
+    "icon": "\uE721",
+    "group": "dev"
   },
   "zypper": [
     "distrobox"

@@ -3,7 +3,8 @@
   "info": {
     "name": "MangoWM",
     "desc": "Compiles MangoWM from source for openSUSE",
-    "icon": "\uF2D2"
+    "icon": "\uF2D2",
+    "group": "wm"
   },
   "zypper": [
     "git",
@@ -39,7 +40,7 @@
     "gobject-introspection-devel"
   ],
   "pre": [
-    "rm -rf /tmp/wlroots-build /tmp/scenefx-build /tmp/mango-build"
+    "sudo rm -rf /tmp/wlroots-build /tmp/scenefx-build /tmp/mango-build"
   ],
   "post": [
     "git clone -b 0.19.3 https://gitlab.freedesktop.org/wlroots/wlroots.git /tmp/wlroots-build",

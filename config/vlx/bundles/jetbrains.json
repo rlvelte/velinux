@@ -2,8 +2,9 @@
   "$schema": "bundle.schema.json",
   "info": {
     "name": "JetBrains Toolbox",
-    "desc": "Downloads the latest toolbox archive and install in ~/.local/share.",
-    "icon": "\uE808"
+    "desc": "Downloads the latest toolbox archive and installs it.",
+    "icon": "\uE808",
+    "group": "dev"
   },
   "zypper": [
     "curl",
@@ -18,8 +19,8 @@
     "libxcb-keysyms1",
     "libfontconfig1",
     "libfreetype6",
-    "Mesa-libGL1",
-    "libxkbcommon0"
+    "libxkbcommon0",
+    "Mesa-libGL1"
   ],
   "pre": [
     "rm -rf /tmp/jetbrains-toolbox-download"
