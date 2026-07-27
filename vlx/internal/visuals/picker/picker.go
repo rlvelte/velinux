@@ -14,6 +14,7 @@ const ContextKey = "picker"
 type Item struct {
 	Icon        string `json:"icon"`
 	Header      string `json:"header"`
+	Group       string `json:"group,omitempty"`
 	Description string `json:"description"`
 	Installed   bool   `json:"installed,omitempty"`
 	Subitems    []Item `json:"subitem"`
@@ -25,6 +26,7 @@ type Variant interface {
 	Select(ctx context.Context, items []Item) (Item, error)
 	SelectMulti(ctx context.Context, items []Item) ([]Item, error)
 	SelectTwoStage(ctx context.Context, items []Item) (Item, error)
+	SelectGrouped(ctx context.Context, items []Item) (Item, error)
 }
 
 // Picker is the unified picking engine.
@@ -56,6 +58,11 @@ func (p *Picker) SelectMulti(ctx context.Context, items []Item) ([]Item, error) 
 // SelectTwoStage prompts the user to choose an item and then a subcommand.
 func (p *Picker) SelectTwoStage(ctx context.Context, items []Item) (Item, error) {
 	return p.variant.SelectTwoStage(ctx, items)
+}
+
+// SelectGrouped prompts the user to choose one item from a grouped list.
+func (p *Picker) SelectGrouped(ctx context.Context, items []Item) (Item, error) {
+	return p.variant.SelectGrouped(ctx, items)
 }
 
 // ForceQuickshell forces the quickshell IPC backend.

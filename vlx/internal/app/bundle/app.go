@@ -1,15 +1,16 @@
 package bundle
 
 import (
-	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 
 	"github.com/mattn/go-isatty"
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
-	"github.com/rlvelte/velinux/vlx/internal/core/pass"
+	"github.com/rlvelte/velinux/vlx/internal/core/logs"
+	"github.com/rlvelte/velinux/vlx/internal/core/su"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/picker"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
@@ -70,7 +71,7 @@ func cmdList(cmd *cobra.Command, _ []string) {
 		return
 	}
 
-	headers := []string{"Name", "Zypper", "Flatpak", "Hooks"}
+	headers := []string{"Name", "Group", "Zypper", "Flatpak", "Hooks"}
 	rows := make([][]string, 0, len(bundles))
 	for _, b := range bundles {
 		hooks := "no"
@@ -78,8 +79,14 @@ func cmdList(cmd *cobra.Command, _ []string) {
 			hooks = "yes"
 		}
 
+		group := b.Info.Group
+		if group == "" {
+			group = "-"
+		}
+
 		rows = append(rows, []string{
 			b.Info.Name,
+			group,
 			strconv.Itoa(len(b.Zypper)),
 			strconv.Itoa(len(b.Flatpak)),
 			hooks,
@@ -121,11 +128,11 @@ func cmdInstall(cmd *cobra.Command, args []string) {
 		name    string
 		run     func() error
 	}{
-		{len(bundle.Repos) > 0, "Adding repos", func() error { return repo(cmd.Context(), bundle.Repos) }},
-		{len(bundle.PreHook) > 0, "Running pre-install hook", func() error { return sh(cmd.Context(), strings.Join(bundle.PreHook, " && ")) }},
-		{len(bundle.Zypper) > 0, "Installing packages", func() error { return zypper(cmd.Context(), bundle.Zypper) }},
-		{len(bundle.Flatpak) > 0, "Installing flatpaks", func() error { return flatpak(cmd.Context(), bundle.Flatpak) }},
-		{len(bundle.PostHook) > 0, "Running post-install hook", func() error { return sh(cmd.Context(), strings.Join(bundle.PostHook, " && ")) }},
+		{len(bundle.Repos) > 0, "Adding repos", func() error { return repo(bundle.Repos) }},
+		{len(bundle.PreHook) > 0, "Running pre-install hook", func() error { return hooks(bundle.PreHook) }},
+		{len(bundle.Zypper) > 0, "Installing packages", func() error { return zypper(bundle.Zypper) }},
+		{len(bundle.Flatpak) > 0, "Installing flatpaks", func() error { return flatpak(bundle.Flatpak) }},
+		{len(bundle.PostHook) > 0, "Running post-install hook", func() error { return hooks(bundle.PostHook) }},
 	}
 
 	totalSteps := 0
@@ -185,12 +192,13 @@ func pick(cmd *cobra.Command, dir string) (string, error) {
 			Icon:        b.Info.Icon,
 			Header:      b.Info.Name,
 			Description: b.Info.Description,
+			Group:       b.Info.Group,
 		}
 
 		lookup[b.Info.Name] = b.filename
 	}
 
-	selected, err := pkr.Select(cmd.Context(), items)
+	selected, err := pkr.SelectGrouped(cmd.Context(), items)
 	if err != nil {
 		return "", err
 	}
@@ -198,30 +206,63 @@ func pick(cmd *cobra.Command, dir string) (string, error) {
 	return lookup[selected.Header], nil
 }
 
-// sh executes a cmd through a shell, respecting the global escalation flag.
-func sh(ctx context.Context, cmdStr string) error {
-	return pass.RunContext(ctx, "sh", "-c", cmdStr)
+// sh executes a cmd through a shell, escalating only when the command.
+func sh(str string) error {
+	if escalate(str) {
+		return su.RunPrivileged("sh", "-c", str)
+	}
+
+	cmd := exec.Command("sh", "-c", str)
+
+	cmd.Stdout = logs.Stdout()
+	cmd.Stderr = logs.Stderr()
+
+	return cmd.Run()
 }
 
-// zypper runs a simple install, respecting the global escalation flag.
-func zypper(ctx context.Context, pkgs []string) error {
+// zypper runs a simple installation with privilege escalation.
+func zypper(pkgs []string) error {
 	args := append([]string{"zypper", "install", "-y"}, pkgs...)
-	return pass.RunContext(ctx, args...)
+	return su.RunPrivileged(args...)
 }
 
-// flatpak runs a simple install, respecting the global escalation flag.
-func flatpak(ctx context.Context, pkgs []string) error {
+// flatpak runs a simple installation with privilege escalation.
+func flatpak(pkgs []string) error {
 	args := append([]string{"flatpak", "install", "-y"}, pkgs...)
-	return pass.RunContext(ctx, args...)
+	return su.RunPrivileged(args...)
 }
 
-// repo adds a repository to zypper, respecting the global escalation flag.
-func repo(ctx context.Context, repos []Repo) error {
+// repo adds a repository with privilege escalation.
+func repo(repos []Repo) error {
 	for _, repo := range repos {
-		if err := pass.RunContext(ctx, "zypper", "ar", repo.URL, repo.Alias); err != nil {
+		if err := su.RunPrivileged("zypper", "ar", repo.URL, repo.Alias); err != nil {
 			return fmt.Errorf("failed to add repo %q: %w", repo.Alias, err)
 		}
 	}
 
 	return nil
+}
+
+// hooks executes each hook individually with per-command privilege decisions.
+func hooks(hooks []string) error {
+	for _, hook := range hooks {
+		if err := sh(hook); err != nil {
+			return fmt.Errorf("hook %q failed: %w", hook, err)
+		}
+	}
+
+	return nil
+}
+
+func escalate(cmd string) bool {
+	lower := strings.ToLower(cmd)
+	if strings.Contains(lower, "sudo ") || strings.Contains(lower, " sudo ") {
+		return true
+	}
+
+	if strings.HasPrefix(lower, "su ") || strings.Contains(lower, " su ") {
+		return true
+	}
+
+	return false
 }

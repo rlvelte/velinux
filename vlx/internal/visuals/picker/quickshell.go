@@ -59,7 +59,7 @@ func (q *QuickshellPicker) SelectTwoStage(ctx context.Context, items []Item) (It
 		return Item{}, fmt.Errorf("picker twostage: %w", err)
 	}
 
-	if err := q.waitForResult(ctx, resultFile); err != nil {
+	if err := q.wait(ctx, resultFile); err != nil {
 		return Item{}, err
 	}
 	defer os.Remove(resultFile)
@@ -83,6 +83,20 @@ func (q *QuickshellPicker) SelectTwoStage(ctx context.Context, items []Item) (It
 	return result.Item, nil
 }
 
+// SelectGrouped prompts the user to choose one item from a grouped list via quickshell.
+func (q *QuickshellPicker) SelectGrouped(ctx context.Context, items []Item) (Item, error) {
+	result, err := q.pick(ctx, items, "grouppicker")
+	if err != nil {
+		return Item{}, err
+	}
+
+	if len(result) == 0 {
+		return Item{}, fmt.Errorf("picker cancelled")
+	}
+
+	return result[0], nil
+}
+
 func (q *QuickshellPicker) pick(ctx context.Context, items []Item, target string) ([]Item, error) {
 	ts := fmt.Sprintf("%d", time.Now().UnixNano())
 	itemsFile := filepath.Join("/dev/shm", "vlx-picker-"+ts+"-items")
@@ -102,7 +116,7 @@ func (q *QuickshellPicker) pick(ctx context.Context, items []Item, target string
 		return nil, fmt.Errorf("picker %s: %w", target, err)
 	}
 
-	if err := q.waitForResult(ctx, resultFile); err != nil {
+	if err := q.wait(ctx, resultFile); err != nil {
 		return nil, err
 	}
 	defer os.Remove(resultFile)
@@ -125,7 +139,7 @@ func (q *QuickshellPicker) pick(ctx context.Context, items []Item, target string
 	return result, nil
 }
 
-func (q *QuickshellPicker) waitForResult(ctx context.Context, resultFile string) error {
+func (q *QuickshellPicker) wait(ctx context.Context, resultFile string) error {
 	ticker := time.NewTicker(50 * time.Millisecond)
 	defer ticker.Stop()
 

@@ -25,6 +25,10 @@
         "icon": {
           "type": "string",
           "description": "Nerdfont icon for style"
+        },
+        "group": {
+          "type": "string",
+          "description": "Category used to group this bundle in the picker (e.g. desktop, development, applications)"
         }
       },
       "required": ["name", "desc", "icon"]

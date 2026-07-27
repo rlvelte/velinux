@@ -19,7 +19,7 @@ func (f *FzfPicker) Available() bool {
 
 // Select prompts the user to choose one item via fzf.
 func (f *FzfPicker) Select(ctx context.Context, items []Item) (Item, error) {
-	selected, err := f.pick(ctx, items, false)
+	selected, err := f.pick(ctx, items, false, false)
 	if err != nil {
 		return Item{}, err
 	}
@@ -33,12 +33,12 @@ func (f *FzfPicker) Select(ctx context.Context, items []Item) (Item, error) {
 
 // SelectMulti prompts the user to choose multiple items via fzf --multi.
 func (f *FzfPicker) SelectMulti(ctx context.Context, items []Item) ([]Item, error) {
-	return f.pick(ctx, items, true)
+	return f.pick(ctx, items, true, false)
 }
 
 // SelectTwoStage prompts the user to choose an item and then a subitem via fzf.
 func (f *FzfPicker) SelectTwoStage(ctx context.Context, items []Item) (Item, error) {
-	selected, err := f.pick(ctx, items, false)
+	selected, err := f.pick(ctx, items, false, false)
 	if err != nil {
 		return Item{}, err
 	}
@@ -51,7 +51,7 @@ func (f *FzfPicker) SelectTwoStage(ctx context.Context, items []Item) (Item, err
 		return parent, nil
 	}
 
-	sub, err := f.pick(ctx, parent.Subitems, false)
+	sub, err := f.pick(ctx, parent.Subitems, false, false)
 	if err != nil {
 		return Item{}, err
 	}
@@ -62,12 +62,27 @@ func (f *FzfPicker) SelectTwoStage(ctx context.Context, items []Item) (Item, err
 	return sub[0], nil
 }
 
-func (f *FzfPicker) pick(ctx context.Context, items []Item, multi bool) ([]Item, error) {
+// SelectGrouped prompts the user to choose one item from a grouped list via fzf.
+func (f *FzfPicker) SelectGrouped(ctx context.Context, items []Item) (Item, error) {
+	selected, err := f.pick(ctx, items, false, true)
+	if err != nil {
+		return Item{}, err
+	}
+	if len(selected) == 0 {
+		return Item{}, nil
+	}
+	return selected[0], nil
+}
+
+func (f *FzfPicker) pick(ctx context.Context, items []Item, multi bool, grouped bool) ([]Item, error) {
 	lines := make([]string, len(items))
 	for i, item := range items {
 		s := item.Header
 		if item.Description != "" {
 			s += "  " + item.Description
+		}
+		if grouped && item.Group != "" {
+			s = item.Group + ": " + s
 		}
 
 		lines[i] = fmt.Sprintf("%d\t%s", i, s)
@@ -87,7 +102,7 @@ func (f *FzfPicker) pick(ctx context.Context, items []Item, multi bool) ([]Item,
 	}
 
 	var result []Item
-	for _, line := range strings.Split(string(out), "\n") {
+	for line := range strings.SplitSeq(string(out), "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" {
 			continue

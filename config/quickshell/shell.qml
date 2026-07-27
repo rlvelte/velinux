@@ -13,6 +13,7 @@ ShellRoot {
     SinglePickerMenu {}
     MultiPickerMenu {}
     TwoStagedPickerMenu {}
+    GroupedPickerMenu {}
     ProgressPopup {}
     PasswordPopup {}
     PowerMenu {}

@@ -28,6 +28,7 @@ type Info struct {
 	Name        string `json:"name"`
 	Description string `json:"desc"`
 	Icon        string `json:"icon"`
+	Group       string `json:"group,omitempty"`
 }
 
 // decodeBundle decodes a bundle file.
