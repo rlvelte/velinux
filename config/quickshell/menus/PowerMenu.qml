@@ -90,8 +90,8 @@ PanelWindow {
 
     function launch(index) {
         var model = [
-            { command: ["quickshell", "ipc", "call", "lock", "lock"] },
             { command: ["loginctl", "terminate-session", "$XDG_SESSION_ID"] },
+            { command: elevated(["systemctl", "hybrid-sleep"]) },
             { command: elevated(["systemctl", "poweroff"]) },
             { command: elevated(["systemctl", "reboot"]) },
             { command: elevated(["systemctl", "reboot", "--firmware-setup"]) }
@@ -175,8 +175,8 @@ PanelWindow {
 
             Repeater {
                 model: [
-                    { label: "Lock" },
                     { label: "Logout" },
+                    { label: "Suspend" },
                     { label: "Shutdown" },
                     { label: "Reboot" },
                     { label: "BIOS" }
