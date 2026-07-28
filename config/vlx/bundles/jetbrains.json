@@ -4,7 +4,7 @@
     "name": "JetBrains Toolbox",
     "desc": "Downloads the latest toolbox archive and installs it.",
     "icon": "\uE808",
-    "group": "dev"
+    "group": "app"
   },
   "zypper": [
     "curl",

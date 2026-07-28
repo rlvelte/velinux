@@ -26,7 +26,7 @@ var targets = []target{
 	{"mangowm", func(d string) string { return filepath.Join(d, "mango", "config.d", "40-theme.conf") }},
 	{"kitty", func(d string) string { return filepath.Join(d, "kitty", "theme.conf") }},
 	{"mako", func(d string) string { return filepath.Join(d, "mako", "theme.conf") }},
-	{"quickshell", func(d string) string { return filepath.Join(d, "quickshell", "services", "Theme.qml") }},
+	{"quickshell", func(d string) string { return filepath.Join(d, "quickshell", "globals", "Theme.qml") }},
 }
 
 // GenerateAll takes all target definitions and generate a new theme file.

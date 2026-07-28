@@ -1,0 +1,21 @@
+{
+  "$schema": "bundle.schema.json",
+  "info": {
+    "name": "Sublime Text",
+    "desc": "Installs Sublime Text via the official zypper repository.",
+    "icon": "\uE60B",
+    "group": "app"
+  },
+  "pre": [
+    "sudo rpm -v --import https://download.sublimetext.com/sublimehq-rpm-pub.gpg"
+  ],
+  "repos": [
+    {
+      "alias": "sublime-text",
+      "url": "https://download.sublimetext.com/rpm/stable/x86_64/sublime-text.repo"
+    }
+  ],
+  "zypper": [
+    "sublime-text"
+  ]
+}

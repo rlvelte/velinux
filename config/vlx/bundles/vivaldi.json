@@ -1,0 +1,18 @@
+{
+  "$schema": "bundle.schema.json",
+  "info": {
+    "name": "Vivaldi",
+    "desc": "Installs Vivaldi browser via the official zypper repository.",
+    "icon": "\uF269",
+    "group": "app"
+  },
+  "repos": [
+    {
+      "alias": "vivaldi",
+      "url": "https://repo.vivaldi.com/archive/vivaldi-suse.repo"
+    }
+  ],
+  "zypper": [
+    "vivaldi-stable"
+  ]
+}
