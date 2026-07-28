@@ -1,13 +1,13 @@
 import QtQuick
-import qs.services
+import qs.globals
 
 Item {
-    id: seperator
-    implicitWidth: seperatorText.implicitWidth
-    implicitHeight: 40
+    id: root
+    implicitWidth: separatorText.implicitWidth
+    implicitHeight: Dimensions.barHeight
 
     Text {
-        id: seperatorText
+        id: separatorText
         anchors.verticalCenter: parent.verticalCenter
         text: "|"
         color: Theme.surface1

@@ -1,11 +1,11 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import qs.services
+import qs.globals
 
 Item {
     id: commandCenter
-    implicitWidth: commandCenterIcon.implicitWidth + 0
+    implicitWidth: commandCenterIcon.implicitWidth
     implicitHeight: 40
 
     Image {
@@ -21,10 +21,5 @@ Item {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         onClicked: toggleProcess.running = true
-    }
-
-    Process {
-        id: toggleProcess
-        command: ["quickshell", "ipc", "call", "commandCenter", "toggle"]
     }
 }

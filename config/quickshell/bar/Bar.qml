@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import qs.services
+import qs.globals
 import qs.bar.widgets.interactable
 import qs.bar.widgets.hardware
 import qs.bar.widgets.design
@@ -22,16 +22,9 @@ PanelWindow {
         right: 8
     }
 
-    exclusiveZone: 40
-    implicitHeight: 40
+    exclusiveZone: Dimensions.barHeight
+    implicitHeight: Dimensions.barHeight
     color: "transparent"
-
-    Rectangle {
-        anchors.fill: parent
-        color: Theme.base
-        radius: 8
-        opacity: 0.0
-    }
 
     RowLayout {
         anchors.fill: parent
@@ -42,11 +35,11 @@ PanelWindow {
         BarWidget {
             Layout.alignment: Qt.AlignVCenter
             CommandCenter { }
-            Seperator { }
+            Separator { }
             CpuMonitor { }
-            Seperator { }
+            Separator { }
             MemoryMonitor { }
-            Seperator { }
+            Separator { }
             DiskMonitor { }
         }
 
@@ -60,9 +53,9 @@ PanelWindow {
         BarWidget {
             Layout.alignment: Qt.AlignVCenter
             TrayInfo { }
-            Seperator { }
+            Separator { }
             AudioInfo { }
-            Seperator { }
+            Separator { }
             ClockInfo { }
         }
     }
@@ -71,10 +64,10 @@ PanelWindow {
         anchors.centerIn: parent
         spacing: 0
 
-        BracketLeft { anchors.verticalCenter: parent.verticalCenter }
+        Bracket { opening: true; anchors.verticalCenter: parent.verticalCenter }
         TitleInfo {
             width: Math.min(implicitWidth, (bar.width - 400))
         }
-        BracketRight { anchors.verticalCenter: parent.verticalCenter }
+        Bracket { opening: false; anchors.verticalCenter: parent.verticalCenter }
     }
 }

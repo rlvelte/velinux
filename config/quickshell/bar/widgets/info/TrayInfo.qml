@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Services.SystemTray
-import qs.services
+import qs.globals
 
 Item {
     id: trayInfo

@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import Quickshell
 import qs.core
+import qs.globals
+import qs.windows
 
 PickerWindow {
     id: picker
@@ -128,13 +130,13 @@ PickerWindow {
 
             TextField {
                 id: searchField
-                focus: true; width: parent.width; height: Theme.searchFieldHeight; leftPadding: 16
+                focus: true; width: parent.width; height: Dimensions.searchFieldHeight; leftPadding: 16
                 placeholderText: picker.stage === 0 ? "Search..." : "Search subitems..."
                 font.family: Theme.fontName; font.pixelSize: Theme.fontSizeHeading
                 color: Theme.text; placeholderTextColor: Theme.muted
 
                 background: Rectangle {
-                    color: Theme.surface0; radius: Theme.inputRadius
+                    color: Theme.surface0; radius: Dimensions.inputRadius
                     border.color: searchField.activeFocus ? Theme.primary : Theme.surface1
                     border.width: searchField.activeFocus ? 2 : 1
                 }
@@ -149,27 +151,23 @@ PickerWindow {
 
             Row {
                 width: parent.width
-                height: parent.height - Theme.searchFieldHeight - 12
+                height: parent.height - Dimensions.searchFieldHeight - 12
                 spacing: 16
 
                 ListView {
                     id: appList
                     width: picker.narrowWidth - 32
                     height: parent.height
-                    clip: true; model: picker.filteredModel
+                    clip: true; cacheBuffer: 400; model: picker.filteredModel
                     currentIndex: picker.selected
-                    highlightMoveDuration: Theme.animDurationHighlight
+                    highlightMoveDuration: Anims.durationHighlight
                     highlightFollowsCurrentItem: true
                     boundsBehavior: Flickable.StopAtBounds
                     spacing: 4
                     opacity: picker.stage === 1 ? 0.45 : 1
 
-                    Behavior on opacity {
-                        NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
-                    }
-
                     highlight: Rectangle {
-                        width: appList.width; height: Theme.listItemHeight; radius: Theme.inputRadius
+                        width: appList.width; height: Dimensions.listItemHeight; radius: Dimensions.inputRadius
                         color: Theme.primarySelected
                         Rectangle {
                             anchors { left: parent.left; top: parent.top; bottom: parent.bottom }
@@ -180,7 +178,7 @@ PickerWindow {
                     delegate: Rectangle {
                         required property var modelData
                         required property int index
-                        width: appList.width; height: Theme.listItemHeight; radius: Theme.inputRadius
+                        width: appList.width; height: Dimensions.listItemHeight; radius: Dimensions.inputRadius
                         color: "transparent"
 
                         ItemRow {
@@ -217,10 +215,6 @@ PickerWindow {
                     opacity: picker.stage === 1 ? 1 : 0
                     visible: width > 0
 
-                    Behavior on opacity {
-                        NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
-                    }
-
                     Text {
                         width: parent.width
                         text: picker.selectedItem ? picker.selectedItem.header : ""
@@ -232,15 +226,15 @@ PickerWindow {
                         id: subList
                         width: parent.width
                         height: parent.height - 32
-                        clip: true; model: subFiltered
+                        clip: true; cacheBuffer: 400; model: subFiltered
                         currentIndex: picker.selectedSub
-                        highlightMoveDuration: Theme.animDurationHighlight
+                        highlightMoveDuration: Anims.durationHighlight
                         highlightFollowsCurrentItem: true
                         boundsBehavior: Flickable.StopAtBounds
                         spacing: 4
 
                         highlight: Rectangle {
-                            width: subList.width; height: Theme.listItemHeight; radius: Theme.inputRadius
+                            width: subList.width; height: Dimensions.listItemHeight; radius: Dimensions.inputRadius
                             color: Theme.primarySelected
                             Rectangle {
                                 anchors { left: parent.left; top: parent.top; bottom: parent.bottom }
@@ -251,7 +245,7 @@ PickerWindow {
                         delegate: Rectangle {
                             required property var modelData
                             required property int index
-                            width: subList.width; height: Theme.listItemHeight; radius: Theme.inputRadius
+                            width: subList.width; height: Dimensions.listItemHeight; radius: Dimensions.inputRadius
                             color: "transparent"
                             opacity: modelData.installed ? 0.45 : 1
 

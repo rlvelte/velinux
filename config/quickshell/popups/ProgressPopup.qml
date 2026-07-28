@@ -3,7 +3,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Widgets
-import qs.services
+import qs.globals
 
 PanelWindow {
     id: progressPopup
@@ -30,8 +30,7 @@ PanelWindow {
     property real progressValue: 0.0
     property bool isIndefinite: false
 
-    // Spinner animation
-    property int    spinnerFrame: 0
+    property int spinnerFrame: 0
     readonly property var spinnerChars: ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
 
     visible: shown || animatingOut
@@ -67,14 +66,14 @@ PanelWindow {
 
     onShownChanged: {
         if (shown) {
-            contentTranslate.y = -80
+            contentTranslate.y = -Dimensions.overlaySlideOffset
             dropTimer.restart()
         }
     }
 
     Timer {
         id: dropTimer
-        interval: 50
+        interval: Anims.dropDelay
         repeat: false
         onTriggered: {
             showAnim.start()
@@ -84,28 +83,22 @@ PanelWindow {
 
     NumberAnimation {
         id: showAnim
-        target: contentTranslate
-        property: "y"
-        from: -80
-        to: 0
-        duration: 200
-        easing.type: Easing.OutCubic
+        target: contentTranslate; property: "y"
+        from: -Dimensions.overlaySlideOffset; to: 0
+        duration: Anims.duration; easing.type: Easing.OutCubic
     }
 
     NumberAnimation {
         id: hideAnim
-        target: contentTranslate
-        property: "y"
-        from: 0
-        to: -80
-        duration: 200
-        easing.type: Easing.InCubic
+        target: contentTranslate; property: "y"
+        from: 0; to: -Dimensions.overlaySlideOffset
+        duration: Anims.duration; easing.type: Easing.InCubic
         onFinished: hideTimer.restart()
     }
 
     Timer {
         id: hideTimer
-        interval: 50
+        interval: Anims.duration
         repeat: false
         onTriggered: {
             progressPopup.animatingOut = false
@@ -151,34 +144,28 @@ PanelWindow {
         interval: 120
         repeat: true
         running: shown && isIndefinite
-        onTriggered: {
-            spinnerFrame = (spinnerFrame + 1) % spinnerChars.length
-        }
+        onTriggered: spinnerFrame = (spinnerFrame + 1) % spinnerChars.length
     }
 
     Rectangle {
         id: contentRect
         width: Math.round(progressPopup.screenWidth / 3)
-        height: 64
+        height: Dimensions.listItemHeight
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.topMargin: 0
         color: Theme.base
-        radius: 12
-        border.color: Theme.surface1
-        border.width: 1
+        radius: Dimensions.overlayRadius
+        border.color: Theme.surface1; border.width: 1
 
         transform: Translate {
             id: contentTranslate
-            y: -80
+            y: -Dimensions.overlaySlideOffset
         }
 
         Row {
             anchors.fill: parent
             anchors.leftMargin: 20
             anchors.rightMargin: 20
-            anchors.topMargin: 0
-            anchors.bottomMargin: 0
             spacing: 12
 
             Item {
@@ -237,7 +224,7 @@ PanelWindow {
                         color: progressPopup.progressValue >= 1.0 ? Theme.success : Theme.primary
 
                         Behavior on width {
-                            NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
+                            NumberAnimation { duration: Anims.durationFast; easing.type: Easing.OutCubic }
                         }
                     }
 

@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
-import qs.core
+import qs.globals
 
 PanelWindow {
     id: powerMenu
@@ -43,7 +43,7 @@ PanelWindow {
         if (shown) {
             selected = 0
             canClose = false
-            contentTranslate.y = -Theme.overlaySlideOffset
+            contentTranslate.y = -Dimensions.overlaySlideOffset
             dropTimer.restart()
             closeGuard.restart()
         }
@@ -51,7 +51,7 @@ PanelWindow {
 
     Timer {
         id: dropTimer
-        interval: Theme.animDropDelay
+        interval: Anims.dropDelay
         repeat: false
         onTriggered: {
             showAnim.start()
@@ -61,14 +61,14 @@ PanelWindow {
 
     Timer {
         id: closeGuard
-        interval: Theme.animDuration
+        interval: Anims.duration
         repeat: false
         onTriggered: canClose = true
     }
 
     Timer {
         id: hideTimer
-        interval: Theme.animDuration
+        interval: Anims.duration
         repeat: false
         onTriggered: animatingOut = false
     }
@@ -100,15 +100,15 @@ PanelWindow {
     NumberAnimation {
         id: showAnim
         target: contentTranslate; property: "y"
-        from: -Theme.overlaySlideOffset; to: 0
-        duration: Theme.animDuration; easing.type: Easing.OutCubic
+        from: -Dimensions.overlaySlideOffset; to: 0
+        duration: Anims.duration; easing.type: Easing.OutCubic
     }
 
     NumberAnimation {
         id: hideAnim
         target: contentTranslate; property: "y"
-        from: 0; to: -Theme.overlaySlideOffset
-        duration: Theme.animDuration; easing.type: Easing.InCubic
+        from: 0; to: -Dimensions.overlaySlideOffset
+        duration: Anims.duration; easing.type: Easing.InCubic
         onFinished: hideTimer.restart()
     }
 
@@ -126,13 +126,13 @@ PanelWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         color: Theme.base
-        radius: Theme.overlayRadius
+        radius: Dimensions.overlayRadius
         border.color: Theme.surface1; border.width: 1
         focus: true
 
         transform: Translate {
             id: contentTranslate
-            y: -Theme.overlaySlideOffset
+            y: -Dimensions.overlaySlideOffset
         }
 
         MouseArea {
@@ -159,7 +159,7 @@ PanelWindow {
                     required property int index
                     width: (parent.width - parent.spacing * (powerMenu.actions.length - 1)) / powerMenu.actions.length
                     height: parent.height
-                    radius: Theme.inputRadius
+                    radius: Dimensions.inputRadius
                     color: index === powerMenu.selected
                         ? Theme.primarySelected
                         : mouseArea.containsMouse ? Theme.primaryHovered : "transparent"

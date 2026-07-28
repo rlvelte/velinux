@@ -4,7 +4,8 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Widgets
-import qs.services
+import qs.globals
+import "../util/utils.js" as Utils
 
 PanelWindow {
     id: passwordPopup
@@ -62,7 +63,7 @@ PanelWindow {
 
     Timer {
         id: dropTimer
-        interval: 50
+        interval: Anims.dropDelay
         repeat: false
         onTriggered: {
             showAnim.start()
@@ -72,7 +73,7 @@ PanelWindow {
 
     Timer {
         id: hideTimer
-        interval: 200
+        interval: Anims.duration
         repeat: false
         onTriggered: {
             passwordPopup.animatingOut = false
@@ -82,22 +83,14 @@ PanelWindow {
 
     NumberAnimation {
         id: showAnim
-        target: contentRect
-        property: "opacity"
-        from: 0
-        to: 1
-        duration: 200
-        easing.type: Easing.OutCubic
+        target: contentRect; property: "opacity"
+        from: 0; to: 1; duration: Anims.duration; easing.type: Easing.OutCubic
     }
 
     NumberAnimation {
         id: hideAnim
-        target: contentRect
-        property: "opacity"
-        from: 1
-        to: 0
-        duration: 200
-        easing.type: Easing.InCubic
+        target: contentRect; property: "opacity"
+        from: 1; to: 0; duration: Anims.duration; easing.type: Easing.InCubic
         onFinished: hideTimer.restart()
     }
 
@@ -115,24 +108,18 @@ PanelWindow {
         }
     }
 
-    Process {
-        id: resultWriter
-    }
-
-    function escapeShell(str) {
-        return "'" + str.replace(/'/g, "'\\''") + "'"
-    }
+    Process { id: resultWriter }
 
     function submitPassword() {
         var pwd = passwordField.text
         if (pwd === "") return
-        resultWriter.command = ["sh", "-c", "printf '%s' " + escapeShell(pwd) + " > " + escapeShell(passwordPopup.resultPath)]
+        resultWriter.command = ["sh", "-c", "printf '%s' " + Utils.escapeShell(pwd) + " > " + Utils.escapeShell(passwordPopup.resultPath)]
         resultWriter.running = true
         passwordPopup.closePrompt()
     }
 
     function cancelPrompt() {
-        resultWriter.command = ["sh", "-c", "printf '' > " + escapeShell(passwordPopup.resultPath)]
+        resultWriter.command = ["sh", "-c", "printf '' > " + Utils.escapeShell(passwordPopup.resultPath)]
         resultWriter.running = true
         passwordPopup.closePrompt()
     }
@@ -148,11 +135,9 @@ PanelWindow {
         width: 400
         height: 200
         anchors.centerIn: parent
-        anchors.topMargin: 0
-        radius: 12
+        radius: Dimensions.overlayRadius
         color: Theme.base
-        border.color: Theme.surface1
-        border.width: 1
+        border.color: Theme.surface1; border.width: 1
         opacity: 0
 
         MouseArea {
@@ -191,7 +176,7 @@ PanelWindow {
 
                 background: Rectangle {
                     color: Theme.surface0
-                    radius: 8
+                    radius: Dimensions.inputRadius
                     border.color: passwordField.activeFocus ? Theme.primary : Theme.surface1
                     border.width: passwordField.activeFocus ? 2 : 1
                 }

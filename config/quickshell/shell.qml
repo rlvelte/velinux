@@ -3,21 +3,21 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import qs.bar
-import qs.commandcenter
 import qs.lock
-import qs.menus
+import qs.windows
+import qs.windows.menus
+import qs.windows.pickers
 import qs.popups
-import qs.services
+import qs.globals
 
 ShellRoot {
-    SinglePickerMenu {}
-    MultiPickerMenu {}
-    TwoStagedPickerMenu {}
-    GroupedPickerMenu {}
+    SinglePicker {}
+    MultiPicker {}
+    TwoStagedPicker {}
+    GroupedPicker {}
     ProgressPopup {}
     PasswordPopup {}
     PowerMenu {}
-    CommandCenter {}
 
     LockContext {
         id: lockContext

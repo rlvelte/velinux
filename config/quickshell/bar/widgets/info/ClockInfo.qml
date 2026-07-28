@@ -1,7 +1,8 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import qs.services
+import qs.globals
+import qs.bar.widgets.design
 
 Item {
     id: clockWidget
@@ -15,7 +16,7 @@ Item {
 
     Process {
         id: calendarProcess
-        command: ["gnome-calendar"]
+        command: ["thunderbird"]
     }
 
     Row {
@@ -31,14 +32,7 @@ Item {
             font.weight: Font.Medium
         }
 
-        Text {
-            text: "|"
-            color: Theme.surface1
-            font.family: Theme.fontName
-            font.pixelSize: Theme.fontSizeHeading
-            rightPadding: 4
-            leftPadding: 4
-        }
+        Separator { }
 
         Text {
             text: Qt.formatTime(clock.date, "HH:mm")

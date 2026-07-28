@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.I3
-import qs.services
+import qs.globals
 
 Item {
     id: workspaces
@@ -25,8 +25,7 @@ Item {
 
                 width: wsText.implicitWidth + 10
                 height: 20
-                color: isFocused ? "transparent" : "transparent"
-                radius: 4
+                color: "transparent"
 
                 Text {
                     id: wsText

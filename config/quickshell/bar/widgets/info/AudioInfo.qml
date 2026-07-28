@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pipewire
-import qs.services
+import qs.globals
 
 Item {
     id: audioWidget

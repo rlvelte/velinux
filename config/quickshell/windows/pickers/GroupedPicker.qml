@@ -1,5 +1,7 @@
 import QtQuick
 import qs.core
+import qs.globals
+import qs.windows
 
 PickerWindow {
     id: picker
@@ -30,7 +32,7 @@ PickerWindow {
         required property var modelData
         required property int index
         width: ListView.view.width
-        height: (modelData.showHeader ? 34 : 0) + Theme.listItemHeight
+        height: (modelData.showHeader ? 34 : 0) + Dimensions.listItemHeight
         color: "transparent"
 
         Rectangle {
@@ -55,7 +57,7 @@ PickerWindow {
         }
 
         Rectangle {
-            width: parent.width; height: Theme.listItemHeight; radius: Theme.inputRadius
+            width: parent.width; height: Dimensions.listItemHeight; radius: Dimensions.inputRadius
             y: modelData.showHeader ? 34 : 0
             color: index === picker.selected
                 ? Theme.primarySelected

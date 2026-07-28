@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell.Wayland
-import qs.services
+import qs.globals
 
 Item {
     id: titleInfo
