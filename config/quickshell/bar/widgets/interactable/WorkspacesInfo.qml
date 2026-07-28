@@ -10,7 +10,6 @@ Item {
     implicitHeight: Dimensions.barHeight
 
     property var wsModel: Quickshell.hyprland ? Hyprland.workspaces : I3.workspaces
-    property var wsFocused: Quickshell.hyprland ? (Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : -1) : (I3.focusedWorkspace ? I3.focusedWorkspace.id : -1)
 
     Row {
         id: wsRow
@@ -21,7 +20,6 @@ Item {
             model: wsModel
             delegate: Rectangle {
                 property var ws: modelData
-                property bool isFocused: ws.id === workspaces.wsFocused
 
                 width: wsText.implicitWidth + 10
                 height: 20
@@ -31,10 +29,10 @@ Item {
                     id: wsText
                     anchors.centerIn: parent
                     text: ws.name
-                    color: isFocused ? Theme.primary : Theme.subtext
+                    color: ws.focused ? Theme.primary : Theme.subtext
                     font.family: Theme.fontName
                     font.pixelSize: Theme.fontSizeHeading
-                    font.weight: isFocused ? Font.Bold : Font.Medium
+                    font.weight: ws.focused ? Font.Bold : Font.Medium
                 }
 
                 MouseArea {
