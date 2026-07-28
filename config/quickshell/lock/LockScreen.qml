@@ -84,7 +84,7 @@ Rectangle {
 
                 background: Rectangle {
                     color: Theme.surface0
-                    radius: 8
+                    radius: Dimensions.inputRadius
                     border.color: passwordBox.activeFocus ? Theme.primary : Theme.surface1
                     border.width: passwordBox.activeFocus ? 2 : 1
                 }

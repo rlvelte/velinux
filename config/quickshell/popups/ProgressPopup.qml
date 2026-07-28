@@ -184,7 +184,7 @@ PanelWindow {
                     visible: !isIndefinite
                     anchors.centerIn: parent
                     text: "●"
-                    font.pixelSize: 20
+                    font.pixelSize: Theme.fontSizeHeading
                     color: progressValue >= 1.0 ? Theme.success : Theme.primary
                 }
             }
@@ -213,14 +213,14 @@ PanelWindow {
                     width: parent.width
                     height: 20
                     anchors.verticalCenter: parent.verticalCenter
-                    radius: 10
+                        radius: Dimensions.overlayRadius
                     color: Theme.surface0
                     clip: true
 
                     Rectangle {
                         width: parent.width * progressPopup.progressValue
                         height: parent.height
-                        radius: 10
+                    radius: Dimensions.overlayRadius
                         color: progressPopup.progressValue >= 1.0 ? Theme.success : Theme.primary
 
                         Behavior on width {
