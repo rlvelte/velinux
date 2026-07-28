@@ -43,17 +43,11 @@
     "sudo rm -rf /tmp/wlroots-build /tmp/scenefx-build /tmp/mango-build"
   ],
   "post": [
-    "git clone -b 0.19.3 https://gitlab.freedesktop.org/wlroots/wlroots.git /tmp/wlroots-build",
-    "cd /tmp/wlroots-build",
-    "meson setup build --prefix=/usr",
-    "sudo ninja -C build install",
-    "git clone -b 0.4.1 https://github.com/wlrfx/scenefx.git /tmp/scenefx-build",
-    "cd /tmp/scenefx-build",
-    "meson setup build --prefix=/usr",
-    "sudo ninja -C build install",
-    "git clone https://github.com/mangowm/mango.git /tmp/mango-build",
-    "cd /tmp/mango-build",
-    "meson setup build --prefix=/usr",
-    "sudo ninja -C build install"
+    "git clone -b 0.19.3 https://gitlab.freedesktop.org/wlroots/wlroots.git /tmp/wlroots-build && cd /tmp/wlroots-build && meson setup build --prefix=/usr",
+    "cd /tmp/wlroots-build && sudo ninja -C build install",
+    "git clone -b 0.4.1 https://github.com/wlrfx/scenefx.git /tmp/scenefx-build && cd /tmp/scenefx-build && meson setup build --prefix=/usr",
+    "cd /tmp/scenefx-build && sudo ninja -C build install",
+    "git clone https://github.com/mangowm/mango.git /tmp/mango-build && cd /tmp/mango-build && meson setup build --prefix=/usr",
+    "cd /tmp/mango-build && sudo ninja -C build install"
   ]
 }
