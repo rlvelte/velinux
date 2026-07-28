@@ -8,6 +8,7 @@ Item {
     required property string label
     required property var command
     required property int pollInterval
+    property string suffix: ""
 
     implicitWidth: monitorText.implicitWidth
     implicitHeight: Dimensions.barHeight
@@ -17,7 +18,7 @@ Item {
     Text {
         id: monitorText
         anchors.verticalCenter: parent.verticalCenter
-        text: root.label + root.usage
+        text: root.label + root.usage + root.suffix
         color: {
             var val = parseInt(root.usage)
             if (val >= 90) return Theme.error
