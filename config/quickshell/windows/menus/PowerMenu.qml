@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
-import qs.services
+import qs.core
 
 PanelWindow {
     id: powerMenu
@@ -22,6 +22,14 @@ PanelWindow {
 
     property int screenWidth: screen ? screen.width : (Quickshell.screens.length > 0 ? Quickshell.screens[0].width : 1920)
 
+    readonly property var actions: [
+        { label: "Logout",   command: ["swaymsg", "exit"] },
+        { label: "Suspend",  command: elevated(["systemctl", "hybrid-sleep"]) },
+        { label: "Shutdown", command: elevated(["systemctl", "poweroff"]) },
+        { label: "Reboot",   command: elevated(["systemctl", "reboot"]) },
+        { label: "BIOS",     command: elevated(["systemctl", "reboot", "--firmware-setup"]) }
+    ]
+
     visible: shown || animatingOut
 
     IpcHandler {
@@ -35,7 +43,7 @@ PanelWindow {
         if (shown) {
             selected = 0
             canClose = false
-            contentTranslate.y = -80
+            contentTranslate.y = -Theme.overlaySlideOffset
             dropTimer.restart()
             closeGuard.restart()
         }
@@ -43,7 +51,7 @@ PanelWindow {
 
     Timer {
         id: dropTimer
-        interval: 50
+        interval: Theme.animDropDelay
         repeat: false
         onTriggered: {
             showAnim.start()
@@ -53,14 +61,14 @@ PanelWindow {
 
     Timer {
         id: closeGuard
-        interval: 200
+        interval: Theme.animDuration
         repeat: false
         onTriggered: canClose = true
     }
 
     Timer {
         id: hideTimer
-        interval: 200
+        interval: Theme.animDuration
         repeat: false
         onTriggered: animatingOut = false
     }
@@ -74,9 +82,8 @@ PanelWindow {
 
     function executeCommand(cmd) {
         for (var i = 0; i < cmd.length; i++) {
-            if (cmd[i] === "$XDG_SESSION_ID") {
+            if (cmd[i] === "$XDG_SESSION_ID")
                 cmd[i] = Quickshell.env("XDG_SESSION_ID")
-            }
         }
         processRunner.command = cmd
         processRunner.running = true
@@ -84,43 +91,24 @@ PanelWindow {
     }
 
     function elevated(cmd) {
-        var joined = cmd.map(function (arg) { return "'" + arg.replace(/'/g, "'\\''") + "'" }).join(" ")
+        var joined = cmd.map(function(arg) { return "'" + arg.replace(/'/g, "'\\''") + "'" }).join(" ")
         return ["sh", "-c", "SUDO_ASKPASS=$(command -v vlxpass) exec sudo -A --preserve-env=WAYLAND_DISPLAY,HOME,XDG_RUNTIME_DIR " + joined]
     }
 
-    function launch(index) {
-        var model = [
-            { command: ["swaymsg", "exit"] },
-            { command: elevated(["systemctl", "hybrid-sleep"]) },
-            { command: elevated(["systemctl", "poweroff"]) },
-            { command: elevated(["systemctl", "reboot"]) },
-            { command: elevated(["systemctl", "reboot", "--firmware-setup"]) }
-        ]
-        executeCommand(model[index].command)
-    }
-
-    Process {
-        id: processRunner
-    }
+    Process { id: processRunner }
 
     NumberAnimation {
         id: showAnim
-        target: contentTranslate
-        property: "y"
-        from: -80
-        to: 0
-        duration: 200
-        easing.type: Easing.OutCubic
+        target: contentTranslate; property: "y"
+        from: -Theme.overlaySlideOffset; to: 0
+        duration: Theme.animDuration; easing.type: Easing.OutCubic
     }
 
     NumberAnimation {
         id: hideAnim
-        target: contentTranslate
-        property: "y"
-        from: 0
-        to: -80
-        duration: 200
-        easing.type: Easing.InCubic
+        target: contentTranslate; property: "y"
+        from: 0; to: -Theme.overlaySlideOffset
+        duration: Theme.animDuration; easing.type: Easing.InCubic
         onFinished: hideTimer.restart()
     }
 
@@ -137,16 +125,14 @@ PanelWindow {
         height: 80
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        anchors.topMargin: 0
         color: Theme.base
-        radius: 12
-        border.color: Theme.surface1
-        border.width: 1
+        radius: Theme.overlayRadius
+        border.color: Theme.surface1; border.width: 1
         focus: true
 
         transform: Translate {
             id: contentTranslate
-            y: -80
+            y: -Theme.overlaySlideOffset
         }
 
         MouseArea {
@@ -155,18 +141,10 @@ PanelWindow {
             onClicked: {}
         }
 
-        Keys.onLeftPressed: {
-            selected = Math.max(selected - 1, 0)
-        }
-        Keys.onRightPressed: {
-            selected = Math.min(selected + 1, 4)
-        }
-        Keys.onReturnPressed: {
-            launch(selected)
-        }
-        Keys.onEscapePressed: {
-            powerMenu.hide()
-        }
+        Keys.onLeftPressed:  selected = Math.max(selected - 1, 0)
+        Keys.onRightPressed: selected = Math.min(selected + 1, powerMenu.actions.length - 1)
+        Keys.onReturnPressed: executeCommand(powerMenu.actions[selected].command)
+        Keys.onEscapePressed: powerMenu.hide()
 
         Row {
             anchors.fill: parent
@@ -174,32 +152,22 @@ PanelWindow {
             spacing: 4
 
             Repeater {
-                model: [
-                    { label: "Logout" },
-                    { label: "Suspend" },
-                    { label: "Shutdown" },
-                    { label: "Reboot" },
-                    { label: "BIOS" }
-                ]
+                model: powerMenu.actions
 
                 delegate: Rectangle {
                     required property var modelData
                     required property int index
-                    width: (parent.width - parent.spacing * 4) / 5
+                    width: (parent.width - parent.spacing * (powerMenu.actions.length - 1)) / powerMenu.actions.length
                     height: parent.height
-                    radius: 8
+                    radius: Theme.inputRadius
                     color: index === powerMenu.selected
-                        ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.14)
-                        : mouseArea.containsMouse
-                            ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.07)
-                            : "transparent"
+                        ? Theme.primarySelected
+                        : mouseArea.containsMouse ? Theme.primaryHovered : "transparent"
 
                     Rectangle {
                         visible: index === powerMenu.selected
                         anchors { left: parent.left; top: parent.top; bottom: parent.bottom }
-                        width: 3
-                        radius: 1.5
-                        color: Theme.primary
+                        width: 3; radius: 1.5; color: Theme.primary
                     }
 
                     Text {
@@ -216,7 +184,7 @@ PanelWindow {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onEntered: powerMenu.selected = index
-                        onClicked: powerMenu.launch(index)
+                        onClicked: powerMenu.executeCommand(modelData.command)
                     }
                 }
             }
