@@ -90,7 +90,7 @@ PanelWindow {
 
     function launch(index) {
         var model = [
-            { command: ["loginctl", "terminate-session", "$XDG_SESSION_ID"] },
+            { command: ["swaymsg", "exit"] },
             { command: elevated(["systemctl", "hybrid-sleep"]) },
             { command: elevated(["systemctl", "poweroff"]) },
             { command: elevated(["systemctl", "reboot"]) },
