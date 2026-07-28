@@ -7,7 +7,7 @@ import qs.globals
 Item {
     id: workspaces
     implicitWidth: wsRow.implicitWidth
-    implicitHeight: 40
+    implicitHeight: Dimensions.barHeight
 
     property var wsModel: Quickshell.hyprland ? Hyprland.workspaces : I3.workspaces
     property var wsFocused: Quickshell.hyprland ? (Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : -1) : (I3.focusedWorkspace ? I3.focusedWorkspace.id : -1)

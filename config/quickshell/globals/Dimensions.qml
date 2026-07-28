@@ -3,7 +3,7 @@ import QtQuick
 import Quickshell
 
 Singleton {
-    readonly property int barHeight: 40
+    readonly property int barHeight: 36
     readonly property int overlayRadius: 12
     readonly property int inputRadius: 8
     readonly property int listItemHeight: 64

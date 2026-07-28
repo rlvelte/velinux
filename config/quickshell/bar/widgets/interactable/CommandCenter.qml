@@ -6,7 +6,7 @@ import qs.globals
 Item {
     id: commandCenter
     implicitWidth: commandCenterIcon.implicitWidth
-    implicitHeight: 40
+    implicitHeight: Dimensions.barHeight
 
     Image {
         id: commandCenterIcon

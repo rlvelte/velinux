@@ -7,7 +7,7 @@ import qs.globals
 Item {
     id: audioWidget
     implicitWidth: audioRow.implicitWidth
-    implicitHeight: 40
+    implicitHeight: Dimensions.barHeight
 
     PwObjectTracker {
         objects: [Pipewire.defaultAudioSink]

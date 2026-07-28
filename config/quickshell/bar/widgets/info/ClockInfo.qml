@@ -2,12 +2,11 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.globals
-import qs.bar.widgets.design
 
 Item {
     id: clockWidget
     implicitWidth: clockRow.implicitWidth
-    implicitHeight: 40
+    implicitHeight: Dimensions.barHeight
 
     SystemClock {
         id: clock
@@ -32,7 +31,14 @@ Item {
             font.weight: Font.Medium
         }
 
-        Separator { }
+        Text {
+            text: "|"
+            color: Theme.surface1
+            font.family: Theme.fontName
+            font.pixelSize: Theme.fontSizeHeading
+            rightPadding: 4
+            leftPadding: 4
+        }
 
         Text {
             text: Qt.formatTime(clock.date, "HH:mm")
