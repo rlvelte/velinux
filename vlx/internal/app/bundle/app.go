@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
-	"strings"
 
 	"github.com/mattn/go-isatty"
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
@@ -206,9 +205,11 @@ func pick(cmd *cobra.Command, dir string) (string, error) {
 	return lookup[selected.Header], nil
 }
 
-// sh executes a cmd through a shell, escalating only when the command.
+// sh executes a cmd through a shell, escalating only when the command
+// actually needs host-level privilege (actual "sudo"/"su" calls on the
+// host, not arguments passed to wrappers like distrobox enter / ssh / …).
 func sh(str string) error {
-	if escalate(str) {
+	if su.ShouldEscalate(str) {
 		return su.RunPrivileged("sh", "-c", str)
 	}
 
@@ -254,15 +255,3 @@ func hooks(hooks []string) error {
 	return nil
 }
 
-func escalate(cmd string) bool {
-	lower := strings.ToLower(cmd)
-	if strings.Contains(lower, "sudo ") || strings.Contains(lower, " sudo ") {
-		return true
-	}
-
-	if strings.HasPrefix(lower, "su ") || strings.Contains(lower, " su ") {
-		return true
-	}
-
-	return false
-}
