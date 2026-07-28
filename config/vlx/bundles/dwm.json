@@ -1,0 +1,32 @@
+{
+  "$schema": "bundle.schema.json",
+  "info": {
+    "name": "DWM",
+    "desc": "Compiles the suckless trio from source for openSUSE.",
+    "icon": "\uf356",
+    "group": "wm"
+  },
+  "zypper": [
+    "git",
+    "gcc",
+    "make",
+    "pkgconf-pkg-config",
+    "libX11-devel",
+    "libXft-devel",
+    "libXinerama-devel",
+    "fontconfig-devel",
+    "freetype-devel",
+    "libXrandr-devel"
+  ],
+  "pre": [
+    "sudo rm -rf /tmp/dwm-build /tmp/dmenu-build /tmp/st-build"
+  ],
+  "post": [
+    "git clone https://git.suckless.org/dwm /tmp/dwm-build",
+    "cd /tmp/dwm-build && make && sudo make install",
+    "git clone https://git.suckless.org/dmenu /tmp/dmenu-build",
+    "cd /tmp/dmenu-build && make && sudo make install",
+    "git clone https://git.suckless.org/st /tmp/st-build",
+    "cd /tmp/st-build && make && sudo make install"
+  ]
+}

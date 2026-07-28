@@ -1,4 +1,4 @@
-# VeLinux - Opinionated openSUSE Configuration
+# VeLinux – Opinionated openSUSE Configuration
 
 My very own opinionated openSUSE dotfiles featuring a curated selection of packages,
 system configurations, and the `vlx` utility suite for theme management and more.
@@ -18,14 +18,12 @@ velinux/
 │   ├── environment.d/   # Environment variables
 │   ├── eza/             # Fancy ls
 │   ├── git/             # Git configuration
-│   ├── hypr/            # Hyprland window manager
 │   ├── kitty/           # Terminal emulator
 │   ├── mako/            # Notification daemon
-│   ├── mango/           # Mangowm window manager
 │   ├── quickshell/      # Desktop shell
 │   ├── sway/            # Sway window manager
-│   ├── systemd/		 # User scoped systemd services
-│   ├── vlx/			 # Configuration files for vlx
+│   ├── systemd/         # User scoped systemd services
+│   ├── vlx/             # Configuration files for vlx
 │   └── zsh/             # Shell configuration
 │
 ├── etc/                 

@@ -1,0 +1,33 @@
+{
+  "$schema": "bundle.schema.json",
+  "info": {
+    "name": "libvirt",
+    "desc": "Stack for running VMs with UEFI, TPM, and SPICE.",
+    "icon": "\udb81\udd5d",
+    "group": "dev"
+  },
+  "zypper": [
+    "qemu",
+    "qemu-kvm",
+    "qemu-tools",
+    "qemu-hw-display-virtio-vga",
+    "qemu-hw-usb-redirect",
+    "libvirt",
+    "libvirt-daemon-qemu",
+    "libvirt-client",
+    "virt-manager",
+    "virt-install",
+    "ovmf",
+    "swtpm",
+    "swtpm-tools",
+    "spice-gtk",
+    "spice-vdagent",
+    "bridge-utils",
+    "tpm2-0-tss",
+    "tpm2-0-tools"
+  ],
+  "post": [
+    "sudo systemctl enable --now libvirtd",
+    "REAL_USER=\"${SUDO_USER:-$USER}\"; [ -n \"${PKEXEC_UID:-}\" ] && REAL_USER=\"$(id -un \"$PKEXEC_UID\")\"; sudo usermod -aG libvirt \"$REAL_USER\""
+  ]
+}

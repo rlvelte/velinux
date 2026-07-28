@@ -1,12 +1,22 @@
 {
   "$schema": "bundle.schema.json",
+  "info": {
+    "name": "k3s",
+    "desc": "Installs k3s stack with podman backend.",
+    "icon": "\uE811",
+    "group": "dev"
+  },
   "zypper": [
-    "containerd",
+    "podman",
+    "podman-docker",
     "k3s-selinux",
     "k9s",
     "helm"
   ],
   "post": [
-    "curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC=\"--write-kubeconfig-mode 644\" sh -s -"
+    "sudo systemctl enable --now podman.socket",
+    "systemctl --user enable --now podman.socket",
+    "curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC=\"--write-kubeconfig-mode 644\" sudo sh -s -"
   ]
 }
+

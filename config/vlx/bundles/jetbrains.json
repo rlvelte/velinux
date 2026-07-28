@@ -1,7 +1,14 @@
 {
   "$schema": "bundle.schema.json",
+  "info": {
+    "name": "JetBrains Toolbox",
+    "desc": "Downloads the latest toolbox archive and installs it.",
+    "icon": "\uE808",
+    "group": "app"
+  },
   "zypper": [
     "curl",
+    "tar",
     "libX11-6",
     "libXext6",
     "libXi6",
@@ -12,8 +19,8 @@
     "libxcb-keysyms1",
     "libfontconfig1",
     "libfreetype6",
-    "Mesa-libGL1",
-    "libxkbcommon0"
+    "libxkbcommon0",
+    "Mesa-libGL1"
   ],
   "pre": [
     "rm -rf /tmp/jetbrains-toolbox-download"
@@ -21,13 +28,15 @@
   "post": [
     "mkdir -p /tmp/jetbrains-toolbox-download",
     "curl -fsSL 'https://data.services.jetbrains.com/products/download?code=TBA&platform=linux' -o /tmp/jetbrains-toolbox-download/jetbrains-toolbox.tar.gz",
-    "sudo rm -rf /opt/jetbrains-toolbox",
-    "sudo mkdir -p /opt/jetbrains-toolbox",
-    "sudo tar -xzf /tmp/jetbrains-toolbox-download/jetbrains-toolbox.tar.gz -C /opt/jetbrains-toolbox --strip-components=1",
-    "sudo ln -sf /opt/jetbrains-toolbox/bin/jetbrains-toolbox /usr/local/bin/jetbrains-toolbox",
-    "sudo cp /opt/jetbrains-toolbox/bin/jetbrains-toolbox.desktop /usr/share/applications/jetbrains-toolbox.desktop",
-    "sudo sed -i 's|^Exec=jetbrains-toolbox$|Exec=/opt/jetbrains-toolbox/bin/jetbrains-toolbox|' /usr/share/applications/jetbrains-toolbox.desktop",
-    "sudo sed -i 's|^Icon=jetbrains-toolbox$|Icon=/opt/jetbrains-toolbox/bin/toolbox-tray-color.png|' /usr/share/applications/jetbrains-toolbox.desktop",
+    "rm -rf ~/.local/share/JetBrains/Toolbox",
+    "mkdir -p ~/.local/share/JetBrains/Toolbox",
+    "tar -xzf /tmp/jetbrains-toolbox-download/jetbrains-toolbox.tar.gz -C ~/.local/share/JetBrains/Toolbox --strip-components=1",
+    "mkdir -p ~/.local/bin",
+    "ln -sf ~/.local/share/JetBrains/Toolbox/bin/jetbrains-toolbox ~/.local/bin/jetbrains-toolbox",
+    "mkdir -p ~/.local/share/applications",
+    "cp ~/.local/share/JetBrains/Toolbox/bin/jetbrains-toolbox.desktop ~/.local/share/applications/jetbrains-toolbox.desktop",
+    "sed -i 's|^Exec=jetbrains-toolbox$|Exec=~/.local/share/JetBrains/Toolbox/bin/jetbrains-toolbox|' ~/.local/share/applications/jetbrains-toolbox.desktop",
+    "sed -i 's|^Icon=jetbrains-toolbox$|Icon=~/.local/share/JetBrains/Toolbox/bin/toolbox-tray-color.png|' ~/.local/share/applications/jetbrains-toolbox.desktop",
     "rm -rf /tmp/jetbrains-toolbox-download"
   ]
 }

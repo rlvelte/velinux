@@ -1,58 +1,57 @@
 package fsys
 
 import (
+	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
+// DecodeFunc decodes a file into an entity.
 type DecodeFunc[T any] func(name, path string, data []byte) (T, error)
-type EncodeFunc[T any] func(name, path string, data []byte) (T, error) // TODO: LATER
 
-type Store[T any] struct {
-	dir     string
-	exts    []string
-	decode  DecodeFunc[T]
-	encoder EncodeFunc[T]
-}
-
-func NewStore[T any](baseDir string, decode DecodeFunc[T], exts ...string) *Store[T] {
-	if len(exts) == 0 {
-		exts = []string{""}
+// GetJSON reads a single JSON file from dir/name.json and decodes it.
+func GetJSON[T any](dir, name string, decode DecodeFunc[T]) (T, error) {
+	path := filepath.Join(dir, name+".json")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		var zero T
+		return zero, err
 	}
 
-	return &Store[T]{dir: baseDir, exts: exts, decode: decode}
+	return decode(name, path, data)
 }
 
-func (s *Store[T]) List() ([]T, error) {
-	entries, err := os.ReadDir(s.dir)
+// ListJSON reads and decodes all .json files in a directory.
+func ListJSON[T any](dir string, decode DecodeFunc[T]) ([]T, error) {
+	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return nil, nil
 		}
+
 		return nil, err
 	}
 
 	var entities []T
 	for _, entry := range entries {
-		if entry.IsDir() {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") {
 			continue
 		}
 
-		name, ok := s.matchExt(entry.Name())
-		if !ok {
+		name := strings.TrimSuffix(entry.Name(), ".json")
+		if name == "" {
 			continue
 		}
 
-		path := filepath.Join(s.dir, entry.Name())
+		path := filepath.Join(dir, entry.Name())
 		data, err := os.ReadFile(path)
 		if err != nil {
-			continue
+			return nil, err
 		}
 
-		entity, err := s.decode(name, path, data)
+		entity, err := decode(name, path, data)
 		if err != nil {
 			continue
 		}
@@ -63,41 +62,28 @@ func (s *Store[T]) List() ([]T, error) {
 	return entities, nil
 }
 
-func (s *Store[T]) Get(name string) (T, error) {
-	for _, ext := range s.exts {
-		path := filepath.Join(s.dir, name+ext)
-		data, err := os.ReadFile(path)
-
-		if err != nil {
-			if errors.Is(err, os.ErrNotExist) {
-				continue
-			}
-
-			var zero T
-			return zero, err
-		}
-
-		return s.decode(name, path, data)
+// AtomicWrite writes data to a path atomically using a temporary file + rename.
+func AtomicWrite(path string, data []byte) error {
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, data, 0644); err != nil {
+		return err
 	}
 
-	var zero T
-	return zero, fmt.Errorf("%s not found", name)
+	return os.Rename(tmp, path)
 }
 
-// matchExt checks if the extension is in the specified field.
-func (s *Store[T]) matchExt(filename string) (string, bool) {
-	for _, ext := range s.exts {
-		if ext == "" {
-			return filename, true
-		}
-
-		if strings.HasSuffix(filename, ext) {
-			name := strings.TrimSuffix(filename, ext)
-			if name != "" {
-				return name, true
-			}
-		}
+// SetJSON marshals v and writes it atomically to dir/name.json.
+// The directory is created if it does not exist.
+func SetJSON[T any](dir, name string, v T) error {
+	path := filepath.Join(dir, name+".json")
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return err
 	}
 
-	return "", false
+	data, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	return AtomicWrite(path, data)
 }

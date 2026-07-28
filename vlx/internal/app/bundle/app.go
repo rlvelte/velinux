@@ -1,41 +1,31 @@
 package bundle
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
-	"sort"
 	"strconv"
-	"strings"
 
+	"github.com/mattn/go-isatty"
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
-	"github.com/rlvelte/velinux/vlx/internal/core/guard"
-	"github.com/rlvelte/velinux/vlx/internal/core/picker"
-	"github.com/rlvelte/velinux/vlx/internal/core/printer"
+	"github.com/rlvelte/velinux/vlx/internal/core/logs"
+	"github.com/rlvelte/velinux/vlx/internal/core/su"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/picker"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/progress"
 	"github.com/spf13/cobra"
 )
-
-// setup validates all requirements for further processing.
-func setup(cmd *cobra.Command, _ []string) error {
-	if err := errors.Join(guard.Network(), guard.Binaries("zypper", "flatpak", "bash")); err != nil {
-		return err
-	}
-
-	cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, printer.New()))
-	return nil
-}
 
 // Command returns the cobra command tree for vlx bundle.
 func Command() *cobra.Command {
 	root := &cobra.Command{
-		Use:               "bundle",
-		Short:             "Horribly bad bundle/recipe installer",
-		Long:              "",
-		PersistentPreRunE: setup,
-		Aliases:           []string{"bun"},
-		Args:              cobra.NoArgs,
+		Use:          "bundle",
+		Short:        "Horribly bad bundle installer",
+		Long:         "Install/Compile predefined recipes with shell hooks.",
+		Aliases:      []string{"bun"},
+		Args:         cobra.NoArgs,
+		SilenceUsage: !isatty.IsTerminal(os.Stdout.Fd()),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -46,17 +36,18 @@ func Command() *cobra.Command {
 			Use:     "list",
 			Short:   "List available bundles",
 			Long:    "List all available bundles with their segments.",
-			Aliases: []string{"ls"},
+			Aliases: []string{"l", "ls"},
 			Args:    cobra.NoArgs,
-			RunE:    cmdList,
+			Run:     cmdList,
 		},
 		&cobra.Command{
-			Use:     "install [bundle]",
-			Short:   "Install a bundle",
-			Long:    "Install a bundle by name or interactively select from a list.",
-			Aliases: []string{"in"},
-			Args:    cobra.MaximumNArgs(1),
-			RunE:    cmdInstall,
+			Use:          "install [bundle]",
+			Short:        "Install a bundle",
+			Long:         "Install a bundle by name or interactively select from a list.",
+			Aliases:      []string{"i", "in"},
+			Args:         cobra.MaximumNArgs(1),
+			SilenceUsage: true,
+			Run:          cmdInstall,
 		},
 	)
 
@@ -64,33 +55,37 @@ func Command() *cobra.Command {
 }
 
 // cmdList lists out all bundles and peek at its contents.
-func cmdList(cmd *cobra.Command, _ []string) error {
+func cmdList(cmd *cobra.Command, _ []string) {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
 
-	bundlesDir := fsys.ConfigPath("vlx", "bundles")
-	store := fsys.NewStore(bundlesDir, decodeBundle, ".json")
-
-	bundles, err := store.List()
+	dir := fsys.ConfigPath("vlx", "bundles")
+	bundles, err := fsys.ListJSON(dir, decodeBundle)
 	if err != nil {
-		return err
+		p.Error(err)
+		return
 	}
 
 	if len(bundles) == 0 {
-		p.Info("No bundles found")
-		return nil
+		p.Success("No bundles found")
+		return
 	}
 
-	headers := []string{"Name", "Zypper", "Flatpak", "Hooks"}
+	headers := []string{"Name", "Group", "Zypper", "Flatpak", "Hooks"}
 	rows := make([][]string, 0, len(bundles))
-
 	for _, b := range bundles {
 		hooks := "no"
 		if len(b.PreHook) > 0 || len(b.PostHook) > 0 {
 			hooks = "yes"
 		}
 
+		group := b.Info.Group
+		if group == "" {
+			group = "-"
+		}
+
 		rows = append(rows, []string{
-			b.Name,
+			b.Info.Name,
+			group,
 			strconv.Itoa(len(b.Zypper)),
 			strconv.Itoa(len(b.Flatpak)),
 			hooks,
@@ -98,147 +93,165 @@ func cmdList(cmd *cobra.Command, _ []string) error {
 	}
 
 	p.Table(headers, rows)
-	return nil
+	return
 }
 
 // cmdInstall installs a selected bundle.
-func cmdInstall(cmd *cobra.Command, args []string) error {
+func cmdInstall(cmd *cobra.Command, args []string) {
 	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+	n := cmd.Context().Value(notify.ContextKey).(*notify.Notify)
 
-	bundlesDir := fsys.ConfigPath("vlx", "bundles")
-	store := fsys.NewStore(bundlesDir, decodeBundle, ".json")
+	dir := fsys.ConfigPath("vlx", "bundles")
 
-	var bundleName string
-
+	var fileName string
 	if len(args) == 0 {
-		bundles, err := store.List()
+		fn, err := pick(cmd, dir)
 		if err != nil {
-			return err
+			p.Error(err)
+			return
 		}
 
-		sort.Slice(bundles, func(i, j int) bool {
-			return bundles[i].Name < bundles[j].Name
-		})
-
-		items := make([]picker.Item, len(bundles))
-		for i, b := range bundles {
-			desc := fmt.Sprintf("%d zypper, %d flatpak", len(b.Zypper), len(b.Flatpak))
-			items[i] = picker.Item{
-				Header:      b.Name,
-				Description: desc,
-			}
-		}
-
-		pkr := picker.New()
-		if pkr == nil {
-			return fmt.Errorf("no picker available")
-		}
-
-		selected, err := pkr.Select(cmd.Context(), items)
-		if err != nil {
-			return err
-		}
-
-		bundleName = selected.Header
+		fileName = fn
 	} else {
-		bundleName = args[0]
+		fileName = args[0]
 	}
 
-	bundle, err := store.Get(bundleName)
+	bundle, err := fsys.GetJSON(dir, fileName, decodeBundle)
 	if err != nil {
-		return fmt.Errorf("bundle %q not found", bundleName)
+		p.Error(err)
+		return
 	}
 
-	if len(bundle.Repos) > 0 {
-		if err := p.Spinner("\nAdding repositories", func() error {
-			return repo(bundle.Repos)
-		}); err != nil {
-			return fmt.Errorf("adding repos failed: %w", err)
+	steps := []struct {
+		enabled bool
+		name    string
+		run     func() error
+	}{
+		{len(bundle.Repos) > 0, "Adding repos", func() error { return repo(bundle.Repos) }},
+		{len(bundle.PreHook) > 0, "Running pre-install hook", func() error { return hooks(bundle.PreHook) }},
+		{len(bundle.Zypper) > 0, "Installing packages", func() error { return zypper(bundle.Zypper) }},
+		{len(bundle.Flatpak) > 0, "Installing flatpaks", func() error { return flatpak(bundle.Flatpak) }},
+		{len(bundle.PostHook) > 0, "Running post-install hook", func() error { return hooks(bundle.PostHook) }},
+	}
+
+	totalSteps := 0
+	for _, step := range steps {
+		if step.enabled {
+			totalSteps++
 		}
 	}
 
-	if len(bundle.PreHook) > 0 {
-		combined := strings.Join(bundle.PreHook, " && ")
-		if err := p.Spinner("\nRunning pre-hooks", func() error {
-			return sh(combined)
-		}); err != nil {
-			return fmt.Errorf("pre-hooks failed: %w", err)
+	prog, progErr := progress.New()
+	if progErr == nil && totalSteps > 0 && !isatty.IsTerminal(os.Stdout.Fd()) {
+		prog.Start("Installing "+bundle.Info.Name, totalSteps)
+		defer prog.Stop()
+	}
+
+	for _, step := range steps {
+		if !step.enabled {
+			continue
+		}
+
+		if prog != nil {
+			prog.SetLabel(step.name)
+		}
+
+		if err := step.run(); err != nil {
+			p.Error(err)
+			return
+		}
+
+		if prog != nil {
+			prog.Advance(1)
 		}
 	}
 
-	if len(bundle.Zypper) > 0 {
-		if err := p.Spinner("\nInstalling zypper packages", func() error {
-			return zypper(bundle.Zypper)
-		}); err != nil {
-			return fmt.Errorf("zypper install failed: %w", err)
-		}
-	}
-
-	if len(bundle.Flatpak) > 0 {
-		if err := p.Spinner("\nInstalling flatpak packages", func() error {
-			return flatpak(bundle.Flatpak)
-		}); err != nil {
-			return fmt.Errorf("flatpak install failed: %w", err)
-		}
-	}
-
-	if len(bundle.PostHook) > 0 {
-		combined := strings.Join(bundle.PostHook, " && ")
-		if err := p.Spinner("\nRunning post-hooks", func() error {
-			return sh(combined)
-		}); err != nil {
-			return fmt.Errorf("post-hooks failed: %w", err)
-		}
-	}
-
-	p.Info(fmt.Sprintf("Bundle %q installed", bundleName))
-	return nil
+	_ = n.Send("Successfully installed bundle "+bundle.Info.Name, &notify.Details{
+		Title:   "VLX Bundle",
+		Urgency: "normal",
+	})
 }
 
-// sh executes a cmd with basic shell
-func sh(cmdStr string) error {
-	cmd := exec.Command("sh", "-c", cmdStr)
+// pick selects a bundle via an interactive picker.
+func pick(cmd *cobra.Command, dir string) (string, error) {
+	pkr, err := picker.New()
+	if err != nil {
+		return "", err
+	}
 
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	bundles, err := fsys.ListJSON(dir, decodeBundle)
+	if err != nil {
+		return "", err
+	}
+
+	items := make([]picker.Item, len(bundles))
+	lookup := make(map[string]string, len(bundles))
+	for i, b := range bundles {
+		items[i] = picker.Item{
+			Icon:        b.Info.Icon,
+			Header:      b.Info.Name,
+			Description: b.Info.Description,
+			Group:       b.Info.Group,
+		}
+
+		lookup[b.Info.Name] = b.filename
+	}
+
+	selected, err := pkr.SelectGrouped(cmd.Context(), items)
+	if err != nil {
+		return "", err
+	}
+
+	return lookup[selected.Header], nil
+}
+
+// sh executes a cmd through a shell, escalating only when the command
+// actually needs host-level privilege (actual "sudo"/"su" calls on the
+// host, not arguments passed to wrappers like distrobox enter / ssh / …).
+func sh(str string) error {
+	if su.ShouldEscalate(str) {
+		return su.RunPrivileged("sh", "-c", str)
+	}
+
+	cmd := exec.Command("sh", "-c", str)
+
+	cmd.Stdout = logs.Stdout()
+	cmd.Stderr = logs.Stderr()
 
 	return cmd.Run()
 }
 
-// zypper runs a simple install
+// zypper runs a simple installation with privilege escalation.
 func zypper(pkgs []string) error {
 	args := append([]string{"zypper", "install", "-y"}, pkgs...)
-	cmd := exec.Command("sudo", args...)
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
+	return su.RunPrivileged(args...)
 }
 
-// flatpak runs a simple install
+// flatpak runs a simple installation with privilege escalation.
 func flatpak(pkgs []string) error {
 	args := append([]string{"flatpak", "install", "-y"}, pkgs...)
-	cmd := exec.Command("sudo", args...)
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
+	return su.RunPrivileged(args...)
 }
 
-// repo adds a repository to zypper
+// repo adds a repository with privilege escalation.
 func repo(repos []Repo) error {
 	for _, repo := range repos {
-		cmd := exec.Command("sudo", "zypper", "ar", repo.URL, repo.Alias)
-
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		if err := cmd.Run(); err != nil {
+		if err := su.RunPrivileged("zypper", "ar", repo.URL, repo.Alias); err != nil {
 			return fmt.Errorf("failed to add repo %q: %w", repo.Alias, err)
 		}
 	}
 
 	return nil
 }
+
+// hooks executes each hook individually with per-command privilege decisions.
+func hooks(hooks []string) error {
+	for _, hook := range hooks {
+		if err := sh(hook); err != nil {
+			return fmt.Errorf("hook %q failed: %w", hook, err)
+		}
+	}
+
+	return nil
+}
+

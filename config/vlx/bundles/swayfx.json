@@ -1,5 +1,11 @@
 {
   "$schema": "bundle.schema.json",
+  "info": {
+    "name": "SwayFX",
+    "desc": "Compiles swayfx from source for openSUSE.",
+    "icon": "\uF35D",
+    "group": "wm"
+  },
   "zypper": [
     "git",
     "gcc",
@@ -22,6 +28,7 @@
     "Mesa-libGLESv2-devel",
     "Mesa-dri",
     "xwayland-devel",
+    "xcb-util-wm-devel",
     "libpixman-1-0-devel",
     "pango-devel",
     "cairo-devel",
@@ -31,23 +38,19 @@
     "hwdata",
     "pam-devel",
     "libpcap-devel",
-    "libliftoff-devel"
+    "libliftoff-devel",
+    "libdisplay-info-devel",
+    "seatd-devel"
   ],
   "pre": [
-    "rm -rf /tmp/wlroots-build /tmp/scenefx-build /tmp/swayfx-build"
+    "sudo rm -rf /tmp/wlroots-build /tmp/scenefx-build /tmp/swayfx-build"
   ],
   "post": [
-    "git clone -b 0.19.3 https://gitlab.freedesktop.org/wlroots/wlroots.git /tmp/wlroots-build",
-    "cd /tmp/wlroots-build",
-    "meson setup build --prefix=/usr",
-    "sudo ninja -C build install",
-    "git clone -b 0.4.1 https://github.com/wlrfx/scenefx.git /tmp/scenefx-build",
-    "cd /tmp/scenefx-build",
-    "meson setup build --prefix=/usr",
-    "sudo ninja -C build install",
-    "git clone -b 0.5.3 https://github.com/WillPower3309/swayfx.git /tmp/swayfx-build",
-    "cd /tmp/swayfx-build",
-    "meson setup build --prefix=/usr",
-    "sudo ninja -C build install"
+    "git clone -b 0.19.3 https://gitlab.freedesktop.org/wlroots/wlroots.git /tmp/wlroots-build && cd /tmp/wlroots-build && meson setup build --prefix=/usr -Dbackends=drm,libinput -Dxwayland=enabled",
+    "cd /tmp/wlroots-build && sudo ninja -C build install",
+    "git clone -b 0.4.1 https://github.com/wlrfx/scenefx.git /tmp/scenefx-build && cd /tmp/scenefx-build && meson setup build --prefix=/usr",
+    "cd /tmp/scenefx-build && sudo ninja -C build install",
+    "git clone -b 0.5.3 https://github.com/WillPower3309/swayfx.git /tmp/swayfx-build && cd /tmp/swayfx-build && meson setup build --prefix=/usr",
+    "cd /tmp/swayfx-build && sudo ninja -C build install"
   ]
 }

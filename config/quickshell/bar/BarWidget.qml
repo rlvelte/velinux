@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.services
+import qs.globals
 import qs.bar.widgets.design
 
 RowLayout {
@@ -9,7 +9,7 @@ RowLayout {
 
     default property alias content: inner.data
 
-    BracketLeft { }
+    Bracket { opening: true }
 
     RowLayout {
         id: inner
@@ -17,5 +17,5 @@ RowLayout {
         Layout.alignment: Qt.AlignVCenter
     }
 
-    BracketRight { }
+    Bracket { opening: false }
 }

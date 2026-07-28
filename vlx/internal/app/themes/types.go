@@ -2,34 +2,19 @@ package themes
 
 import (
 	"encoding/json"
-	"fmt"
+	"path/filepath"
+
+	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
 )
 
 type Theme struct {
-	Icon      string `json:"icon"`
-	Logo      string `json:"logo"`
-	Id        string `json:"id"`
-	Name      string `json:"name"`
-	Wallpaper string `json:"wallpaper"`
-	Active    bool   `json:"active"`
-	Path      string
-}
-
-func decodeTheme(_ string, path string, data []byte) (*Theme, error) {
-	var t Theme
-	if err := json.Unmarshal(data, &t); err != nil {
-		return nil, err
-	}
-
-	t.Path = path
-	if t.Id == "" {
-		return nil, fmt.Errorf("theme %s has no id", path)
-	}
-
-	return &t, nil
-}
-
-type ThemeContent struct {
+	path            string
+	filename        string
+	Logo            string `json:"logo"`
+	LogoPath        string // QML helper
+	Name            string `json:"name"`
+	Description     string `json:"desc"`
+	Wallpaper       string `json:"wallpaper"`
 	Primary         string `json:"color_primary"`
 	PrimaryDim      string `json:"color_primary_dim"`
 	PrimarySubtle   string `json:"color_primary_subtle"`
@@ -70,11 +55,14 @@ type ThemeContent struct {
 	FontSizeHeading string `json:"font_size_heading"`
 }
 
-func decodeThemeContent(_ string, _ string, data []byte) (*ThemeContent, error) {
-	var tc ThemeContent
-	if err := json.Unmarshal(data, &tc); err != nil {
+func decodeTheme(name string, path string, data []byte) (*Theme, error) {
+	var t Theme
+	if err := json.Unmarshal(data, &t); err != nil {
 		return nil, err
 	}
 
-	return &tc, nil
+	t.LogoPath = "file://" + filepath.Join(fsys.ConfigPath("vlx", "themes"), t.Logo)
+	t.path = path
+	t.filename = name
+	return &t, nil
 }

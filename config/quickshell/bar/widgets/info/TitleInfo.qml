@@ -1,11 +1,11 @@
 import QtQuick
 import Quickshell.Wayland
-import qs.services
+import qs.globals
 
 Item {
     id: titleInfo
     implicitWidth: titleInfoText.implicitWidth
-    implicitHeight: 40
+    implicitHeight: Dimensions.barHeight
 
     Text {
         id: titleInfoText

@@ -1,15 +1,21 @@
 import QtQuick
 import Quickshell
-import qs.services
+import Quickshell.Io
+import qs.globals
 
 Item {
     id: clockWidget
     implicitWidth: clockRow.implicitWidth
-    implicitHeight: 40
+    implicitHeight: Dimensions.barHeight
 
     SystemClock {
         id: clock
         precision: SystemClock.Seconds
+    }
+
+    Process {
+        id: calendarProcess
+        command: ["thunderbird"]
     }
 
     Row {
@@ -40,6 +46,14 @@ Item {
             font.family: Theme.fontName
             font.pixelSize: Theme.fontSizeHeading
             font.weight: Font.Bold
+        }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: {
+            calendarProcess.running = true
         }
     }
 }

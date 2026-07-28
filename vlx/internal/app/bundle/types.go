@@ -5,13 +5,11 @@ import (
 	"errors"
 )
 
-type Repo struct {
-	Alias string `json:"alias"`
-	URL   string `json:"url"`
-}
-
-type Scheme struct {
-	Name     string
+// Bundle is a bundle file.
+type Bundle struct {
+	path     string
+	filename string
+	Info     Info     `json:"info"`
 	Repos    []Repo   `json:"repos"`
 	Zypper   []string `json:"zypper"`
 	Flatpak  []string `json:"flatpak"`
@@ -19,16 +17,32 @@ type Scheme struct {
 	PostHook []string `json:"post"`
 }
 
-func decodeBundle(name, _ string, data []byte) (Scheme, error) {
+// Repo is a repository.
+type Repo struct {
+	Alias string `json:"alias"`
+	URL   string `json:"url"`
+}
+
+// Info is a bundle info.
+type Info struct {
+	Name        string `json:"name"`
+	Description string `json:"desc"`
+	Icon        string `json:"icon"`
+	Group       string `json:"group,omitempty"`
+}
+
+// decodeBundle decodes a bundle file.
+func decodeBundle(name, path string, data []byte) (Bundle, error) {
 	if name == "bundle.schema" {
-		return Scheme{}, errors.New("skip schema file")
+		return Bundle{}, errors.New("skip schema file")
 	}
 
-	var s Scheme
+	var s Bundle
 	if err := json.Unmarshal(data, &s); err != nil {
-		return Scheme{}, err
+		return Bundle{}, err
 	}
 
-	s.Name = name
+	s.path = path
+	s.filename = name
 	return s, nil
 }

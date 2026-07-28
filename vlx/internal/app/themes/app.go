@@ -1,281 +1,199 @@
 package themes
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"sort"
 
+	"github.com/mattn/go-isatty"
 	"github.com/rlvelte/velinux/vlx/internal/core/fsys"
-	"github.com/rlvelte/velinux/vlx/internal/core/notify"
-	"github.com/rlvelte/velinux/vlx/internal/core/picker"
-	"github.com/rlvelte/velinux/vlx/internal/core/printer"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/picker"
+	"github.com/rlvelte/velinux/vlx/internal/visuals/printer"
 	"github.com/spf13/cobra"
 )
 
-// setup configures all requirements and guards against wrong usage.
-func setup(cmd *cobra.Command, _ []string) error {
-	cmd.SetContext(context.WithValue(cmd.Context(), notify.ContextKey, notify.New()))
-	cmd.SetContext(context.WithValue(cmd.Context(), printer.ContextKey, printer.New()))
-	return nil
-}
+// TODO: REWORK FOR - progress
 
 func Command() *cobra.Command {
 	root := &cobra.Command{
-		Use:               "themes",
-		Short:             "Horribly bad theming manager",
-		Long:              "Manage and switch between theme profiles.",
-		PersistentPreRunE: setup,
-		Args:              cobra.NoArgs,
-		Aliases:           []string{"theme"},
-		SilenceUsage:      true,
+		Use:          "themes",
+		Short:        "Horribly bad theming manager",
+		Long:         "Manage and switch between theme profiles.",
+		Aliases:      []string{"theme"},
+		Args:         cobra.NoArgs,
+		SilenceUsage: !isatty.IsTerminal(os.Stdout.Fd()),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
 	}
 
-	cmdListCmd := &cobra.Command{
-		Use:     "list",
-		Short:   "List available theme profiles",
-		Long:    "List all available theme profiles with their icons and IDs.",
-		Aliases: []string{"ls"},
-		Args:    cobra.NoArgs,
-		RunE:    cmdList,
-	}
-	cmdListCmd.Flags().BoolP("json", "j", false, "output as JSON")
-
 	root.AddCommand(
-		cmdListCmd,
 		&cobra.Command{
-			Use:     "apply [theme]",
-			Short:   "Apply a theme",
-			Long:    "Apply a theme by name or interactively select from a list.",
-			Aliases: []string{"sw"},
-			Args:    cobra.MaximumNArgs(1),
-			RunE:    cmdApply,
+			Use:     "list",
+			Short:   "List available theme profiles",
+			Long:    "List all available theme profiles with their icons and IDs.",
+			Aliases: []string{"l", "ls"},
+			Args:    cobra.NoArgs,
+			Run:     cmdList,
+		},
+		&cobra.Command{
+			Use:          "apply [theme]",
+			Short:        "Apply a theme",
+			Long:         "Apply a theme by name or interactively select from a list.",
+			Aliases:      []string{"a", "ap"},
+			Args:         cobra.MaximumNArgs(1),
+			SilenceUsage: true,
+			Run:          cmdApply,
 		},
 	)
 
 	return root
 }
 
-func cmdList(cmd *cobra.Command, _ []string) error {
-	themesDir := fsys.ConfigPath("vlx", "themes")
-	store := fsys.NewStore(themesDir, decodeTheme, ".json")
+// cmdList lists all available themes.
+func cmdList(cmd *cobra.Command, _ []string) {
+	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+
+	dir := fsys.ConfigPath("vlx", "themes")
 	active := current()
-
-	all, err := store.List()
+	themes, err := fsys.ListJSON(dir, decodeTheme)
 	if err != nil {
-		return err
+		p.Error(err)
+		return
 	}
 
-	seen := make(map[string]bool)
-	var list []*Theme
-	for _, t := range all {
-		if seen[t.Id] {
-			continue
-		}
-		if filepath.Base(t.Path) == "current.json" {
-			continue
-		}
-
-		seen[t.Id] = true
-		list = append(list, t)
+	if len(themes) == 0 {
+		p.Success("No themes found")
+		return
 	}
 
-	sort.Slice(list, func(i, j int) bool {
-		return list[i].Name < list[j].Name
-	})
-
-	jsonFlag, _ := cmd.Flags().GetBool("json")
-	if jsonFlag {
-		var out []Theme
-		for _, t := range list {
-			th := *t
-			th.Logo = filepath.Join(themesDir, t.Logo)
-			th.Active = t.Id == active
-			out = append(out, th)
-		}
-
-		data, err := json.Marshal(out)
-		if err != nil {
-			return err
-		}
-
-		fmt.Println(string(data))
-		return nil
-	}
-
-	p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
-	headers := []string{"ACTIVE", "ID", "Name"}
+	headers := []string{"Name", "Description", "Active"}
 	var rows [][]string
-	for _, t := range list {
+	for _, t := range themes {
 		marker := ""
-		if t.Id == active {
+		if t.filename == active {
 			marker = "*"
 		}
 
-		rows = append(rows, []string{marker, t.Id, t.Name})
+		rows = append(rows, []string{
+			t.Name,
+			t.Description,
+			marker,
+		})
 	}
 
 	p.Table(headers, rows)
-	return nil
 }
 
-func cmdApply(cmd *cobra.Command, args []string) error {
-	themesDir := fsys.ConfigPath("vlx", "themes")
+// cmdApply applies a selected theme.
+func cmdApply(cmd *cobra.Command, args []string) {
+	p := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
+	n := cmd.Context().Value(notify.ContextKey).(*notify.Notify)
 
-	store := fsys.NewStore(themesDir, decodeTheme, ".json")
-	all, err := store.List()
-	if err != nil {
-		return err
-	}
+	dir := fsys.ConfigPath("vlx", "themes")
 
-	seen := make(map[string]bool)
-	var themes []*Theme
-	for _, t := range all {
-		if seen[t.Id] {
-			continue
-		}
-		if filepath.Base(t.Path) == "current.json" {
-			continue
-		}
-		seen[t.Id] = true
-		themes = append(themes, t)
-	}
-
-	var theme *Theme
+	var fileName string
 	if len(args) == 0 {
-		pkr := picker.New()
-		if pkr == nil {
-			return fmt.Errorf("no picker available")
-		}
-
-		sort.Slice(themes, func(i, j int) bool {
-			return themes[i].Name < themes[j].Name
-		})
-
-		items := make([]picker.Item, len(themes))
-		for i, t := range themes {
-			items[i] = picker.Item{
-				Icon:        filepath.Join(themesDir, t.Logo),
-				Header:      t.Name,
-				Description: t.Id,
-			}
-		}
-
-		selected, err := pkr.Select(cmd.Context(), items)
+		fn, err := pick(cmd, dir)
 		if err != nil {
-			return err
+			p.Error(err)
+			return
 		}
 
-		for _, t := range themes {
-			if t.Name == selected.Header {
-				theme = t
-				break
-			}
-		}
+		fileName = fn
 	} else {
-		req := args[0]
-		for _, t := range themes {
-			if t.Id == req || t.Name == req {
-				theme = t
-				break
-			}
-		}
+		fileName = args[0]
 	}
 
-	if theme == nil {
-		return fmt.Errorf("theme not found")
-	}
-
-	data, err := os.ReadFile(theme.Path)
+	theme, err := fsys.GetJSON(dir, fileName, decodeTheme)
 	if err != nil {
-		return err
+		p.Error(err)
+		return
 	}
 
-	content, err := decodeThemeContent("", theme.Path, data)
-	if err != nil {
-		return err
-	}
-
-	currentPath := filepath.Join(themesDir, "current.json")
+	currentPath := filepath.Join(dir, "current.json")
 	if err := os.Remove(currentPath); err != nil && !os.IsNotExist(err) {
-		return err
-	}
-	if err := os.Symlink(filepath.Base(theme.Path), currentPath); err != nil {
-		return err
+		p.Error(err)
+		return
 	}
 
-	wallpaperPath := filepath.Join(themesDir, "current.png")
+	if err := os.Symlink(theme.filename+".json", currentPath); err != nil {
+		p.Error(err)
+		return
+	}
+
+	wallpaperPath := filepath.Join(dir, "wallpaper.png")
 	if err := os.Remove(wallpaperPath); err != nil && !os.IsNotExist(err) {
-		return err
+		p.Error(err)
+		return
 	}
+
 	if err := os.Symlink(theme.Wallpaper, wallpaperPath); err != nil {
-		return err
+		p.Error(err)
+		return
 	}
 
-	if err := GenerateAll(*content); err != nil {
-		return err
+	if err := GenerateAll(*theme); err != nil {
+		p.Error(err)
+		return
 	}
 
-	if err := exec.Command("swaymsg", "reload").Run(); err != nil {
-		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
-		if p != nil {
-			p.Warn("sway reload failed (sway may not be running)")
-		}
-	}
+	_ = exec.Command("swaymsg", "reload").Run()
+	_ = exec.Command("hyprctl", "reload").Run()
+	_ = exec.Command("makoctl", "reload").Run()
+	_ = exec.Command("mmsg", "dispatch", "reload_config").Run()
 
-	if err := exec.Command("hyprctl", "reload").Run(); err != nil {
-		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
-		if p != nil {
-			p.Warn("hypr reload failed (Hyprland may not be running)")
-		}
-	}
-
-	if err := exec.Command("makoctl", "reload").Run(); err != nil {
-		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
-		if p != nil {
-			p.Warn("mako reload failed (mako may not be running)")
-		}
-	}
-
-	if err := exec.Command("mmsg", "dispatch", "reload_config").Run(); err != nil {
-		p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
-		if p != nil {
-			p.Warn("mango reload failed (mango may not be running)")
-		}
-	}
-
-	n := notify.New()
 	_ = n.Send("Switched to theme "+theme.Name, &notify.Details{
 		Title:   "VLX Themes",
 		Urgency: "normal",
 	})
 
-	p, _ := cmd.Context().Value(printer.ContextKey).(*printer.Printer)
-	if p != nil {
-		p.Info("Applied theme " + theme.Name)
+	p.Success("Applied theme " + theme.Name)
+	return
+}
+
+// pick selects a theme via an interactive picker.
+func pick(cmd *cobra.Command, dir string) (string, error) {
+	pkr, err := picker.New()
+	if err != nil {
+		return "", err
 	}
 
-	return nil
+	themes, err := fsys.ListJSON(dir, decodeTheme)
+	if err != nil {
+		return "", err
+	}
+
+	items := make([]picker.Item, 0, len(themes))
+	lookup := make(map[string]string, len(themes))
+	for _, t := range themes {
+		if t.filename == "current" {
+			continue
+		}
+		items = append(items, picker.Item{
+			Icon:        filepath.Join(dir, t.Logo),
+			Header:      t.Name,
+			Description: t.Description,
+		})
+
+		lookup[t.Name] = t.filename
+	}
+
+	selected, err := pkr.Select(cmd.Context(), items)
+	if err != nil {
+		return "", err
+	}
+
+	return lookup[selected.Header], nil
 }
 
 // current returns the currently active theme id.
 func current() string {
-	themes := fsys.ConfigPath("vlx", "themes")
-	data, err := os.ReadFile(filepath.Join(themes, "current.json"))
+	t, err := fsys.GetJSON(fsys.ConfigPath("vlx", "themes"), "current", decodeTheme)
 	if err != nil {
 		return ""
 	}
 
-	t, err := decodeTheme("current", "", data)
-	if err != nil {
-		return ""
-	}
-
-	return t.Id
+	return t.filename
 }

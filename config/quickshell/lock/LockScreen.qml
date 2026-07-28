@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Fusion
 import Quickshell.Wayland
-import qs.services
+import qs.globals
 
 Rectangle {
     id: root
@@ -13,7 +13,7 @@ Rectangle {
     Image {
         id: bgImage
         anchors.fill: parent
-        source: Quickshell.env("HOME") + "/.config/vlx/themes/current.png"
+        source: Quickshell.env("HOME") + "/.config/vlx/themes/wallpaper.png"
         fillMode: Image.PreserveAspectCrop
         opacity: 0.15
     }
@@ -31,7 +31,7 @@ Rectangle {
         anchors.topMargin: 120
         renderType: Text.NativeRendering
         font.family: Theme.fontName
-        font.pointSize: 72
+        font.pixelSize: 72
         color: Theme.text
 
         Timer {
@@ -57,7 +57,7 @@ Rectangle {
         Text {
             text: Quickshell.env("USER")
             font.family: Theme.fontName
-            font.pointSize: Theme.fontSizeHeading
+            font.pixelSize: Theme.fontSizeHeading
             color: Theme.text
             anchors.horizontalCenter: parent.horizontalCenter
         }
@@ -78,13 +78,13 @@ Rectangle {
                 inputMethodHints: Qt.ImhSensitiveData
                 placeholderText: "Password"
                 font.family: Theme.fontName
-                font.pointSize: Theme.fontSize
+                font.pixelSize: Theme.fontSize
                 color: Theme.text
                 placeholderTextColor: Theme.muted
 
                 background: Rectangle {
                     color: Theme.surface0
-                    radius: 8
+                    radius: Dimensions.inputRadius
                     border.color: passwordBox.activeFocus ? Theme.primary : Theme.surface1
                     border.width: passwordBox.activeFocus ? 2 : 1
                 }
@@ -114,7 +114,7 @@ Rectangle {
             visible: root.context.showFailure
             text: "Incorrect password"
             font.family: Theme.fontName
-            font.pointSize: Theme.fontSize
+            font.pixelSize: Theme.fontSize
             color: Theme.error
             anchors.horizontalCenter: parent.horizontalCenter
         }

@@ -26,14 +26,13 @@ var targets = []target{
 	{"mangowm", func(d string) string { return filepath.Join(d, "mango", "config.d", "40-theme.conf") }},
 	{"kitty", func(d string) string { return filepath.Join(d, "kitty", "theme.conf") }},
 	{"mako", func(d string) string { return filepath.Join(d, "mako", "theme.conf") }},
-	{"quickshell", func(d string) string { return filepath.Join(d, "quickshell", "services", "Theme.qml") }},
+	{"quickshell", func(d string) string { return filepath.Join(d, "quickshell", "globals", "Theme.qml") }},
 }
 
 // GenerateAll takes all target definitions and generate a new theme file.
-func GenerateAll(from ThemeContent) error {
+func GenerateAll(from Theme) error {
 	for _, g := range targets {
 		targetPath := g.output(fsys.ConfigPath())
-
 		if err := render(targetPath, g.template, from); err != nil {
 			return fmt.Errorf("failed to generate %s config: %w", g.template, err)
 		}
@@ -42,7 +41,7 @@ func GenerateAll(from ThemeContent) error {
 	return nil
 }
 
-func render(target, tmplName string, content ThemeContent) error {
+func render(target, tmplName string, content Theme) error {
 	tmplStr, err := load(tmplName)
 	if err != nil {
 		return err

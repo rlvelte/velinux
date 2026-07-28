@@ -1,5 +1,11 @@
 {
   "$schema": "bundle.schema.json",
+  "info": {
+    "name": "Unity",
+    "desc": "Creates a ubuntu distrobox with unity.",
+    "icon": "\uE721",
+    "group": "app"
+  },
   "zypper": [
     "distrobox"
   ],
@@ -10,9 +16,10 @@
     "distrobox enter unity-dev -- sudo apt install -y curl gnupg ca-certificates",
     "distrobox enter unity-dev -- sudo install -d /etc/apt/keyrings",
     "distrobox enter unity-dev -- bash -c 'curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg'",
-    "distrobox enter unity-dev -- bash -c \"echo 'deb [arch=amd64 signed-by=/etc/apt/keyrings/unityhub.gpg] https://hub.unity3d.com/linux/repos/deb stable main' | sudo tee /etc/apt/sources.list.d/unityhub.list\"",
+    "distrobox enter unity-dev -- sh -c 'echo \"deb [arch=amd64 signed-by=/etc/apt/keyrings/unityhub.gpg] https://hub.unity3d.com/linux/repos/deb stable main\" | sudo tee /etc/apt/sources.list.d/unityhub.list'",
     "distrobox enter unity-dev -- sudo apt update",
-    "distrobox enter unity-dev -- sudo apt install -y unityhub",
+    "distrobox enter unity-dev -- sudo apt install -y unityhub libasound2t64 xdg-utils libicu78",
+    "distrobox enter unity-dev -- sudo sh -c 'rm -f /usr/local/bin/xdg-open && printf \"#!/bin/sh\\nexec /usr/bin/distrobox-host-exec env DISPLAY=\\\"${DISPLAY:-:0}\\\" xdg-open \\\"\\$@\\\"\\n\" > /usr/local/bin/xdg-open && chmod +x /usr/local/bin/xdg-open'",
     "distrobox enter unity-dev -- distrobox-export --app unityhub"
   ]
 }

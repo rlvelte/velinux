@@ -5,13 +5,24 @@ before:
     - go mod tidy
 
 builds:
-  - env:
+  - id: vlx
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
     goarch:
       - amd64
-    main: .
+    main: ./cmd/vlx
+    binary: vlx
+  - id: vlxpass
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+    main: ./cmd/vlxpass
+    binary: vlxpass
 
 archives:
   - formats: tar.gz

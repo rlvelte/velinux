@@ -1,12 +1,12 @@
 import QtQuick
 import Quickshell
 import Quickshell.Services.SystemTray
-import qs.services
+import qs.globals
 
 Item {
     id: trayInfo
     implicitWidth: trayRow.implicitWidth
-    implicitHeight: 40
+    implicitHeight: Dimensions.barHeight
     visible: SystemTray.items.values.length > 0
 
     Row {

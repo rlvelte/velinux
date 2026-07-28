@@ -9,6 +9,30 @@
     "$schema": {
       "type": "string"
     },
+    "info": {
+      "type": "object",
+      "description": "Metadata describing the bundle",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the bundle"
+        },
+        "desc": {
+          "type": "string",
+          "description": "Description of what it does"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Nerdfont icon for style"
+        },
+        "group": {
+          "type": "string",
+          "description": "Category used to group this bundle in the picker (e.g. desktop, development, applications)"
+        }
+      },
+      "required": ["name", "desc", "icon"]
+    },
     "repos": {
       "type": "array",
       "description": "Zypper repositories to add before installing packages",

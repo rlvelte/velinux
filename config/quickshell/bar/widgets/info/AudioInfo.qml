@@ -1,12 +1,13 @@
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Pipewire
-import qs.services
+import qs.globals
 
 Item {
     id: audioWidget
     implicitWidth: audioRow.implicitWidth
-    implicitHeight: 40
+    implicitHeight: Dimensions.barHeight
 
     PwObjectTracker {
         objects: [Pipewire.defaultAudioSink]
@@ -37,13 +38,16 @@ Item {
         }
     }
 
+    Process {
+        id: pavucontrolProcess
+        command: ["pavucontrol"]
+    }
+
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         onClicked: {
-            if (audioWidget.ready) {
-                audioWidget.sink.audio.muted = !audioWidget.sink.audio.muted
-            }
+            pavucontrolProcess.running = true
         }
         onWheel: function(wheel) {
             if (!audioWidget.ready) return

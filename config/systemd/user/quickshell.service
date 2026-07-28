@@ -6,6 +6,7 @@ Wants=graphical-session.target
 
 [Service]
 Type=simple
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
 ExecStart=/usr/bin/env QT_QPA_PLATFORM=wayland quickshell -p %h/.config/quickshell
 Restart=on-failure
 RestartSec=3

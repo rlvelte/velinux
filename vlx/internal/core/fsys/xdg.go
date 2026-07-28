@@ -3,6 +3,7 @@ package fsys
 import (
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // ConfigPath returns a path under XDG_CONFIG_HOME.
@@ -17,9 +18,24 @@ func DataPath(rel ...string) string {
 	return filepath.Join(parts...)
 }
 
+// DataDirs returns the system data directories from XDG_DATA_DIRS.
+func DataDirs() []string {
+	s := os.Getenv("XDG_DATA_DIRS")
+	if s == "" {
+		s = "/usr/local/share:/usr/share"
+	}
+	return strings.Split(s, ":")
+}
+
 // CachePath returns a path under XDG_CACHE_HOME.
 func CachePath(rel ...string) string {
 	parts := append([]string{env("XDG_CACHE_HOME", ".cache")}, rel...)
+	return filepath.Join(parts...)
+}
+
+// StatePath returns a path under XDG_STATE_HOME.
+func StatePath(rel ...string) string {
+	parts := append([]string{env("XDG_STATE_HOME", ".local/state")}, rel...)
 	return filepath.Join(parts...)
 }
 
