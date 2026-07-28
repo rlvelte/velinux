@@ -18,11 +18,16 @@ PanelWindow {
     WlrLayershell.keyboardFocus: shown ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     WlrLayershell.layer: WlrLayer.Overlay
 
+    mask: Region { item: contentRect }
+
     property bool shown: false
     property bool animatingOut: false
     property string promptDir: ""
     property string promptText: "Password:"
     property string resultPath: ""
+
+    property int screenWidth: screen ? screen.width
+        : (Quickshell.screens.length > 0 ? Quickshell.screens[0].width : 1920)
 
     visible: shown || animatingOut
 
@@ -56,7 +61,7 @@ PanelWindow {
 
     onShownChanged: {
         if (shown) {
-            contentRect.opacity = 0
+            contentTranslate.y = -Dimensions.overlaySlideOffset
             dropTimer.restart()
         }
     }
@@ -83,14 +88,16 @@ PanelWindow {
 
     NumberAnimation {
         id: showAnim
-        target: contentRect; property: "opacity"
-        from: 0; to: 1; duration: Anims.duration; easing.type: Easing.OutCubic
+        target: contentTranslate; property: "y"
+        from: -Dimensions.overlaySlideOffset; to: 0
+        duration: Anims.duration; easing.type: Easing.OutCubic
     }
 
     NumberAnimation {
         id: hideAnim
-        target: contentRect; property: "opacity"
-        from: 1; to: 0; duration: Anims.duration; easing.type: Easing.InCubic
+        target: contentTranslate; property: "y"
+        from: 0; to: -Dimensions.overlaySlideOffset
+        duration: Anims.duration; easing.type: Easing.InCubic
         onFinished: hideTimer.restart()
     }
 
@@ -132,39 +139,53 @@ PanelWindow {
 
     Rectangle {
         id: contentRect
-        width: 400
-        height: 200
-        anchors.centerIn: parent
-        radius: Dimensions.overlayRadius
+        width: Math.round(passwordPopup.screenWidth / 3)
+        height: 64
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
         color: Theme.base
+        radius: Dimensions.overlayRadius
         border.color: Theme.surface1; border.width: 1
-        opacity: 0
 
+        transform: Translate {
+            id: contentTranslate
+            y: -Dimensions.overlaySlideOffset
+        }
+
+        // Prevent click-through into the background dismiss area
         MouseArea {
             anchors.fill: parent
             propagateComposedEvents: false
             onClicked: {}
         }
 
-        Column {
-            anchors.fill: parent
-            anchors.margins: 24
-            spacing: 16
+        // ── Content ──────────────────────────────────────────────────
+        Row {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin: 20
+            anchors.rightMargin: 20
+            spacing: 12
 
+            // Prompt
             Text {
+                id: promptLabel
                 text: passwordPopup.promptText
                 font.family: Theme.fontName
-                font.pixelSize: Theme.fontSizeHeading
+                font.pixelSize: Theme.fontSizeLarge
                 color: Theme.text
-                width: parent.width
-                horizontalAlignment: Text.AlignLeft
+                elide: Text.ElideRight
+                anchors.verticalCenter: parent.verticalCenter
             }
 
+            // Password field
             TextField {
                 id: passwordField
-                width: parent.width
-                height: 48
-                padding: 12
+                width: parent.width - promptLabel.width - okButton.width
+                    - parent.spacing
+                height: 38
+                padding: 10
                 focus: true
                 echoMode: TextInput.Password
                 inputMethodHints: Qt.ImhSensitiveData
@@ -173,36 +194,64 @@ PanelWindow {
                 font.pixelSize: Theme.fontSize
                 color: Theme.text
                 placeholderTextColor: Theme.muted
+                anchors.verticalCenter: parent.verticalCenter
 
                 background: Rectangle {
-                    color: Theme.surface0
+                    color: Qt.rgba(Theme.surface0.r, Theme.surface0.g, Theme.surface0.b, 0.6)
                     radius: Dimensions.inputRadius
                     border.color: passwordField.activeFocus ? Theme.primary : Theme.surface1
                     border.width: passwordField.activeFocus ? 2 : 1
+
+                    Behavior on border.color {
+                        ColorAnimation { duration: Anims.duration; easing.type: Easing.OutCubic }
+                    }
+                    Behavior on border.width {
+                        NumberAnimation { duration: Anims.duration; easing.type: Easing.OutCubic }
+                    }
                 }
 
                 onAccepted: passwordPopup.submitPassword()
                 Keys.onEscapePressed: passwordPopup.cancelPrompt()
             }
 
-            Row {
-                width: parent.width
-                spacing: 12
-                layoutDirection: Qt.RightToLeft
+            // Primary: OK
+            Rectangle {
+                id: okButton
+                width: 80; height: 38
+                radius: Dimensions.inputRadius
+                color: okMouse.containsMouse
+                    ? Qt.lighter(Theme.primary, 1.08)
+                    : Theme.primary
+                opacity: passwordField.text !== "" ? 1.0 : 0.35
+                anchors.verticalCenter: parent.verticalCenter
 
-                Button {
-                    text: "OK"
-                    height: 40
-                    padding: 16
-                    enabled: passwordField.text !== ""
-                    onClicked: passwordPopup.submitPassword()
+                Behavior on color {
+                    ColorAnimation { duration: Anims.durationFast; easing.type: Easing.OutCubic }
+                }
+                Behavior on opacity {
+                    NumberAnimation { duration: Anims.durationFast; easing.type: Easing.OutCubic }
                 }
 
-                Button {
-                    text: "Cancel"
-                    height: 40
-                    padding: 16
-                    onClicked: passwordPopup.cancelPrompt()
+                Text {
+                    anchors.centerIn: parent
+                    text: "OK"
+                    font.family: Theme.fontName
+                    font.pixelSize: Theme.fontSizeSmall
+                    font.bold: true
+                    color: Theme.textOnPrimary
+                }
+
+                MouseArea {
+                    id: okMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: passwordField.text !== ""
+                        ? Qt.PointingHandCursor
+                        : Qt.ArrowCursor
+                    onClicked: {
+                        if (passwordField.text !== "")
+                            passwordPopup.submitPassword()
+                    }
                 }
             }
         }
