@@ -2,6 +2,8 @@
 
 # Environment
 export GOPATH="$HOME/.go"
+export GOMODCACHE="$GOPATH/pkg/mod"
+export GOCACHE="$GOPATH/.cache/go-build"
 export NPM_CONFIG_CACHE="$HOME/.cache/npm"
 
 # Path
