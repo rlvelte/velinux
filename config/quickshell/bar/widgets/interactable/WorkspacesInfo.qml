@@ -13,36 +13,34 @@ Item {
 
     readonly property int totalWorkspaces: 5
 
-    function isWorkspaceFocused(num: int): bool {
+    function getWorkspace(num: int): var {
         var values = wsValues;
         for (var i = 0; i < values.length; i++) {
-            var ws = values[i];
-            if (ws.number === num && ws.focused)
-                return true;
+            if (values[i].number === num)
+                return values[i];
         }
-        return false;
+        return null;
     }
 
-    function isWorkspaceActive(num: int): bool {
-        var values = wsValues;
-        for (var i = 0; i < values.length; i++) {
-            var ws = values[i];
-            if (ws.number === num && ws.active)
-                return true;
-        }
-        return false;
+    function isWorkspaceFocused(num: int): bool {
+        var ws = getWorkspace(num);
+        return ws ? ws.focused : false;
+    }
+
+    function hasWindows(num: int): bool {
+        var ws = getWorkspace(num);
+        if (!ws || !ws.lastIpcObject) return false;
+        var obj = ws.lastIpcObject;
+        return (obj.nodes && obj.nodes.length > 0) || (obj.floating_nodes && obj.floating_nodes.length > 0);
     }
 
     function activateWorkspace(num: int): void {
-        var values = wsValues;
-        for (var i = 0; i < values.length; i++) {
-            var ws = values[i];
-            if (ws.number === num) {
-                ws.activate();
-                return;
-            }
+        var ws = getWorkspace(num);
+        if (ws) {
+            ws.activate();
+        } else {
+            I3.dispatch("workspace number " + num);
         }
-        I3.dispatch("workspace number " + num);
     }
 
     Row {
@@ -55,7 +53,7 @@ Item {
             delegate: Rectangle {
                 property int num: index + 1
                 property bool focused: workspaces.isWorkspaceFocused(num)
-                property bool active: workspaces.isWorkspaceActive(num)
+                property bool populated: workspaces.hasWindows(num)
 
                 width: wsText.implicitWidth + 10
                 height: 20
@@ -65,10 +63,10 @@ Item {
                     id: wsText
                     anchors.centerIn: parent
                     text: num
-                    color: focused ? Theme.primary : (active ? Theme.subtext : Qt.darker(Theme.subtext, 2))
+                    color: focused ? Theme.primary : (populated ? Theme.text : Qt.darker(Theme.subtext, 2))
                     font.family: Theme.fontName
                     font.pixelSize: Theme.fontSizeHeading
-                    font.weight: focused ? Font.Bold : Font.Medium
+                    font.weight: focused ? Font.Bold : (populated ? Font.Medium : Font.Normal)
                 }
 
                 MouseArea {
