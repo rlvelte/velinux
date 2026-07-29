@@ -69,5 +69,7 @@ PanelWindow {
             width: Math.min(implicitWidth, (bar.width - 400))
         }
         Bracket { opening: false; anchors.verticalCenter: parent.verticalCenter }
+        Item { width: 6; height: 1 }
+        ResizeIndicator { anchors.verticalCenter: parent.verticalCenter }
     }
 }

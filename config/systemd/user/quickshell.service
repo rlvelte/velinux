@@ -6,10 +6,10 @@ Wants=graphical-session.target
 
 [Service]
 Type=simple
-Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
-ExecStart=/usr/bin/env QT_QPA_PLATFORM=wayland quickshell -p %h/.config/quickshell
+ExecStart=/bin/sh -c 'QT_QPA_PLATFORM=wayland exec quickshell -p %h/.config/quickshell'
 Restart=on-failure
 RestartSec=3
+PassEnvironment=SWAYSOCK I3SOCK WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP
 
 [Install]
 WantedBy=default.target

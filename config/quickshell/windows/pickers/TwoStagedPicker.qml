@@ -38,6 +38,7 @@ PickerWindow {
         else picker.launchSub(subFiltered.values[picker.selectedSub])
     }
     escapeKeyHandler: function() {
+        if (!picker.shown) return
         if (picker.stage === 1) picker.backToMain()
         else { cancelPicker(); hide() }
     }
@@ -130,7 +131,7 @@ PickerWindow {
 
             TextField {
                 id: searchField
-                focus: true; width: parent.width; height: Dimensions.searchFieldHeight; leftPadding: 16
+                width: parent.width; height: Dimensions.searchFieldHeight; leftPadding: 16
                 placeholderText: picker.stage === 0 ? "Search..." : "Search subitems..."
                 font.family: Theme.fontName; font.pixelSize: Theme.fontSizeHeading
                 color: Theme.text; placeholderTextColor: Theme.muted
