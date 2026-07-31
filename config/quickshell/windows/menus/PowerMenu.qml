@@ -24,7 +24,7 @@ PanelWindow {
 
     readonly property var actions: [
         { label: "Logout",   command: ["swaymsg", "exit"] },
-        { label: "Suspend",  command: elevated(["systemctl", "hybrid-sleep"]) },
+        { label: "Suspend",  command: elevated(["systemctl", "suspend"]) },
         { label: "Shutdown", command: elevated(["systemctl", "poweroff"]) },
         { label: "Reboot",   command: elevated(["systemctl", "reboot"]) },
         { label: "BIOS",     command: elevated(["systemctl", "reboot", "--firmware-setup"]) }

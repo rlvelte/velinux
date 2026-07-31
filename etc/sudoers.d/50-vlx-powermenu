@@ -1,0 +1,1 @@
+rvelte ALL=(root) NOPASSWD: /usr/bin/systemctl suspend, /usr/bin/systemctl poweroff, /usr/bin/systemctl reboot, /usr/bin/systemctl reboot --firmware-setup
