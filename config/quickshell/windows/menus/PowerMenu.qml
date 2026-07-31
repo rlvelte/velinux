@@ -41,6 +41,9 @@ PanelWindow {
 
     onShownChanged: {
         if (shown) {
+            animatingOut = false
+            hideTimer.stop()
+            hideAnim.stop()
             selected = 0
             canClose = false
             contentTranslate.y = -Dimensions.overlaySlideOffset

@@ -97,7 +97,6 @@ PanelWindow {
 
     onShownChanged: {
         if (shown) {
-            // Clear any stuck close state from an interrupted hide animation
             window.animatingOut = false
             hideTimer.stop()
             hideAnim.stop()
@@ -135,7 +134,7 @@ PanelWindow {
 
     function writeResult(payload) {
         var json = JSON.stringify(payload)
-        if (json === undefined) json = "null"   // guard: undefined payload must not abort the close path
+        if (json === undefined) json = "null"
         resultWriter.command = ["sh", "-c", "printf '%s' "
             + Utils.escapeShell(json) + " > " + Utils.escapeShell(window.pickerResultPath)]
         resultWriter.running = true
