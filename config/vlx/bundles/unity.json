@@ -6,11 +6,14 @@
     "icon": "\uE721",
     "group": "app"
   },
+  "pre": [
+    "podman rm -f unity-dev 2>/dev/null || true"
+  ],
   "zypper": [
     "distrobox"
   ],
   "post": [
-    "distrobox create --name unity-dev --image ubuntu:latest --yes",
+    "distrobox create --name unity-dev --image ubuntu:latest --yes --additional-flags \"--volume /run/dbus/system_bus_socket:/run/dbus/system_bus_socket:ro\"",
     "distrobox enter unity-dev -- sudo apt update",
     "distrobox enter unity-dev -- sudo apt upgrade -y",
     "distrobox enter unity-dev -- sudo apt install -y curl gnupg ca-certificates",
@@ -18,8 +21,10 @@
     "distrobox enter unity-dev -- bash -c 'curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg'",
     "distrobox enter unity-dev -- sh -c 'echo \"deb [arch=amd64 signed-by=/etc/apt/keyrings/unityhub.gpg] https://hub.unity3d.com/linux/repos/deb stable main\" | sudo tee /etc/apt/sources.list.d/unityhub.list'",
     "distrobox enter unity-dev -- sudo apt update",
-    "distrobox enter unity-dev -- sudo apt install -y unityhub libasound2t64 xdg-utils libicu78",
+    "distrobox enter unity-dev -- sudo apt install -y unityhub gnome-keyring git git-lfs libasound2t64 xdg-utils libicu78 libglib2.0-dev libsecret-1-dev pkg-config",
     "distrobox enter unity-dev -- sudo sh -c 'rm -f /usr/local/bin/xdg-open && printf \"#!/bin/sh\\nexec /usr/bin/distrobox-host-exec env DISPLAY=\\\"${DISPLAY:-:0}\\\" xdg-open \\\"\\$@\\\"\\n\" > /usr/local/bin/xdg-open && chmod +x /usr/local/bin/xdg-open'",
+    "distrobox enter unity-dev -- sudo sed -i 's|^Exec=.*|Exec=/opt/unityhub/unityhub --password-store=basic %U|' /usr/share/applications/unityhub.desktop",
+    "distrobox enter unity-dev -- sh -c 'printf \"%s\\n\" \"\" \"# Unity Hub: auto-start gnome-keyring for credential persistence\" \"if [ -n \\\"\\$CONTAINER_ID\\\" ] && [ -z \\\"\\$GNOME_KEYRING_CONTROL\\\" ] && command -v gnome-keyring-daemon >/dev/null 2>&1; then\" \"    eval \\$(gnome-keyring-daemon --start --components=secrets 2>/dev/null)\" \"    export GNOME_KEYRING_CONTROL\" \"fi\" >> ~/.profile'",
     "distrobox enter unity-dev -- distrobox-export --app unityhub"
   ]
 }

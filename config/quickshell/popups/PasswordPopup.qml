@@ -39,6 +39,7 @@ PanelWindow {
     }
 
     function startPrompt(dirPath) {
+        passwordPopup.reset()
         passwordPopup.promptDir = dirPath
         passwordPopup.resultPath = dirPath + "/result"
         promptReader.command = ["cat", dirPath + "/prompt.json"]
@@ -61,6 +62,9 @@ PanelWindow {
 
     onShownChanged: {
         if (shown) {
+            animatingOut = false
+            hideTimer.stop()
+            hideAnim.stop()
             contentTranslate.y = -Dimensions.overlaySlideOffset
             dropTimer.restart()
         }
@@ -152,14 +156,12 @@ PanelWindow {
             y: -Dimensions.overlaySlideOffset
         }
 
-        // Prevent click-through into the background dismiss area
         MouseArea {
             anchors.fill: parent
             propagateComposedEvents: false
             onClicked: {}
         }
 
-        // ── Content ──────────────────────────────────────────────────
         Row {
             anchors.left: parent.left
             anchors.right: parent.right
@@ -168,7 +170,6 @@ PanelWindow {
             anchors.rightMargin: 20
             spacing: 12
 
-            // Prompt
             Text {
                 id: promptLabel
                 text: passwordPopup.promptText
@@ -179,7 +180,6 @@ PanelWindow {
                 anchors.verticalCenter: parent.verticalCenter
             }
 
-            // Password field
             TextField {
                 id: passwordField
                 width: parent.width - promptLabel.width - okButton.width
@@ -214,7 +214,6 @@ PanelWindow {
                 Keys.onEscapePressed: passwordPopup.cancelPrompt()
             }
 
-            // Primary: OK
             Rectangle {
                 id: okButton
                 width: 80; height: 38
