@@ -95,7 +95,7 @@ PanelWindow {
 
     function elevated(cmd) {
         var joined = cmd.map(function(arg) { return "'" + arg.replace(/'/g, "'\\''") + "'" }).join(" ")
-        return ["sh", "-c", "SUDO_ASKPASS=$(command -v vlxpass) exec sudo -A --preserve-env=WAYLAND_DISPLAY,HOME,XDG_RUNTIME_DIR " + joined]
+        return ["sh", "-c", "SUDO_ASKPASS=$(command -v vlxpass) exec sudo -A " + joined]
     }
 
     Process { id: processRunner }
