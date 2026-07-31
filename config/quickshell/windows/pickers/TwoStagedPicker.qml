@@ -9,7 +9,7 @@ PickerWindow {
     id: picker
 
     ipcTarget: "twostagepicker"
-    cancelResult: {}
+    cancelResult: ({})
     contentWidth: picker.narrowWidth
 
     property int stage: 0
@@ -17,6 +17,13 @@ PickerWindow {
     property var selectedItem: null
     readonly property int narrowWidth: 640
     readonly property int wideWidth: 1100
+
+    resetExtra: function() {
+        picker.stage = 0
+        picker.selectedSub = 0
+        picker.selectedItem = null
+        picker.contentWidth = picker.narrowWidth
+    }
 
     buildModel: function(items, query) {
         var all = items.map(function(e, i) {
@@ -90,6 +97,7 @@ PickerWindow {
         picker.stage = 0
         picker.selectedSub = 0
         picker.searchQuery = ""
+        contentItem.resetSearch()
         picker.contentWidth = picker.narrowWidth
     }
 
@@ -128,10 +136,11 @@ PickerWindow {
             spacing: 12
 
             function focusSearch() { searchField.forceActiveFocus() }
+            function resetSearch() { searchField.text = "" }
 
             TextField {
                 id: searchField
-                width: parent.width; height: Dimensions.searchFieldHeight; leftPadding: 16
+                focus: true; width: parent.width; height: Dimensions.searchFieldHeight; leftPadding: 16
                 placeholderText: picker.stage === 0 ? "Search..." : "Search subitems..."
                 font.family: Theme.fontName; font.pixelSize: Theme.fontSizeHeading
                 color: Theme.text; placeholderTextColor: Theme.muted
