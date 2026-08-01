@@ -1,0 +1,17 @@
+{
+  "$schema": "bundle.schema.json",
+  "info": {
+    "name": "Xbox Controller",
+    "desc": "Installs xpadneo driver for Xbox Wireless Controllers over Bluetooth.",
+    "icon": "\uF11B",
+    "group": "app"
+  },
+  "zypper": [
+    "xpadneo",
+    "xpadneo-kmp-default"
+  ],
+  "post": [
+    "sudo modprobe hid-xpadneo",
+    "sudo sh -c 'echo hid-xpadneo > /etc/modules-load.d/xpadneo.conf'"
+  ]
+}
