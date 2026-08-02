@@ -47,6 +47,8 @@ PanelWindow {
         BarWidget {
             Layout.alignment: Qt.AlignVCenter
             WorkspacesInfo { }
+            Separator { }
+            ScratchpadInfo { }
         }
 
         Item { Layout.fillWidth: true }
