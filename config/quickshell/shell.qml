@@ -17,7 +17,6 @@ ShellRoot {
     GroupedPicker {}
     ProgressPopup {}
     PasswordPopup {}
-    NotifyPopup {}
     PowerMenu {}
 
     LockContext {
