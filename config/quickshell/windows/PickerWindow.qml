@@ -18,8 +18,6 @@ PanelWindow {
     WlrLayershell.keyboardFocus: shown ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     WlrLayershell.layer: WlrLayer.Overlay
 
-    Keys.onEscapePressed: window.escapeKeyHandler()
-
     property string ipcTarget: ""
 
     property bool shown: false
@@ -41,6 +39,7 @@ PanelWindow {
 
     property var returnKeyHandler: function(entry) { launch(entry) }
     property var escapeKeyHandler: function() { cancelPicker(); hide() }
+    property var resetExtra: function() {}
     property var downKeyHandler: function() {
         window.selected = Math.min(window.selected + 1, filtered.values.length - 1)
     }
@@ -81,6 +80,7 @@ PanelWindow {
         window.selected = 0
         window.selectedIndices = new Set()
         window.searchQuery = ""
+        window.resetExtra()
         itemsReader.command = ["cat", filePath]
         itemsReader.running = true
         window.shown = true
@@ -92,14 +92,19 @@ PanelWindow {
         window.pickerResultPath = ""
         window.pickerItems = []
         window.selectedIndices = new Set()
+        window.resetExtra()
     }
 
     onShownChanged: {
         if (shown) {
+            window.animatingOut = false
+            hideTimer.stop()
+            hideAnim.stop()
             window.selected = 0
             window.selectedIndices = new Set()
             window.canClose = false
             window.searchQuery = ""
+            contentItem.resetSearch()
             contentRect.opacity = 0
             dropTimer.restart()
             closeGuard.restart()
@@ -129,6 +134,7 @@ PanelWindow {
 
     function writeResult(payload) {
         var json = JSON.stringify(payload)
+        if (json === undefined) json = "null"
         resultWriter.command = ["sh", "-c", "printf '%s' "
             + Utils.escapeShell(json) + " > " + Utils.escapeShell(window.pickerResultPath)]
         resultWriter.running = true
@@ -186,6 +192,10 @@ PanelWindow {
             if (!contentLoader.item || !contentLoader.item.focusSearch) return
             contentLoader.item.focusSearch()
         }
+        function resetSearch() {
+            if (!contentLoader.item || !contentLoader.item.resetSearch) return
+            contentLoader.item.resetSearch()
+        }
     }
 
     Component {
@@ -195,6 +205,7 @@ PanelWindow {
             spacing: 12
 
             function focusSearch() { searchField.forceActiveFocus() }
+            function resetSearch() { searchField.text = "" }
 
             TextField {
                 id: searchField

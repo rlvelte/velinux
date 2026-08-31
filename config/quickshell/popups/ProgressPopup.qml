@@ -43,8 +43,8 @@ PanelWindow {
     }
 
     function startProgress(dirPath) {
+        progressPopup.reset()
         progressPopup.progressDir = dirPath
-        progressPopup.animatingOut = false
         progressPopup.shown = true
         stateReader.command = ["cat", dirPath + "/state.json"]
         stateReader.running = true
@@ -66,6 +66,9 @@ PanelWindow {
 
     onShownChanged: {
         if (shown) {
+            animatingOut = false
+            hideTimer.stop()
+            hideAnim.stop()
             contentTranslate.y = -Dimensions.overlaySlideOffset
             dropTimer.restart()
         }

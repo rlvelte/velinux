@@ -24,7 +24,7 @@ PanelWindow {
 
     readonly property var actions: [
         { label: "Logout",   command: ["swaymsg", "exit"] },
-        { label: "Suspend",  command: elevated(["systemctl", "hybrid-sleep"]) },
+        { label: "Suspend",  command: elevated(["systemctl", "suspend"]) },
         { label: "Shutdown", command: elevated(["systemctl", "poweroff"]) },
         { label: "Reboot",   command: elevated(["systemctl", "reboot"]) },
         { label: "BIOS",     command: elevated(["systemctl", "reboot", "--firmware-setup"]) }
@@ -41,6 +41,9 @@ PanelWindow {
 
     onShownChanged: {
         if (shown) {
+            animatingOut = false
+            hideTimer.stop()
+            hideAnim.stop()
             selected = 0
             canClose = false
             contentTranslate.y = -Dimensions.overlaySlideOffset
@@ -92,7 +95,7 @@ PanelWindow {
 
     function elevated(cmd) {
         var joined = cmd.map(function(arg) { return "'" + arg.replace(/'/g, "'\\''") + "'" }).join(" ")
-        return ["sh", "-c", "SUDO_ASKPASS=$(command -v vlxpass) exec sudo -A --preserve-env=WAYLAND_DISPLAY,HOME,XDG_RUNTIME_DIR " + joined]
+        return ["sh", "-c", "SUDO_ASKPASS=$(command -v vlxpass) exec sudo -A " + joined]
     }
 
     Process { id: processRunner }

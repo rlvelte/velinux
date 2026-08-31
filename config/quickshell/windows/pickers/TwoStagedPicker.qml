@@ -9,7 +9,7 @@ PickerWindow {
     id: picker
 
     ipcTarget: "twostagepicker"
-    cancelResult: {}
+    cancelResult: ({})
     contentWidth: picker.narrowWidth
 
     property int stage: 0
@@ -17,6 +17,13 @@ PickerWindow {
     property var selectedItem: null
     readonly property int narrowWidth: 640
     readonly property int wideWidth: 1100
+
+    resetExtra: function() {
+        picker.stage = 0
+        picker.selectedSub = 0
+        picker.selectedItem = null
+        picker.contentWidth = picker.narrowWidth
+    }
 
     buildModel: function(items, query) {
         var all = items.map(function(e, i) {
@@ -38,6 +45,7 @@ PickerWindow {
         else picker.launchSub(subFiltered.values[picker.selectedSub])
     }
     escapeKeyHandler: function() {
+        if (!picker.shown) return
         if (picker.stage === 1) picker.backToMain()
         else { cancelPicker(); hide() }
     }
@@ -89,6 +97,7 @@ PickerWindow {
         picker.stage = 0
         picker.selectedSub = 0
         picker.searchQuery = ""
+        contentItem.resetSearch()
         picker.contentWidth = picker.narrowWidth
     }
 
@@ -125,8 +134,11 @@ PickerWindow {
 
         Column {
             spacing: 12
+            width: parent.width
+            height: parent.height
 
             function focusSearch() { searchField.forceActiveFocus() }
+            function resetSearch() { searchField.text = "" }
 
             TextField {
                 id: searchField
@@ -153,6 +165,7 @@ PickerWindow {
                 width: parent.width
                 height: parent.height - Dimensions.searchFieldHeight - 12
                 spacing: 16
+                clip: true
 
                 ListView {
                     id: appList
