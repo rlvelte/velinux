@@ -134,6 +134,8 @@ PickerWindow {
 
         Column {
             spacing: 12
+            width: parent.width
+            height: parent.height
 
             function focusSearch() { searchField.forceActiveFocus() }
             function resetSearch() { searchField.text = "" }
@@ -163,6 +165,7 @@ PickerWindow {
                 width: parent.width
                 height: parent.height - Dimensions.searchFieldHeight - 12
                 spacing: 16
+                clip: true
 
                 ListView {
                     id: appList
