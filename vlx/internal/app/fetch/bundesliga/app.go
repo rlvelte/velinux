@@ -14,10 +14,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// TODO: -----
-// TODO: Testing when new season starts to proper evaluate how much i like it and what i want to add...
-// TODO: -----
-
 const apiBase = "https://api.openligadb.de"
 
 // setup validates all requirements for further processing.
@@ -25,12 +21,12 @@ func setup(_ *cobra.Command, _ []string) error {
 	return guard.Network()
 }
 
-// Command returns the cobra command tree for vlx fetch bundesliga.
+// Command returns the cobra command tree for vlx fetch Bundesliga.
 func Command() *cobra.Command {
 	root := &cobra.Command{
 		Use:          "bundesliga",
-		Short:        "Horribly bad bundesliga tracker",
-		Aliases:      []string{"bl"},
+		Short:        "Horribly bad Bundesliga tracker",
+		Aliases:      []string{"buli", "bl"},
 		SilenceUsage: !isatty.IsTerminal(os.Stdout.Fd()),
 		PreRunE:      setup,
 		RunE: func(cmd *cobra.Command, args []string) error {

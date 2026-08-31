@@ -11,7 +11,6 @@ import (
 	"github.com/rlvelte/velinux/vlx/internal/app/bundle"
 	"github.com/rlvelte/velinux/vlx/internal/app/fetch"
 	"github.com/rlvelte/velinux/vlx/internal/app/launcher"
-	"github.com/rlvelte/velinux/vlx/internal/app/mise"
 	"github.com/rlvelte/velinux/vlx/internal/app/themes"
 	"github.com/rlvelte/velinux/vlx/internal/core/logs"
 	"github.com/rlvelte/velinux/vlx/internal/visuals/notify"
@@ -56,7 +55,6 @@ func main() {
 		completions(),
 		themes.Command(),
 		launcher.Command(),
-		mise.Command(),
 		bundle.Command(),
 		fetch.Command(),
 	)
