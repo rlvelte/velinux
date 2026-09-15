@@ -9,3 +9,11 @@
 	prune = true
 	pruneTags = true
 	all = true
+[user]
+	email = robin.leandro.velte@icloud.com
+	name = Robin L. Velte
+	signingkey = ADA8DD79C22F76B9245BB6A59F5D578CBCAEE5A8
+[commit]
+	gpgsign = true
+[tag]
+	gpgsign = true
