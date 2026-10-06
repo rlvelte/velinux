@@ -7,6 +7,27 @@
       - target_user_uid is defined
       - target_user_gid is defined
 
+- name: Add user repositories
+  community.general.zypper_repository:
+    name: "{{ item.name }}"
+    repo: "{{ item.repo }}"
+    state: present
+    autorefresh: true
+    auto_import_keys: true
+  loop: "{{ velinux_user_repositories }}"
+
+- name: Install user dependencies
+  ansible.builtin.package:
+    name: "{{ velinux_user_dependencies }}"
+    state: present
+  when: velinux_user_dependencies | length > 0
+
+- name: Install user packages
+  ansible.builtin.package:
+    name: "{{ velinux_user_packages }}"
+    state: present
+  when: velinux_user_packages | length > 0
+
 - name: Create the configuration directory
   ansible.builtin.file:
     path: "{{ target_user_home }}/.config"

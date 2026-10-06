@@ -1,16 +1,4 @@
 ---
-- name: Install dependencies
-  ansible.builtin.package:
-    name: "{{ velinux_jetbrains_dependencies }}"
-    state: present
-  when: velinux_jetbrains_dependencies | length > 0
-
-- name: Install packages
-  ansible.builtin.package:
-    name: "{{ velinux_jetbrains_packages }}"
-    state: present
-  when: velinux_jetbrains_packages | length > 0
-
 - name: Check whether the JetBrains Toolbox is already installed
   ansible.builtin.stat:
     path: "{{ target_user_home }}/.local/bin/jetbrains-toolbox"

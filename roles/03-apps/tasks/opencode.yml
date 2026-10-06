@@ -1,16 +1,4 @@
 ---
-- name: Install dependencies
-  ansible.builtin.package:
-    name: "{{ velinux_opencode_dependencies }}"
-    state: present
-  when: velinux_opencode_dependencies | length > 0
-
-- name: Install packages
-  ansible.builtin.package:
-    name: "{{ velinux_opencode_packages }}"
-    state: present
-  when: velinux_opencode_packages | length > 0
-
 - name: Check whether OpenCode is already installed
   ansible.builtin.stat:
     path: "{{ target_user_home }}/.opencode/bin/opencode"

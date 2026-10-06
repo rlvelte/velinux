@@ -1,4 +1,8 @@
 ---
+velinux_system_repositories: []
+
+velinux_system_dependencies: []
+
 velinux_system_packages:
   - sudo
   - ca-certificates
@@ -9,23 +13,11 @@ velinux_system_packages:
   - tar
   - jq
   - yq
-
-velinux_greetd_dependencies: []
-velinux_greetd_packages:
   - greetd
   - tuigreet
-
-velinux_keyd_dependencies: []
-velinux_keyd_packages:
   - keyd
-
-velinux_virt_dependencies: []
-velinux_virt_packages:
   - patterns-containers-runtime_podman
   - patterns-server-kvm_server
   - patterns-server-kvm_tools
-
-velinux_cockpit_dependencies: []
-velinux_cockpit_packages:
   - patterns-cockpit
   - patterns-cockpit-client

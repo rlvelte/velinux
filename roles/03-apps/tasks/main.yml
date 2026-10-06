@@ -1,4 +1,25 @@
 ---
+- name: Add app repositories
+  community.general.zypper_repository:
+    name: "{{ item.name }}"
+    repo: "{{ item.repo }}"
+    state: present
+    autorefresh: true
+    auto_import_keys: true
+  loop: "{{ velinux_apps_repositories }}"
+
+- name: Install app dependencies
+  ansible.builtin.package:
+    name: "{{ velinux_apps_dependencies }}"
+    state: present
+  when: velinux_apps_dependencies | length > 0
+
+- name: Install app packages
+  ansible.builtin.package:
+    name: "{{ velinux_apps_packages }}"
+    state: present
+  when: velinux_apps_packages | length > 0
+
 - name: Install uv
   ansible.builtin.include_tasks: uv.yml
 
@@ -7,12 +28,6 @@
 
 - name: Install Neovim
   ansible.builtin.include_tasks: nvim.yml
-
-- name: Install Vivaldi
-  ansible.builtin.include_tasks: vivaldi.yml
-
-- name: Install Sublime Text
-  ansible.builtin.include_tasks: subl.yml
 
 - name: Install JetBrains Toolbox
   ansible.builtin.include_tasks: jetbrains.yml

@@ -1,29 +1,13 @@
 ---
-# 03-apps: GUI applications, opencode, steam, editors, browsers
+velinux_apps_repositories:
+  - name: vivaldi
+    repo: "https://repo.vivaldi.com/archive/rpm/x86_64/vivaldi.repo"
+  - name: sublime-text
+    repo: "https://download.sublimetext.com/rpm/stable/x86_64/sublime-text.repo"
 
-velinux_uv_dependencies:
+velinux_apps_dependencies:
   - curl
-velinux_uv_packages: []
-
-velinux_opencode_dependencies:
-  - curl
-velinux_opencode_packages: []
-
-velinux_nvim_dependencies:
   - git
-velinux_nvim_packages:
-  - neovim
-
-velinux_vivaldi_dependencies: []
-velinux_vivaldi_packages:
-  - vivaldi-stable
-
-velinux_subl_dependencies: []
-velinux_subl_packages:
-  - sublime-text
-
-velinux_jetbrains_dependencies:
-  - curl
   - tar
   - libX11-6
   - libXext6
@@ -37,4 +21,15 @@ velinux_jetbrains_dependencies:
   - libfreetype6
   - libxkbcommon0
   - Mesa-libGL1
-velinux_jetbrains_packages: []
+
+velinux_apps_packages:
+  - neovim
+  - vivaldi-stable
+  - sublime-text
+  - kitty
+  - thunar
+  - gimp
+  - discord
+  - obs-studio
+  - steam
+  - htop

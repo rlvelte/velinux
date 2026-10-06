@@ -1,24 +1,4 @@
 ---
-- name: Install dependencies
-  ansible.builtin.package:
-    name: "{{ velinux_noctalia_dependencies }}"
-    state: present
-  when: velinux_noctalia_dependencies | length > 0
-
-- name: Add the Noctalia OBS repository
-  community.general.zypper_repository:
-    name: noctalia-v5
-    repo: "https://download.opensuse.org/repositories/home:neifua:Noctalia/openSUSE_Tumbleweed/home:neifua:Noctalia.repo"
-    state: present
-    autorefresh: true
-    auto_import_keys: true
-
-- name: Install packages
-  ansible.builtin.package:
-    name: "{{ velinux_noctalia_packages }}"
-    state: present
-  when: velinux_noctalia_packages | length > 0
-
 - name: Deploy Noctalia palettes
   ansible.builtin.copy:
     src: "{{ noctalia_item.src }}"

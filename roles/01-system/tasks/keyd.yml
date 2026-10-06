@@ -1,16 +1,4 @@
 ---
-- name: Install dependencies
-  ansible.builtin.package:
-    name: "{{ velinux_keyd_dependencies }}"
-    state: present
-  when: velinux_keyd_dependencies | length > 0
-
-- name: Install packages
-  ansible.builtin.package:
-    name: "{{ velinux_keyd_packages }}"
-    state: present
-  when: velinux_keyd_packages | length > 0
-
 - name: Create keyd configuration directories
   ansible.builtin.file:
     path: "/etc/keyd/{{ keyd_item.path }}"
