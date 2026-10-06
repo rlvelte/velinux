@@ -1,0 +1,24 @@
+---
+- name: Update kernel and firmware
+  community.general.zypper:
+    name:
+      - kernel-default
+      - kernel-firmware-all
+    state: latest
+
+- name: Install system packages
+  ansible.builtin.package:
+    name: "{{ velinux_system_packages }}"
+    state: present
+
+- name: Configure greetd
+  ansible.builtin.import_tasks: greetd.yml
+
+- name: Configure keyd
+  ansible.builtin.import_tasks: keyd.yml
+
+- name: Configure virtualization
+  ansible.builtin.import_tasks: virt.yml
+
+- name: Configure Cockpit
+  ansible.builtin.import_tasks: cockpit.yml

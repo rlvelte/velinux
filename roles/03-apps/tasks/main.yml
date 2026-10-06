@@ -1,0 +1,18 @@
+---
+- name: Install uv
+  ansible.builtin.include_tasks: uv.yml
+
+- name: Install OpenCode
+  ansible.builtin.include_tasks: opencode.yml
+
+- name: Install Neovim
+  ansible.builtin.include_tasks: nvim.yml
+
+- name: Install Vivaldi
+  ansible.builtin.include_tasks: vivaldi.yml
+
+- name: Install Sublime Text
+  ansible.builtin.include_tasks: subl.yml
+
+- name: Install JetBrains Toolbox
+  ansible.builtin.include_tasks: jetbrains.yml

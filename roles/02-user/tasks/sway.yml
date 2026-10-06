@@ -1,0 +1,71 @@
+---
+- name: Install dependencies
+  ansible.builtin.package:
+    name: "{{ velinux_sway_dependencies }}"
+    state: present
+  when: velinux_sway_dependencies | length > 0
+
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ velinux_sway_packages }}"
+    state: present
+  when: velinux_sway_packages | length > 0
+
+- name: Check whether SwayFX is already installed
+  ansible.builtin.command: sway --version
+  register: sway_version
+  changed_when: false
+  check_mode: false
+
+- name: Build and install SwayFX from source
+  ansible.builtin.shell: |
+    set -euo pipefail
+    git clone -b 0.19.3 https://gitlab.freedesktop.org/wlroots/wlroots.git /tmp/wlroots-build
+    cd /tmp/wlroots-build
+    meson setup build --prefix=/usr -Dbackends=drm,libinput -Dxwayland=enabled
+    ninja -C build install
+    git clone -b 0.4.1 https://github.com/wlrfx/scenefx.git /tmp/scenefx-build
+    cd /tmp/scenefx-build
+    meson setup build --prefix=/usr
+    ninja -C build install
+    git clone -b 0.5.3 https://github.com/WillPower3309/swayfx.git /tmp/swayfx-build
+    cd /tmp/swayfx-build
+    meson setup build --prefix=/usr
+    ninja -C build install
+  args:
+    executable: /bin/bash
+  when: "'swayfx' not in sway_version.stdout"
+  changed_when: true
+
+- name: Create Sway configuration directories
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/sway/{{ sway_item.path }}"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/sway', wantlist=True) }}"
+  loop_control:
+    loop_var: sway_item
+  when: sway_item.state == 'directory'
+
+- name: Deploy Sway configuration files
+  ansible.builtin.copy:
+    src: "{{ sway_item.src }}"
+    dest: "{{ target_user_home }}/.config/sway/{{ sway_item.path }}"
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: preserve
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/sway', wantlist=True) }}"
+  loop_control:
+    loop_var: sway_item
+  when: sway_item.state == 'file'
+
+- name: Ensure Sway scripts are executable
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/sway/scripts.d"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+    recurse: true

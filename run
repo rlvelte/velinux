@@ -1,0 +1,45 @@
+#!/bin/sh
+set -eu
+cd "$(dirname "$0")"
+
+if [ "$(id -u)" -eq 0 ]; then
+    sudo=""
+else
+    sudo="sudo"
+fi
+
+missing_packages=""
+command -v python3 >/dev/null 2>&1 || missing_packages="$missing_packages python3 python3-pip"
+command -v pipx >/dev/null 2>&1 || missing_packages="$missing_packages pipx"
+
+if [ -n "$missing_packages" ]; then
+    echo "installing:$missing_packages"
+    $sudo zypper refresh
+    # shellcheck disable=SC2086
+    $sudo zypper install --non-interactive $missing_packages
+fi
+
+export PATH="$HOME/.local/bin:$PATH"
+
+if ! command -v ansible-playbook >/dev/null 2>&1; then
+    echo "installing ansible-core via pipx..."
+    pipx install ansible-core
+    pipx ensurepath >/dev/null 2>&1 || true
+fi
+
+if ! command -v ansible-playbook >/dev/null 2>&1; then
+    echo "error: ansible-playbook not found after installation" >&2
+    exit 1
+fi
+
+if ! ansible-galaxy collection list community.general 2>/dev/null | grep -q community.general; then
+    echo "installing community.general collection..."
+    ansible-galaxy collection install community.general
+fi
+
+if [ -r ansible.cfg ]; then
+    ANSIBLE_CONFIG="$PWD/ansible.cfg"
+    export ANSIBLE_CONFIG
+fi
+export ANSIBLE_ROLES_PATH="$PWD/roles"
+exec ansible-playbook --become --inventory "$PWD/inventory/hosts.yml" playbooks/site.yml "$@"

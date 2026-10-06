@@ -1,0 +1,58 @@
+---
+# 02-user: user setup, home layout, config deployment
+velinux_shell_dependencies:
+  - git
+  - curl
+velinux_shell_packages:
+  - zsh
+  - fd
+  - fzf
+  - ripgrep
+  - htop
+  - less
+  - kitty
+
+velinux_sway_dependencies:
+  - git
+  - gcc
+  - gcc-c++
+  - meson
+  - ninja
+  - make
+  - scdoc
+  - pkgconf-pkg-config
+  - wayland-devel
+  - wayland-protocols-devel
+  - libinput-devel
+  - libevdev-devel
+  - libdrm-devel
+  - libgbm-devel
+  - libxkbcommon-devel
+  - libxcb-devel
+  - systemd-devel
+  - Mesa-libEGL-devel
+  - Mesa-libGLESv2-devel
+  - Mesa-dri
+  - xwayland-devel
+  - xcb-util-wm-devel
+  - libpixman-1-0-devel
+  - pango-devel
+  - cairo-devel
+  - gdk-pixbuf-devel
+  - pcre2-devel
+  - libjson-c-devel
+  - hwdata
+  - pam-devel
+  - libpcap-devel
+  - libliftoff-devel
+  - libdisplay-info-devel
+  - seatd-devel
+velinux_sway_packages:
+  - sway
+  - swaylock
+  - swayidle
+  - patterns-sway-sway
+
+velinux_noctalia_dependencies: []
+velinux_noctalia_packages:
+  - noctalia

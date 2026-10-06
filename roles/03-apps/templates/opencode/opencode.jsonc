@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "enabled": true
+    },
+    "grep-app": {
+      "type": "remote",
+      "url": "https://mcp.grep.app",
+      "enabled": true
+    },
+    "fetch": {
+      "type": "local",
+      "command": ["uvx", "mcp-server-fetch"],
+      "enabled": true
+    },
+    "kubernetes": {
+      "type": "local",
+      "command": ["npx", "-y", "mcp-server-kubernetes"],
+      "enabled": true
+    },
+    "podman": {
+      "type": "local",
+      "command": ["sh", "-c", "export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock; exec uvx mcp-server-docker"
+      ],
+      "enabled": true
+    },
+    "aspire": {
+      "type": "local",
+      "command": ["aspire", "agent", "mcp"],
+      "enabled": true
+    },
+  },
+  "lsp": true
+}

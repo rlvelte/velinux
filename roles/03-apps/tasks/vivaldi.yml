@@ -1,0 +1,20 @@
+---
+- name: Install dependencies
+  ansible.builtin.package:
+    name: "{{ velinux_vivaldi_dependencies }}"
+    state: present
+  when: velinux_vivaldi_dependencies | length > 0
+
+- name: Add the Vivaldi repository
+  community.general.zypper_repository:
+    name: vivaldi
+    repo: "https://repo.vivaldi.com/archive/rpm/x86_64/vivaldi.repo"
+    state: present
+    autorefresh: true
+    auto_import_keys: true
+
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ velinux_vivaldi_packages }}"
+    state: present
+  when: velinux_vivaldi_packages | length > 0

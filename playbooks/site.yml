@@ -1,0 +1,66 @@
+---
+- name: Converge openSUSE installation to velinux desktop
+  hosts: all
+  gather_facts: true
+  pre_tasks:
+    - name: Assert supported distribution
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.distribution in ['openSUSE Tumbleweed', 'openSUSE Leap']
+        fail_msg: "Unsupported distribution. Supported: openSUSE Tumbleweed / Leap 15+."
+      tags: always
+
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: auto
+      tags: always
+
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+      tags: always
+
+    - name: Discover the single regular user on the target host
+      ansible.builtin.shell:
+        cmd: >-
+          set -o pipefail;
+          awk -F: '$3 >= 1000 && $3 != 65534 && $7 !~ /(nologin|false)$/ { print }' /etc/passwd
+        executable: /bin/bash
+      check_mode: false
+      changed_when: false
+      register: target_passwd
+      tags: always
+
+    - name: Assert exactly one regular user exists on the target host
+      ansible.builtin.assert:
+        that:
+          - target_passwd.stdout_lines | length == 1
+        fail_msg: >-
+          Expected exactly one regular (non-root) user on {{ inventory_hostname }},
+          found {{ target_passwd.stdout_lines | length }}: {{ target_passwd.stdout_lines }}.
+      tags: always
+
+    - name: Set target user facts
+      ansible.builtin.set_fact:
+        target_user: "{{ target_passwd.stdout_lines[0].split(':')[0] }}"
+        target_user_home: "{{ target_passwd.stdout_lines[0].split(':')[5] }}"
+        target_user_uid: "{{ target_passwd.stdout_lines[0].split(':')[2] | int }}"
+        target_user_gid: "{{ target_passwd.stdout_lines[0].split(':')[3] | int }}"
+      tags: always
+
+  roles:
+    - role: 01-system
+      tags: [system]
+    - role: 02-user
+      tags: [user]
+
+  post_tasks:
+    - name: Flush handlers before reboot
+      ansible.builtin.meta: flush_handlers
+      tags: always
+
+    - name: Schedule reboot to converge session configuration
+      ansible.builtin.command:
+        cmd: /sbin/shutdown -r +1
+      when: velinux_reboot | bool
+      changed_when: true
+      tags: [system]

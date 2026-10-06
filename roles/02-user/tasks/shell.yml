@@ -1,0 +1,110 @@
+---
+- name: Install dependencies
+  ansible.builtin.package:
+    name: "{{ velinux_shell_dependencies }}"
+    state: present
+  when: velinux_shell_dependencies | length > 0
+
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ velinux_shell_packages }}"
+    state: present
+  when: velinux_shell_packages | length > 0
+
+- name: Create Zsh configuration root
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/zsh"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+
+- name: Check whether Oh My Zsh is installed
+  ansible.builtin.stat:
+    path: "{{ target_user_home }}/.config/zsh/oh-my-zsh"
+  register: oh_my_zsh
+
+- name: Install Oh My Zsh non-interactively
+  ansible.builtin.shell: |
+    set -eu
+    export RUNZSH=no
+    export CHSH=no
+    export KEEP_ZSHRC=yes
+    curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | sh
+  args:
+    executable: /bin/bash
+  become_user: "{{ target_user }}"
+  environment:
+    HOME: "{{ target_user_home }}"
+    ZDOTDIR: "{{ target_user_home }}/.config/zsh"
+    ZSH: "{{ target_user_home }}/.config/zsh/oh-my-zsh"
+  when: not oh_my_zsh.stat.exists
+
+- name: Create Oh My Zsh custom plugin directory
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/zsh/oh-my-zsh/custom/plugins"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+
+- name: Install Oh My Zsh plugins
+  ansible.builtin.git:
+    repo: "{{ item.repo }}"
+    dest: "{{ target_user_home }}/.config/zsh/oh-my-zsh/custom/plugins/{{ item.name }}"
+    update: true
+  become_user: "{{ target_user }}"
+  loop:
+    - name: zsh-interactive-cd
+      repo: https://github.com/johannjhang/zsh-interactive-cd.git
+    - name: zsh-autosuggestions
+      repo: https://github.com/zsh-users/zsh-autosuggestions.git
+    - name: zsh-syntax-highlighting
+      repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+    - name: zsh-eza
+      repo: https://github.com/z-shell/zsh-eza.git
+
+- name: Install the Powerlevel10k theme
+  ansible.builtin.git:
+    repo: https://github.com/romkatv/powerlevel10k.git
+    dest: "{{ target_user_home }}/.config/zsh/oh-my-zsh/custom/themes/powerlevel10k"
+    update: true
+  become_user: "{{ target_user }}"
+
+- name: Create Zsh configuration directory
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/zsh/{{ zsh_item.path }}"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/zsh', wantlist=True) }}"
+  loop_control:
+    loop_var: zsh_item
+  when: zsh_item.state == 'directory'
+
+- name: Deploy Zsh configuration files
+  ansible.builtin.copy:
+    src: "{{ zsh_item.src }}"
+    dest: "{{ target_user_home }}/.config/zsh/{{ zsh_item.path | regex_replace('\\.j2$', '') }}"
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0644"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/zsh', wantlist=True) }}"
+  loop_control:
+    loop_var: zsh_item
+  when: zsh_item.state == 'file'
+
+- name: Link the Zsh environment file from the home directory
+  ansible.builtin.file:
+    src: "{{ target_user_home }}/.config/zsh/.zshenv"
+    dest: "{{ target_user_home }}/.zshenv"
+    state: link
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    force: true
+
+- name: Set Zsh as the user's login shell
+  ansible.builtin.user:
+    name: "{{ target_user }}"
+    shell: /usr/bin/zsh
