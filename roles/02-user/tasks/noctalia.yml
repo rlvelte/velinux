@@ -1,8 +1,20 @@
 ---
-- name: Deploy Noctalia palettes
+- name: Create Noctalia configuration directories
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/noctalia/{{ noctalia_item.path }}"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/noctalia', wantlist=True) }}"
+  loop_control:
+    loop_var: noctalia_item
+  when: noctalia_item.state == 'directory'
+
+- name: Deploy Noctalia configuration files
   ansible.builtin.copy:
     src: "{{ noctalia_item.src }}"
-    dest: "{{ target_user_home }}/.config/noctalia/palettes/{{ noctalia_item.path }}"
+    dest: "{{ target_user_home }}/.config/noctalia/{{ noctalia_item.path }}"
     owner: "{{ target_user_uid }}"
     group: "{{ target_user_gid }}"
     mode: "0644"
