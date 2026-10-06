@@ -1,4 +1,6 @@
 ---
+velinux_swayfx: false
+
 velinux_user_repositories:
   - name: noctalia-v5
     repo: "https://download.opensuse.org/repositories/home:neifua:Noctalia/openSUSE_Tumbleweed/home:neifua:Noctalia.repo"

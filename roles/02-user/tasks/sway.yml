@@ -2,6 +2,7 @@
 - name: Check whether SwayFX is already installed
   ansible.builtin.command: sway --version
   register: sway_version
+  failed_when: false
   changed_when: false
   check_mode: false
 
@@ -22,7 +23,9 @@
     ninja -C build install
   args:
     executable: /bin/bash
-  when: "'swayfx' not in sway_version.stdout"
+  when:
+    - velinux_swayfx | bool
+    - "'swayfx' not in (sway_version.stdout | default(''))"
   changed_when: true
 
 - name: Create Sway configuration directories
