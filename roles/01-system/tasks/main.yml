@@ -1,7 +1,7 @@
 ---
 - name: Add system repositories
   community.general.zypper_repository:
-    name: "{{ item.name }}"
+    name: "{{ omit if item.repo.endswith('.repo') else item.name }}"
     repo: "{{ item.repo }}"
     state: present
     autorefresh: true
