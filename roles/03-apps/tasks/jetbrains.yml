@@ -1,0 +1,42 @@
+---
+- name: Install dependencies
+  ansible.builtin.package:
+    name: "{{ velinux_jetbrains_dependencies }}"
+    state: present
+  when: velinux_jetbrains_dependencies | length > 0
+
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ velinux_jetbrains_packages }}"
+    state: present
+  when: velinux_jetbrains_packages | length > 0
+
+- name: Check whether the JetBrains Toolbox is already installed
+  ansible.builtin.stat:
+    path: "{{ target_user_home }}/.local/bin/jetbrains-toolbox"
+  register: jetbrains_toolbox
+
+- name: Install the JetBrains Toolbox
+  ansible.builtin.shell: |
+    set -euo pipefail
+    rm -rf /tmp/jetbrains-toolbox-download
+    mkdir -p /tmp/jetbrains-toolbox-download
+    curl -fsSL 'https://data.services.jetbrains.com/products/download?code=TBA&platform=linux' -o /tmp/jetbrains-toolbox-download/jetbrains-toolbox.tar.gz
+    rm -rf {{ target_user_home }}/.local/share/JetBrains/Toolbox
+    mkdir -p {{ target_user_home }}/.local/share/JetBrains/Toolbox
+    tar -xzf /tmp/jetbrains-toolbox-download/jetbrains-toolbox.tar.gz -C {{ target_user_home }}/.local/share/JetBrains/Toolbox --strip-components=1
+    mkdir -p {{ target_user_home }}/.local/bin
+    ln -sf {{ target_user_home }}/.local/share/JetBrains/Toolbox/bin/jetbrains-toolbox {{ target_user_home }}/.local/bin/jetbrains-toolbox
+    mkdir -p {{ target_user_home }}/.local/share/applications
+    cp {{ target_user_home }}/.local/share/JetBrains/Toolbox/bin/jetbrains-toolbox.desktop {{ target_user_home }}/.local/share/applications/jetbrains-toolbox.desktop
+    sed -i 's|^Exec=jetbrains-toolbox$|Exec={{ target_user_home }}/.local/share/JetBrains/Toolbox/bin/jetbrains-toolbox|' {{ target_user_home }}/.local/share/applications/jetbrains-toolbox.desktop
+    sed -i 's|^Icon=jetbrains-toolbox$|Icon={{ target_user_home }}/.local/share/JetBrains/Toolbox/bin/toolbox-tray-color.png|' {{ target_user_home }}/.local/share/applications/jetbrains-toolbox.desktop
+    rm -rf /tmp/jetbrains-toolbox-download
+  args:
+    executable: /bin/bash
+  become: true
+  become_user: "{{ target_user }}"
+  environment:
+    HOME: "{{ target_user_home }}"
+  when: not jetbrains_toolbox.stat.exists
+  changed_when: true

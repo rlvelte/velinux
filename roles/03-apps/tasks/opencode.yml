@@ -1,0 +1,71 @@
+---
+- name: Install dependencies
+  ansible.builtin.package:
+    name: "{{ velinux_opencode_dependencies }}"
+    state: present
+  when: velinux_opencode_dependencies | length > 0
+
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ velinux_opencode_packages }}"
+    state: present
+  when: velinux_opencode_packages | length > 0
+
+- name: Check whether OpenCode is already installed
+  ansible.builtin.stat:
+    path: "{{ target_user_home }}/.opencode/bin/opencode"
+  register: opencode_binary
+
+- name: Install OpenCode
+  ansible.builtin.shell: |
+    set -eu
+    curl -fsSL https://opencode.ai/install | bash
+  args:
+    executable: /bin/bash
+  become_user: "{{ target_user }}"
+  environment:
+    HOME: "{{ target_user_home }}"
+  when: not opencode_binary.stat.exists
+
+- name: Install OpenAgentsControl
+  ansible.builtin.shell: |
+    set -eu
+    curl -fsSL https://raw.githubusercontent.com/darrenhinde/OpenAgentsControl/main/install.sh | bash -s developer
+  args:
+    executable: /bin/bash
+  become_user: "{{ target_user }}"
+  environment:
+    HOME: "{{ target_user_home }}"
+  when: not opencode_binary.stat.exists
+
+- name: Create OpenCode configuration directory
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/opencode"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+
+- name: Create OpenCode template directories
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/opencode/{{ opencode_item.path }}"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/opencode', wantlist=True) }}"
+  loop_control:
+    loop_var: opencode_item
+  when: opencode_item.state == 'directory'
+
+- name: Deploy OpenCode configuration files
+  ansible.builtin.copy:
+    src: "{{ opencode_item.src }}"
+    dest: "{{ target_user_home }}/.config/opencode/{{ opencode_item.path | regex_replace('\\.j2$', '') }}"
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0644"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/opencode', wantlist=True) }}"
+  loop_control:
+    loop_var: opencode_item
+  when: opencode_item.state == 'file'

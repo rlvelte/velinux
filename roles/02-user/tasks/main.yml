@@ -1,0 +1,34 @@
+---
+- name: Assert target user facts are available
+  ansible.builtin.assert:
+    that:
+      - target_user is defined
+      - target_user_home is defined
+      - target_user_uid is defined
+      - target_user_gid is defined
+
+- name: Create the configuration directory
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+
+- name: Configure the shell
+  ansible.builtin.include_tasks: shell.yml
+
+- name: Configure Sway
+  ansible.builtin.include_tasks: sway.yml
+
+- name: Configure Noctalia
+  ansible.builtin.include_tasks: noctalia.yml
+
+- name: Reload the user systemd manager
+  ansible.builtin.systemd:
+    scope: user
+    daemon_reload: true
+  become: true
+  become_user: "{{ target_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ target_user_uid }}"

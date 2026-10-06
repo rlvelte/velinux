@@ -1,0 +1,28 @@
+---
+- name: Install dependencies
+  ansible.builtin.package:
+    name: "{{ velinux_uv_dependencies }}"
+    state: present
+  when: velinux_uv_dependencies | length > 0
+
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ velinux_uv_packages }}"
+    state: present
+  when: velinux_uv_packages | length > 0
+
+- name: Check whether uv is already installed
+  ansible.builtin.stat:
+    path: "{{ target_user_home }}/.local/bin/uv"
+  register: uv_binary
+
+- name: Install uv
+  ansible.builtin.shell: |
+    set -eu
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+  args:
+    executable: /bin/bash
+  become_user: "{{ target_user }}"
+  environment:
+    HOME: "{{ target_user_home }}"
+  when: not uv_binary.stat.exists

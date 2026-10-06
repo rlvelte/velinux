@@ -1,0 +1,17 @@
+---
+- name: Install dependencies
+  ansible.builtin.package:
+    name: "{{ velinux_cockpit_dependencies }}"
+    state: present
+  when: velinux_cockpit_dependencies | length > 0
+
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ velinux_cockpit_packages }}"
+    state: present
+  when: velinux_cockpit_packages | length > 0
+
+- name: Enable the Cockpit web console socket
+  ansible.builtin.systemd:
+    name: cockpit.socket
+    enabled: true

@@ -1,0 +1,30 @@
+---
+- name: Install dependencies
+  ansible.builtin.package:
+    name: "{{ velinux_nvim_dependencies }}"
+    state: present
+  when: velinux_nvim_dependencies | length > 0
+
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ velinux_nvim_packages }}"
+    state: present
+  when: velinux_nvim_packages | length > 0
+
+- name: Check whether the Neovim configuration already exists
+  ansible.builtin.stat:
+    path: "{{ target_user_home }}/.config/nvim"
+  register: nvim_config
+
+- name: Install the LazyVim starter configuration
+  ansible.builtin.git:
+    repo: https://github.com/LazyVim/starter.git
+    dest: "{{ target_user_home }}/.config/nvim"
+    update: false
+  become_user: "{{ target_user }}"
+  when: not nvim_config.stat.exists
+
+- name: Remove LazyVim starter Git metadata
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/nvim/.git"
+    state: absent

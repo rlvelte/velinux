@@ -1,0 +1,49 @@
+---
+- name: Install dependencies
+  ansible.builtin.package:
+    name: "{{ velinux_greetd_dependencies }}"
+    state: present
+  when: velinux_greetd_dependencies | length > 0
+
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ velinux_greetd_packages }}"
+    state: present
+  when: velinux_greetd_packages | length > 0
+
+- name: Ensure the greeter system user exists
+  ansible.builtin.user:
+    name: greeter
+    system: true
+    home: /var/lib/greetd
+    shell: /usr/sbin/nologin
+    create_home: false
+
+- name: Create greetd configuration directories
+  ansible.builtin.file:
+    path: "/etc/greetd/{{ greetd_item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/greetd', wantlist=True) }}"
+  loop_control:
+    loop_var: greetd_item
+  when: greetd_item.state == 'directory'
+
+- name: Deploy greetd configuration files
+  ansible.builtin.copy:
+    src: "{{ greetd_item.src }}"
+    dest: "/etc/greetd/{{ greetd_item.path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/greetd', wantlist=True) }}"
+  loop_control:
+    loop_var: greetd_item
+  when: greetd_item.state == 'file'
+
+- name: Enable greetd as the display manager
+  ansible.builtin.systemd:
+    name: greetd.service
+    enabled: true

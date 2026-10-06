@@ -1,0 +1,41 @@
+---
+- name: Install dependencies
+  ansible.builtin.package:
+    name: "{{ velinux_keyd_dependencies }}"
+    state: present
+  when: velinux_keyd_dependencies | length > 0
+
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ velinux_keyd_packages }}"
+    state: present
+  when: velinux_keyd_packages | length > 0
+
+- name: Create keyd configuration directories
+  ansible.builtin.file:
+    path: "/etc/keyd/{{ keyd_item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/keyd', wantlist=True) }}"
+  loop_control:
+    loop_var: keyd_item
+  when: keyd_item.state == 'directory'
+
+- name: Deploy keyd configuration files
+  ansible.builtin.copy:
+    src: "{{ keyd_item.src }}"
+    dest: "/etc/keyd/{{ keyd_item.path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/keyd', wantlist=True) }}"
+  loop_control:
+    loop_var: keyd_item
+  when: keyd_item.state == 'file'
+
+- name: Enable keyd as the key remapping daemon
+  ansible.builtin.systemd:
+    name: keyd.service
+    enabled: true
