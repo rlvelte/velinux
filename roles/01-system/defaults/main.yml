@@ -14,7 +14,6 @@ velinux_system_repositories:
     repo: "http://codecs.opensuse.org/openh264/openSUSE_Tumbleweed"
 
 velinux_system_dependencies: 
-  - sudo
   - jq
   - tar
   - yq

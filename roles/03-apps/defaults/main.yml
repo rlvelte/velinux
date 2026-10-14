@@ -12,7 +12,7 @@ velinux_apps_repositories:
   - name: obs-rvelte
     description: "home:rvelte (openSUSE Tumbleweed)"
     repo: "https://download.opensuse.org/repositories/home:/rvelte/openSUSE_Tumbleweed/"
-j
+
 velinux_apps_dependencies:
   - curl
   - git
