@@ -1,0 +1,11 @@
+---
+- name: Restart the gpg-agent
+  ansible.builtin.command:
+    cmd: gpgconf --kill gpg-agent
+  become: true
+  become_user: "{{ target_user }}"
+  environment:
+    HOME: "{{ target_user_home }}"
+    GNUPGHOME: "{{ target_user_home }}/.gnupg"
+    XDG_RUNTIME_DIR: "/run/user/{{ target_user_uid }}"
+  changed_when: true

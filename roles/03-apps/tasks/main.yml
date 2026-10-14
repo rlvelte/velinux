@@ -1,7 +1,8 @@
 ---
 - name: Add app repositories
   community.general.zypper_repository:
-    name: "{{ omit if item.repo.endswith('.repo') else item.name }}"
+    name: "{{ item.name }}"
+    description: "{{ item.description | default(omit) }}"
     repo: "{{ item.repo }}"
     state: present
     autorefresh: true

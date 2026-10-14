@@ -9,7 +9,8 @@
 
 - name: Add user repositories
   community.general.zypper_repository:
-    name: "{{ omit if item.repo.endswith('.repo') else item.name }}"
+    name: "{{ item.name }}"
+    description: "{{ item.description | default(omit) }}"
     repo: "{{ item.repo }}"
     state: present
     autorefresh: true
@@ -36,8 +37,11 @@
     group: "{{ target_user_gid }}"
     mode: "0755"
 
-- name: Configure the shell
+- name: Configure Shell
   ansible.builtin.include_tasks: shell.yml
+
+- name: Configure GnuPG
+  ansible.builtin.include_tasks: gpg.yml
 
 - name: Configure Sway
   ansible.builtin.include_tasks: sway.yml

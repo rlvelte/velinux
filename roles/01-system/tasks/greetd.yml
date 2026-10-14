@@ -20,9 +20,9 @@
   when: greetd_item.state == 'directory'
 
 - name: Deploy greetd configuration files
-  ansible.builtin.copy:
+  ansible.builtin.template:
     src: "{{ greetd_item.src }}"
-    dest: "/etc/greetd/{{ greetd_item.path }}"
+    dest: "/etc/greetd/{{ greetd_item.path | regex_replace('\\.j2$', '') }}"
     owner: root
     group: root
     mode: "0644"
@@ -30,6 +30,7 @@
   loop_control:
     loop_var: greetd_item
   when: greetd_item.state == 'file'
+  notify: Restart greetd
 
 - name: Enable greetd as the display manager
   ansible.builtin.systemd:

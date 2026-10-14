@@ -1,0 +1,63 @@
+---
+- name: Create the GnuPG home directory
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.gnupg"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0700"
+
+- name: Deploy the GnuPG configuration files
+  ansible.builtin.copy:
+    src: "gnupg/{{ gpg_item }}"
+    dest: "{{ target_user_home }}/.gnupg/{{ gpg_item }}"
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0600"
+  loop:
+    - gpg.conf
+    - gpg-agent.conf
+    - scdaemon.conf
+  loop_control:
+    loop_var: gpg_item
+  notify: Restart the gpg-agent
+
+- name: Enable the smartcard daemon at boot
+  ansible.builtin.systemd:
+    name: pcscd.service
+    enabled: true
+    state: started
+
+- name: Prime the gpg-agent after provisioning
+  ansible.builtin.command:
+    cmd: gpgconf --launch gpg-agent
+  become: true
+  become_user: "{{ target_user }}"
+  environment:
+    HOME: "{{ target_user_home }}"
+    GNUPGHOME: "{{ target_user_home }}/.gnupg"
+    XDG_RUNTIME_DIR: "/run/user/{{ target_user_uid }}"
+  changed_when: true
+  notify: Restart the gpg-agent
+
+- name: Learn the SSH identities provided
+  ansible.builtin.command:
+    cmd: ssh-add -l
+  become: true
+  become_user: "{{ target_user }}"
+  environment:
+    HOME: "{{ target_user_home }}"
+    GNUPGHOME: "{{ target_user_home }}/.gnupg"
+    XDG_RUNTIME_DIR: "/run/user/{{ target_user_uid }}"
+    SSH_AUTH_SOCK: "/run/user/{{ target_user_uid }}/gnupg/S.gpg-agent.ssh"
+  changed_when: false
+  failed_when: false
+  register: gpg_ssh_identities
+
+- name: Report when the authentication key is not served over SSH
+  ansible.builtin.debug:
+    msg: >-
+      No SSH identities were learned from the card. Attach the key and run the playbook again.
+  when:
+    - not ansible_check_mode
+    - gpg_ssh_identities.stdout_lines | length == 0

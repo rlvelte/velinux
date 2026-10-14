@@ -2,8 +2,9 @@
 velinux_swayfx: false
 
 velinux_user_repositories:
-  - name: noctalia-v5
-    repo: "https://download.opensuse.org/repositories/home:neifua:Noctalia/openSUSE_Tumbleweed/home:neifua:Noctalia.repo"
+  - name: obs-noctalia
+    description: "Noctalia Desktop"
+    repo: "https://download.opensuse.org/repositories/home:/neifua:/Noctalia/openSUSE_Tumbleweed/"
 
 velinux_user_dependencies:
   - git
@@ -34,7 +35,7 @@ velinux_user_dependencies:
   - cairo-devel
   - gdk-pixbuf-devel
   - pcre2-devel
-  - libjson-c-devel
+  - json-c-devel
   - hwdata
   - pam-devel
   - libpcap-devel
@@ -58,3 +59,6 @@ velinux_user_packages:
   - patterns-sway-sway
   - noctalia
   - pcsc-lite
+  - gpg2
+  - pinentry-qt6
+  

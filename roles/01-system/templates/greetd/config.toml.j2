@@ -2,7 +2,7 @@
 # __   _____| (_)_ __  _   ___  ____ _ _ __ ___  ___| |_ __| |
 # \ \ / / _ \ | | '_ \| | | \ \/ / _` | '__/ _ \/ _ \ __/ _` |
 #  \ V /  __/ | | | | | |_| |>  < (_| | | |  __/  __/ || (_| |
-#   \_/ \___|_|_|_| |_|\__,_/_/\_\__, |_|  \___|\___|\__\__,_|
+#   \_/ \___|_|_|_| |_|\__, |_|  \___|\___|\__\__,_|
 #                                |___/        greetd by rvelte
 
 [terminal]
@@ -10,7 +10,7 @@ vt = 1
 
 [initial_session]
 command = "sway"
-user = "rvelte"
+user = "{{ target_user }}"
 
 [default_session]
 command = "tuigreet --time --remember --remember-session --sessions /etc/greetd/sessions"

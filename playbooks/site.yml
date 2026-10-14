@@ -6,8 +6,8 @@
     - name: Assert supported distribution
       ansible.builtin.assert:
         that:
-          - ansible_facts.distribution in ['openSUSE Tumbleweed', 'openSUSE Leap']
-        fail_msg: "Unsupported distribution. Supported: openSUSE Tumbleweed / Leap 15+."
+          - ansible_facts.distribution in ['openSUSE Tumbleweed']
+        fail_msg: "Unsupported distribution. Supported: openSUSE Tumbleweed."
       tags: always
 
     - name: Gather package facts
@@ -52,6 +52,8 @@
       tags: [system]
     - role: 02-user
       tags: [user]
+    - role: 03-apps
+      tags: [apps]
 
   post_tasks:
     - name: Flush handlers before reboot

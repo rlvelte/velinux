@@ -17,6 +17,9 @@ alias gs="git status"
 alias gp="git push"
 gco() { git commit "$@"; }
 
+# GnuPG
+alias gpg-reset='gpgconf --kill gpg-agent && gpg-connect-agent /bye && ssh-add -l'
+
 # Systemctl
 alias shutdown='systemctl poweroff'
 alias reboot='systemctl reboot'

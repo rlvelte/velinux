@@ -1,18 +1,30 @@
 ---
-velinux_system_repositories: []
+velinux_system_repositories:
+  - name: opensuse-oss
+    description: "Main Repository (OSS)"
+    repo: "http://download.opensuse.org/tumbleweed/repo/oss/"
+  - name: opensuse-non-oss
+    description: "Main Repository (NON-OSS)"
+    repo: "http://download.opensuse.org/tumbleweed/repo/non-oss/"
+  - name: opensuse-update
+    description: "Main Update Repository"
+    repo: "http://download.opensuse.org/update/tumbleweed/"
+  - name: opensuse-openh264
+    description: "Open H.264 Codec (openSUSE Tumbleweed)"
+    repo: "http://codecs.opensuse.org/openh264/openSUSE_Tumbleweed"
 
-velinux_system_dependencies: []
-
-velinux_system_packages:
+velinux_system_dependencies: 
   - sudo
+  - jq
+  - tar
+  - yq
   - ca-certificates
   - curl
   - wget
   - unzip
   - zip
-  - tar
-  - jq
-  - yq
+
+velinux_system_packages:
   - greetd
   - tuigreet
   - keyd

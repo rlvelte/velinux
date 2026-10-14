@@ -1,5 +1,13 @@
 #!/bin/zsh
 
+# SSH
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+
+# GnuPG
+if tty -s 2>/dev/null; then
+  export GPG_TTY=$(tty)
+fi
+
 # Golang
 export GOPATH="$HOME/.go"
 export GOMODCACHE="$GOPATH/pkg/mod"

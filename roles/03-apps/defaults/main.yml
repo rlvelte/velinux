@@ -1,10 +1,18 @@
 ---
 velinux_apps_repositories:
   - name: vivaldi
-    repo: "https://repo.vivaldi.com/archive/rpm/x86_64/vivaldi.repo"
-  - name: sublime-text
-    repo: "https://download.sublimetext.com/rpm/stable/x86_64/sublime-text.repo"
-
+    description: "Vivaldi Browser"
+    repo: "https://repo.vivaldi.com/archive/rpm/x86_64"
+  - name: sublime
+    description: "Sublime Text - stable"
+    repo: "https://download.sublimetext.com/rpm/stable/x86_64"
+  - name: microsoft
+    description: "Microsoft Production"
+    repo: "https://packages.microsoft.com/opensuse/15/prod/"
+  - name: obs-rvelte
+    description: "home:rvelte (openSUSE Tumbleweed)"
+    repo: "https://download.opensuse.org/repositories/home:/rvelte/openSUSE_Tumbleweed/"
+j
 velinux_apps_dependencies:
   - curl
   - git
@@ -26,6 +34,7 @@ velinux_apps_packages:
   - neovim
   - vivaldi-stable
   - sublime-text
+  - distrobox
   - kitty
   - thunar
   - gimp
@@ -33,3 +42,4 @@ velinux_apps_packages:
   - obs-studio
   - steam
   - htop
+  - vgn
