@@ -21,12 +21,6 @@
       "command": ["npx", "-y", "mcp-server-kubernetes"],
       "enabled": true
     },
-    "podman": {
-      "type": "local",
-      "command": ["sh", "-c", "export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock; exec uvx mcp-server-docker"
-      ],
-      "enabled": true
-    },
     "aspire": {
       "type": "local",
       "command": ["aspire", "agent", "mcp"],

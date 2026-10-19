@@ -37,7 +37,10 @@
 - name: Install OpenCode
   ansible.builtin.include_tasks: opencode.yml
 
-- name: Install Neovim
+- name: Configure Vim
+  ansible.builtin.include_tasks: vim.yml
+
+- name: Configure Neovim
   ansible.builtin.include_tasks: nvim.yml
 
 - name: Install JetBrains Toolbox

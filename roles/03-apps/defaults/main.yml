@@ -42,7 +42,8 @@ velinux_apps_dependencies:
 
 velinux_apps_packages:
   - neovim
-  - librewolf
+  - vim
+  - vivaldi-stable
   - sublime-text
   - distrobox
   - kitty

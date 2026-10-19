@@ -7,6 +7,9 @@ function global:b { bat @args }
 # Ll
 function global:ll { ls -lah @args }
 
+# Navigation
+function global:.. { Set-Location .. }
+
 # Fastfetch
 function global:ff { fastfetch @args }
 function global:of { onefetch @args }

@@ -29,6 +29,21 @@
     state: present
   when: velinux_user_packages | length > 0
 
+- name: Enable and start user audio services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    scope: user
+    enabled: true
+    state: started
+  loop:
+    - pipewire.socket
+    - pipewire-pulse.socket
+    - wireplumber.service
+  become: true
+  become_user: "{{ target_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ target_user_uid }}"
+
 - name: Create the configuration directory
   ansible.builtin.file:
     path: "{{ target_user_home }}/.config"

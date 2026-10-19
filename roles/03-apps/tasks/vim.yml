@@ -1,0 +1,26 @@
+---
+- name: Create Vim configuration directory
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/vim"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0700"
+
+- name: Deploy Vim configuration
+  ansible.builtin.template:
+    src: vim/vimrc
+    dest: "{{ target_user_home }}/.config/vim/vimrc"
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0600"
+
+- name: Link the Vim configuration from the home directory
+  ansible.builtin.file:
+    src: "{{ target_user_home }}/.config/vim/vimrc"
+    dest: "{{ target_user_home }}/.vimrc"
+    state: link
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    force: true
+  become_user: "{{ target_user }}"

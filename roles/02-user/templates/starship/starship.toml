@@ -8,11 +8,11 @@
 
 add_newline = false
 
-format = "$directory$git_branch$git_status$cmd_duration$jobs$character"
+format = "$directory$git_branch$git_status$jobs$character"
 right_format = "$status$direnv$golang$dotnet$python$nodejs$ruby$rust$zig$c$cpp$cmake$java$bun$rbenv$kubernetes$terraform$aws$azure$gcloud$container$nix_shell"
 
 [os]
-disabled = false
+disabled = true
 
 [directory]
 style = "blue"
@@ -21,7 +21,8 @@ truncate_to_repo = false
 fish_style_pwd_dir_length = 1
 truncation_symbol = ""
 read_only_style = "red"
-format = "[$path]($style)[$read_only]($read_only_style) "
+read_only = "[ro] "
+format = "[$read_only]($read_only_style)[$path]($style) "
 
 [git_branch]
 style = "purple"
@@ -30,11 +31,6 @@ format = "on [$branch]($style) "
 [git_status]
 style = "red"
 format = "with ([\\[$all_status$ahead_behind\\]]($style) )"
-
-[cmd_duration]
-min_time = 2000
-style = "yellow"
-format = "took [$duration]($style) "
 
 [jobs]
 style = "yellow"

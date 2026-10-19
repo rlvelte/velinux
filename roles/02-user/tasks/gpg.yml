@@ -26,7 +26,17 @@
   ansible.builtin.systemd:
     name: pcscd.service
     enabled: true
-    state: started
+    state: restarted
+
+- name: Reload udev rules for smartcard readers
+  ansible.builtin.command:
+    cmd: udevadm control --reload-rules
+  changed_when: false
+
+- name: Rescan connected smartcard readers
+  ansible.builtin.command:
+    cmd: udevadm trigger --action=add --subsystem-match=usb --property-match=ID_SMARTCARD_READER=1
+  changed_when: false
 
 - name: Prime the gpg-agent after provisioning
   ansible.builtin.command:

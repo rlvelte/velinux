@@ -52,3 +52,4 @@
     owner: "{{ target_user_uid }}"
     group: "{{ target_user_gid }}"
     force: true
+  become_user: "{{ target_user }}"

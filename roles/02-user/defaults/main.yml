@@ -59,7 +59,10 @@ velinux_user_packages:
   - patterns-sway-sway
   - noctalia
   - pcsc-lite
+  - pcsc-tools
+  - pcsc-ccid
   - gpg2
+  - pipewire
   - pinentry-qt6
   - starship
 
@@ -72,7 +75,6 @@ velinux_user_fonts:
   - ZedMono
   - UbuntuMono
 
-# Regular (non-Nerd) variable fonts from the google/fonts repository
 velinux_user_plain_fonts:
   - name: SUSE
     files:

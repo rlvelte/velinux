@@ -1,0 +1,25 @@
+if empty($XDG_CONFIG_HOME)
+  let s:vim_config = expand('~/.config/vim')
+else
+  let s:vim_config = expand($XDG_CONFIG_HOME . '/vim')
+endif
+
+for s:vim_dir in ['backup', 'swap', 'undo', 'view']
+  let s:vim_path = s:vim_config . '/' . s:vim_dir
+  if !isdirectory(s:vim_path)
+    call mkdir(s:vim_path, 'p', 0700)
+  endif
+endfor
+
+execute 'set backupdir=' . fnameescape(s:vim_config . '/backup//')
+execute 'set directory=' . fnameescape(s:vim_config . '/swap//')
+execute 'set undodir=' . fnameescape(s:vim_config . '/undo')
+execute 'set viewdir=' . fnameescape(s:vim_config . '/view')
+execute 'set viminfofile=' . fnameescape(s:vim_config . '/viminfo')
+
+set backup
+set undofile
+set viewoptions=cursor,folds,slash,unix
+let g:netrw_home = s:vim_config
+
+unlet s:vim_dir s:vim_path s:vim_config
