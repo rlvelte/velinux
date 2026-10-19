@@ -68,10 +68,35 @@
   become: true
   become_user: "{{ target_user }}"
 
+- name: Create the regular font directories
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.local/share/fonts/{{ plain_font.name }}"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+  loop: "{{ velinux_user_plain_fonts }}"
+  loop_control:
+    loop_var: plain_font
+  become: true
+  become_user: "{{ target_user }}"
+
+- name: Install the regular fonts
+  ansible.builtin.get_url:
+    url: "{{ plain_font.1 }}"
+    dest: "{{ target_user_home }}/.local/share/fonts/{{ plain_font.0.name }}/{{ plain_font.1 | basename | regex_replace('%5B', '[') | regex_replace('%5D', ']') }}"
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0644"
+  loop: "{{ velinux_user_plain_fonts | subelements('files') }}"
+  loop_control:
+    label: "{{ plain_font.0.name }} {{ plain_font.1 | basename }}"
+  register: plain_font_downloads
+
 - name: Refresh the font cache
   ansible.builtin.command:
     cmd: fc-cache -f
   become: true
   become_user: "{{ target_user }}"
-  when: nerd_font_downloads.changed
+  when: nerd_font_downloads.changed or plain_font_downloads.changed
   changed_when: true

@@ -71,4 +71,42 @@ velinux_user_fonts:
   - MPlus
   - ZedMono
   - UbuntuMono
+
+# Regular (non-Nerd) variable fonts from the google/fonts repository
+velinux_user_plain_fonts:
+  - name: SUSE
+    files:
+      - "https://raw.githubusercontent.com/google/fonts/main/ofl/suse/SUSE%5Bwght%5D.ttf"
+      - "https://raw.githubusercontent.com/google/fonts/main/ofl/suse/SUSE-Italic%5Bwght%5D.ttf"
+      - "https://raw.githubusercontent.com/google/fonts/main/ofl/susemono/SUSEMono%5Bwght%5D.ttf"
+      - "https://raw.githubusercontent.com/google/fonts/main/ofl/susemono/SUSEMono-Italic%5Bwght%5D.ttf"
+  - name: Montserrat
+    files:
+      - "https://raw.githubusercontent.com/google/fonts/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf"
+      - "https://raw.githubusercontent.com/google/fonts/main/ofl/montserrat/Montserrat-Italic%5Bwght%5D.ttf"
+  - name: IBMPlexSans
+    files:
+      - "https://raw.githubusercontent.com/google/fonts/main/ofl/ibmplexsans/IBMPlexSans%5Bwdth,wght%5D.ttf"
+      - "https://raw.githubusercontent.com/google/fonts/main/ofl/ibmplexsans/IBMPlexSans-Italic%5Bwdth,wght%5D.ttf"
+  - name: Geist
+    files:
+      - "https://raw.githubusercontent.com/google/fonts/main/ofl/geist/Geist%5Bwght%5D.ttf"
+      - "https://raw.githubusercontent.com/google/fonts/main/ofl/geist/Geist-Italic%5Bwght%5D.ttf"
+  - name: Manrope
+    files:
+      - "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/Manrope%5Bwght%5D.ttf"
+  - name: Merriweather
+    files:
+      - "https://raw.githubusercontent.com/google/fonts/main/ofl/merriweather/Merriweather%5Bopsz,wdth,wght%5D.ttf"
+      - "https://raw.githubusercontent.com/google/fonts/main/ofl/merriweather/Merriweather-Italic%5Bopsz,wdth,wght%5D.ttf"
+  - name: BebasNeue
+    files:
+      - "https://raw.githubusercontent.com/google/fonts/main/ofl/bebasneue/BebasNeue-Regular.ttf"
+  - name: AbrilFatface
+    files:
+      - "https://raw.githubusercontent.com/google/fonts/main/ofl/abrilfatface/AbrilFatface-Regular.ttf"
+  - name: Slabo
+    files:
+      - "https://raw.githubusercontent.com/google/fonts/main/ofl/slabo13px/Slabo13px-Regular.ttf"
+      - "https://raw.githubusercontent.com/google/fonts/main/ofl/slabo27px/Slabo27px-Regular.ttf"
   

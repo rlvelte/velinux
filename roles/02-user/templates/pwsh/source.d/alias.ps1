@@ -4,6 +4,9 @@
 function global:c { cat @args }
 function global:b { bat @args }
 
+# Ll
+function global:ll { ls -lah @args }
+
 # Fastfetch
 function global:ff { fastfetch @args }
 function global:of { onefetch @args }

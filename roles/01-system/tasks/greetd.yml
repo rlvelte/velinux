@@ -32,7 +32,14 @@
   when: greetd_item.state == 'file'
   notify: Restart greetd
 
-- name: Enable greetd as the display manager
+- name: Enable the greetd service
   ansible.builtin.systemd:
     name: greetd.service
     enabled: true
+
+- name: Link greetd as the display-manager service
+  ansible.builtin.file:
+    src: /usr/lib/systemd/system/greetd.service
+    dest: /etc/systemd/system/display-manager.service
+    state: link
+    force: true

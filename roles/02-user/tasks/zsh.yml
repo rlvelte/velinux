@@ -76,19 +76,16 @@
     loop_var: zsh_item
   when: zsh_item.state == 'file'
 
-# Shared prompt for zsh, bash and pwsh
-- name: Create the Starship configuration directory
+# Shared prompt for zsh, bash and pwsh; starship reads ~/.config/starship.toml by default
+- name: Remove the stale Starship configuration directory
   ansible.builtin.file:
     path: "{{ target_user_home }}/.config/starship"
-    state: directory
-    owner: "{{ target_user_uid }}"
-    group: "{{ target_user_gid }}"
-    mode: "0755"
+    state: absent
 
 - name: Deploy the Starship configuration
   ansible.builtin.copy:
     src: "{{ starship_item.src }}"
-    dest: "{{ target_user_home }}/.config/starship/{{ starship_item.path | regex_replace('\\.j2$', '') }}"
+    dest: "{{ target_user_home }}/.config/{{ starship_item.path | regex_replace('\\.j2$', '') }}"
     owner: "{{ target_user_uid }}"
     group: "{{ target_user_gid }}"
     mode: "0644"

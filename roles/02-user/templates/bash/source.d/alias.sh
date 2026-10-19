@@ -4,6 +4,11 @@
 alias c='cat'
 alias b='bat'
 
+# Eza
+alias ls='eza --group-directories-first'
+alias ll='eza -lah --group-directories-first --git'
+alias tree='eza --tree --git-ignore'
+
 # Fastfetch
 alias ff='fastfetch'
 alias of='onefetch'

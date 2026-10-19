@@ -7,69 +7,140 @@
 #                                 starship by rvelte
 
 add_newline = false
-format = "$os$directory$git_branch$git_status$cmd_duration$jobs$character"
-right_format = "$status$direnv$golang$python$nodejs$rbenv$kubernetes$terraform$aws$azure$gcloud$container$nix_shell"
+
+format = "$directory$git_branch$git_status$cmd_duration$jobs$character"
+right_format = "$status$direnv$golang$dotnet$python$nodejs$ruby$rust$zig$c$cpp$cmake$java$bun$rbenv$kubernetes$terraform$aws$azure$gcloud$container$nix_shell"
 
 [os]
 disabled = false
 
 [directory]
 style = "blue"
-truncation_length = 4
+truncation_length = 0
+truncate_to_repo = false
 fish_style_pwd_dir_length = 1
 truncation_symbol = ""
 read_only_style = "red"
+format = "[$path]($style)[$read_only]($read_only_style) "
 
 [git_branch]
-style = "green"
+style = "purple"
+format = "on [$branch]($style) "
 
 [git_status]
 style = "red"
-
-[character]
-success_symbol = "[❯](green)"
-error_symbol = "[❯](red)"
-vimcmd_symbol = "[❮](green)"
+format = "with ([\\[$all_status$ahead_behind\\]]($style) )"
 
 [cmd_duration]
 min_time = 2000
+style = "yellow"
+format = "took [$duration]($style) "
+
+[jobs]
+style = "yellow"
+format = "[\\($number jobs\\)]($style) "
+
+[character]
+success_symbol = "[>>](green)"
+error_symbol = "[>>](red)"
+vimcmd_symbol = "[<<](green)"
 
 [status]
 disabled = false
 style = "red"
+format = "[\\[exit $status\\]]($style) "
 
 [direnv]
 disabled = false
+style = "purple"
+format = "[\\[direnv $loaded\\]]($style) "
 
 [golang]
 disabled = false
+style = "cyan"
+format = "[\\[go $version\\]]($style) "
 
 [python]
 disabled = false
+style = "yellow"
+format = "[\\[py $version\\]]($style) "
+
+[dotnet]
+disabled = false
+style = "purple"
+format = "[\\[.net $version( $tfm)\\]]($style) "
 
 [nodejs]
 disabled = false
+style = "green"
+format = "[\\[node $version\\]]($style) "
 
-[rbenv]
+[ruby]
 disabled = false
+style = "red"
+format = "[\\[rb $version\\]]($style) "
+ 
+[rust]
+disabled = false
+style = "red"
+format = "[\\[rs $version\\]]($style) "
+ 
+[zig]
+disabled = false
+style = "yellow"
+format = "[\\[zig $version\\]]($style) "
+ 
+[c]
+disabled = false
+style = "blue"
+format = "[\\[c $version(-$name)\\]]($style) "
+
+[cpp]
+disabled = false
+style = "blue"
+format = "[\\[c++ $version(-$name)\\]]($style) "
+ 
+[cmake]
+disabled = false
+style = "purple"
+format = "[\\[cmake $version\\]]($style) "
+ 
+[java]
+disabled = false
+style = "red"
+format = "[\\[java $version\\]]($style) "
+ 
+[bun]
+disabled = false
+style = "yellow"
+format = "[\\[bun $version\\]]($style) "
 
 [kubernetes]
 disabled = false
+style = "cyan"
+format = "[\\[k8s $context(:$namespace)\\]]($style) "
 
 [terraform]
 disabled = false
+style = "purple"
+format = "[\\[tf $workspace\\]]($style) "
 
 [aws]
 disabled = false
+style = "yellow"
+format = "[\\[aws $profile(@$region)\\]]($style) "
 
 [azure]
 disabled = false
+style = "blue"
+format = "[\\[az $subscription\\]]($style) "
 
 [gcloud]
 disabled = false
+style = "blue"
+format = "[\\[gcp $project\\]]($style) "
 
 [container]
 disabled = false
-
-[nix_shell]
-disabled = false
+style = "dimmed white"
+format = "[\\[$name\\]]($style) "

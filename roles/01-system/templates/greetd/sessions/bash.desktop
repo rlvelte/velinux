@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Bash
+Comment=Bourne Again SHell
+Exec=bash
+Type=Application
+DesktopNames=shell,bash

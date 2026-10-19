@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # History
+HISTFILE="$BASHDOTDIR/.hist_bash"
 HISTSIZE=50000
 HISTFILESIZE=50000
 HISTTIMEFORMAT='%F %T '

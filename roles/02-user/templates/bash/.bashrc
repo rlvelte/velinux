@@ -21,7 +21,8 @@ fi
 
 # Bash
 export BASHDOTDIR="$HOME/.config/bash"
-export OMB="$BASHDOTDIR/oh-my-bash"
+export OSH="$BASHDOTDIR/oh-my-bash"
+export DISABLE_AUTO_UPDATE=true
 
 # Configurations
 for f in "$BASHDOTDIR"/source.d/*.sh; do
@@ -35,7 +36,5 @@ plugins=(
 )
 
 # Source
-[ -r "$OMB/oh-my-bash.sh" ] && . "$OMB/oh-my-bash.sh"
+[ -r "$OSH/oh-my-bash.sh" ] && . "$OSH/oh-my-bash.sh"
 eval "$(starship init bash)"
-
-HISTFILE="$BASHDOTDIR/.hist_bash"
