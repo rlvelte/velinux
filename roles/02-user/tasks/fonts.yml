@@ -1,0 +1,77 @@
+---
+- name: Fetch the latest Nerd Fonts release metadata
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest
+  register: nerd_fonts_release
+
+- name: Resolve the Nerd Font assets
+  ansible.builtin.set_fact:
+    nerd_font_assets: "{{ nerd_font_assets | default([])
+      + [{
+          'name': nerd_font,
+          'url': (nerd_fonts_release.json.assets
+                  | selectattr('name', 'match', '^' ~ nerd_font ~ '[.]zip$')
+                  | map(attribute='browser_download_url') | first),
+          'dest': target_user_home ~ '/.local/share/fonts/' ~ nerd_font
+        }] }}"
+  loop: "{{ velinux_user_fonts }}"
+  loop_control:
+    loop_var: nerd_font
+
+- name: Check the installed Nerd Font releases
+  ansible.builtin.stat:
+    path: "{{ item.dest }}/.nerd-fonts-{{ nerd_fonts_release.json.tag_name }}"
+  loop: "{{ nerd_font_assets }}"
+  register: nerd_font_stamps
+
+- name: Create the Nerd Font directories
+  ansible.builtin.file:
+    path: "{{ item.dest }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ nerd_font_assets }}"
+  become: true
+  become_user: "{{ target_user }}"
+
+- name: Download the Nerd Fonts
+  ansible.builtin.get_url:
+    url: "{{ item.0.url }}"
+    dest: "/tmp/{{ item.0.name }}.zip"
+    mode: "0644"
+  loop: "{{ nerd_font_assets | zip(nerd_font_stamps.results) | list }}"
+  loop_control:
+    label: "{{ item.0.name }}"
+  when: not item.1.stat.exists
+  register: nerd_font_downloads
+
+- name: Install the Nerd Fonts
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ item.0.name }}.zip"
+    dest: "{{ item.0.dest }}"
+    remote_src: true
+  loop: "{{ nerd_font_assets | zip(nerd_font_stamps.results) | list }}"
+  loop_control:
+    label: "{{ item.0.name }}"
+  when: not item.1.stat.exists
+  become: true
+  become_user: "{{ target_user }}"
+
+- name: Stamp the installed Nerd Font releases
+  ansible.builtin.file:
+    path: "{{ item.0.dest }}/.nerd-fonts-{{ nerd_fonts_release.json.tag_name }}"
+    state: touch
+    mode: "0644"
+  loop: "{{ nerd_font_assets | zip(nerd_font_stamps.results) | list }}"
+  loop_control:
+    label: "{{ item.0.name }}"
+  when: not item.1.stat.exists
+  become: true
+  become_user: "{{ target_user }}"
+
+- name: Refresh the font cache
+  ansible.builtin.command:
+    cmd: fc-cache -f
+  become: true
+  become_user: "{{ target_user }}"
+  when: nerd_font_downloads.changed
+  changed_when: true

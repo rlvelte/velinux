@@ -60,9 +60,17 @@
       ansible.builtin.meta: flush_handlers
       tags: always
 
-    - name: Schedule reboot to converge session configuration
+    - name: Set graphical as the default systemd target
+      ansible.builtin.file:
+        src: /usr/lib/systemd/system/graphical.target
+        dest: /etc/systemd/system/default.target
+        state: link
+        force: true
+      tags: [system]
+
+    - name: Reboot immediately after provisioning
       ansible.builtin.command:
-        cmd: /sbin/shutdown -r +1
+        cmd: /sbin/shutdown -r now
       when: velinux_reboot | bool
       changed_when: true
       tags: [system]

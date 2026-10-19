@@ -61,4 +61,14 @@ velinux_user_packages:
   - pcsc-lite
   - gpg2
   - pinentry-qt6
+  - starship
+
+velinux_user_fonts:
+  - JetBrainsMono
+  - Go-Mono
+  - GoogleSansCode
+  - GeistMono
+  - MPlus
+  - ZedMono
+  - UbuntuMono
   

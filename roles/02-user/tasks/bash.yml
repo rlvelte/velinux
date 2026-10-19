@@ -1,0 +1,54 @@
+---
+- name: Create Bash configuration root
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/bash"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+
+- name: Check whether Oh My Bash is installed
+  ansible.builtin.stat:
+    path: "{{ target_user_home }}/.config/bash/oh-my-bash"
+  register: oh_my_bash
+
+- name: Clone Oh My Bash
+  ansible.builtin.git:
+    repo: https://github.com/ohmybash/oh-my-bash.git
+    dest: "{{ target_user_home }}/.config/bash/oh-my-bash"
+    update: true
+  become_user: "{{ target_user }}"
+  when: not oh_my_bash.stat.exists
+
+- name: Create Bash configuration directories
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/bash/{{ bash_item.path }}"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/bash', wantlist=True) }}"
+  loop_control:
+    loop_var: bash_item
+  when: bash_item.state == 'directory'
+
+- name: Deploy Bash configuration files
+  ansible.builtin.copy:
+    src: "{{ bash_item.src }}"
+    dest: "{{ target_user_home }}/.config/bash/{{ bash_item.path | regex_replace('\\.j2$', '') }}"
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0644"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/bash', wantlist=True) }}"
+  loop_control:
+    loop_var: bash_item
+  when: bash_item.state == 'file'
+
+- name: Link the Bash runtime file from the home directory
+  ansible.builtin.file:
+    src: "{{ target_user_home }}/.config/bash/.bashrc"
+    dest: "{{ target_user_home }}/.bashrc"
+    state: link
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    force: true

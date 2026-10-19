@@ -5,6 +5,9 @@
 #   \_/ \___|_|_|_| |_|\__,_/_/\_\/___|___/_| |_|
 #                                   zsh by rvelte
 
+# Interactivity
+[[ -o interactive ]] || return
+
 # Distrobox compatibility
 if [ -f "/run/.containerenv" ] || [ -n "$CONTAINER_ID_ANY" ]; then
     export IN_DISTROBOX=1
@@ -19,7 +22,6 @@ fi
 # ZSH
 export ZSH="$ZDOTDIR/oh-my-zsh"
 export ZSH_CUSTOM="$ZDOTDIR/oh-my-zsh/custom"
-export ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Configurations
 for f in $ZDOTDIR/source.d/*.sh(N); do
@@ -37,5 +39,7 @@ plugins=(
 
 # Source
 source $ZSH/oh-my-zsh.sh
-source $ZDOTDIR/.p10k.zsh
+eval "$(starship init zsh)"
+
+# History
 HISTFILE="$ZDOTDIR/.hist_zsh"

@@ -1,0 +1,75 @@
+#            _ _                      _     _       
+# __   _____| (_)_ __  _   ___  _____| |__ (_)_ __  
+# \ \ / / _ \ | | '_ \| | | \ \/ / __| '_ \| | '_ \ 
+#  \ V /  __/ | | | | | |_| |>  <\__ \ | | | | |_) |
+#   \_/ \___|_|_|_| |_|\__,_/_/\_\___/_| |_|_| .__/ 
+#                                            |_|    
+#                                 starship by rvelte
+
+add_newline = false
+format = "$os$directory$git_branch$git_status$cmd_duration$jobs$character"
+right_format = "$status$direnv$golang$python$nodejs$rbenv$kubernetes$terraform$aws$azure$gcloud$container$nix_shell"
+
+[os]
+disabled = false
+
+[directory]
+style = "blue"
+truncation_length = 4
+fish_style_pwd_dir_length = 1
+truncation_symbol = ""
+read_only_style = "red"
+
+[git_branch]
+style = "green"
+
+[git_status]
+style = "red"
+
+[character]
+success_symbol = "[❯](green)"
+error_symbol = "[❯](red)"
+vimcmd_symbol = "[❮](green)"
+
+[cmd_duration]
+min_time = 2000
+
+[status]
+disabled = false
+style = "red"
+
+[direnv]
+disabled = false
+
+[golang]
+disabled = false
+
+[python]
+disabled = false
+
+[nodejs]
+disabled = false
+
+[rbenv]
+disabled = false
+
+[kubernetes]
+disabled = false
+
+[terraform]
+disabled = false
+
+[aws]
+disabled = false
+
+[azure]
+disabled = false
+
+[gcloud]
+disabled = false
+
+[container]
+disabled = false
+
+[nix_shell]
+disabled = false

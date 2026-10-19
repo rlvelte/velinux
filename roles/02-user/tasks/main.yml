@@ -37,8 +37,17 @@
     group: "{{ target_user_gid }}"
     mode: "0755"
 
-- name: Configure Shell
-  ansible.builtin.include_tasks: shell.yml
+- name: Configure Zsh
+  ansible.builtin.include_tasks: zsh.yml
+
+- name: Configure Bash
+  ansible.builtin.include_tasks: bash.yml
+
+- name: Configure Pwsh
+  ansible.builtin.include_tasks: pwsh.yml
+
+- name: Configure Fonts
+  ansible.builtin.include_tasks: fonts.yml
 
 - name: Configure GnuPG
   ansible.builtin.include_tasks: gpg.yml

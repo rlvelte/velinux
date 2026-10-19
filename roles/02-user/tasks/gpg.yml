@@ -8,7 +8,7 @@
     mode: "0700"
 
 - name: Deploy the GnuPG configuration files
-  ansible.builtin.copy:
+  ansible.builtin.template:
     src: "gnupg/{{ gpg_item }}"
     dest: "{{ target_user_home }}/.gnupg/{{ gpg_item }}"
     owner: "{{ target_user_uid }}"

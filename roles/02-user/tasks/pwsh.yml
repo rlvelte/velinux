@@ -1,0 +1,82 @@
+---
+- name: Fetch the latest pwsh release metadata
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/PowerShell/PowerShell/releases/latest
+  register: pwsh_release
+
+- name: Resolve the latest pwsh tarball asset
+  ansible.builtin.set_fact:
+    pwsh_tarball: "{{ pwsh_release.json.assets
+      | selectattr('name', 'match', '^powershell-[0-9.]+-linux-x64\\.tar\\.gz$')
+      | map(attribute='browser_download_url')
+      | first }}"
+
+- name: Register the installed pwsh version
+  ansible.builtin.command:
+    cmd: /usr/local/bin/pwsh --version
+  register: pwsh_installed
+  failed_when: false
+  changed_when: false
+
+- name: Install the latest pwsh release
+  when: >-
+    pwsh_installed.rc != 0
+    or pwsh_installed.stdout | trim | split(' ') | last
+    is version(pwsh_release.json.tag_name | regex_replace('^v', ''), '<')
+  block:
+    - name: Download the latest pwsh release
+      ansible.builtin.get_url:
+        url: "{{ pwsh_tarball }}"
+        dest: /tmp/pwsh-latest.tar.gz
+        mode: "0644"
+
+    - name: Create the pwsh install directory
+      ansible.builtin.file:
+        path: /opt/pwsh
+        state: directory
+        mode: "0755"
+
+    - name: Unpack the pwsh release
+      ansible.builtin.unarchive:
+        src: /tmp/pwsh-latest.tar.gz
+        dest: /opt/pwsh
+        remote_src: true
+
+    - name: Link the pwsh binary
+      ansible.builtin.file:
+        src: /opt/pwsh/pwsh
+        dest: /usr/local/bin/pwsh
+        state: link
+        force: true
+
+- name: Create Pwsh configuration root
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/powershell"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+
+- name: Create Pwsh configuration directories
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/powershell/{{ pwsh_item.path }}"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/pwsh', wantlist=True) }}"
+  loop_control:
+    loop_var: pwsh_item
+  when: pwsh_item.state == 'directory'
+
+- name: Deploy Pwsh configuration files
+  ansible.builtin.copy:
+    src: "{{ pwsh_item.src }}"
+    dest: "{{ target_user_home }}/.config/powershell/{{ pwsh_item.path | regex_replace('\\.j2$', '') }}"
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0644"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/pwsh', wantlist=True) }}"
+  loop_control:
+    loop_var: pwsh_item
+  when: pwsh_item.state == 'file'

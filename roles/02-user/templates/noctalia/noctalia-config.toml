@@ -1,0 +1,221 @@
+[accessibility]
+ui_scale = 1.1000000089406967
+
+[bar]
+order = [ "Default" ]
+
+    [bar.Default]
+    border = "primary"
+    center = [ "active_window" ]
+    end = [ "tray", "bluetooth", "ambient-sounds", "volume", "Seperator", "date", "clock", "privacy" ]
+    font_family = "Montserrat"
+    font_weight = 600
+    margin_edge = 5
+    margin_ends = 8
+    padding = 16
+    radius = 14
+    scale = 1.5000000149011612
+    shadow = false
+    start = [ "Main", "cpu", "ram", "sysmon", "workspaces" ]
+    thickness = 43
+    widget_spacing = 16
+
+[control_center]
+hidden_tabs = [ "media", "monitor", "power", "weather", "notifications", "screen-time" ]
+shortcuts = []
+show_session_button = false
+width = 1000
+
+[desktop_widgets]
+schema_version = 2
+widget_order = []
+
+    [desktop_widgets.grid]
+    cell_size = 16
+    major_interval = 4
+    visible = true
+
+    [desktop_widgets.widget]
+
+[hooks]
+colors_changed = "swaymsg reload"
+wallpaper_changed = "swaymsg reload"
+
+[location]
+auto_locate = true
+
+[lockscreen_widgets]
+enabled = false
+schema_version = 2
+widget_order = [ "lockscreen-login-box@DP-2", "lockscreen-login-box@X11-1" ]
+
+    [lockscreen_widgets.grid]
+    cell_size = 16
+    major_interval = 4
+    visible = true
+
+    [lockscreen_widgets.widget."lockscreen-login-box@DP-2"]
+    box_height = 196.0
+    box_width = 810.0
+    cx = 1720.0
+    cy = 1258.0
+    output = "DP-2"
+    placement_height = 1440.0
+    placement_width = 3440.0
+    rotation = 0.0
+    type = "login_box"
+
+        [lockscreen_widgets.widget."lockscreen-login-box@DP-2".settings]
+        background_color = "surface_variant"
+        background_opacity = 0.88
+        background_radius = 12.0
+        center_password_text = false
+        input_opacity = 1.0
+        input_radius = 6.0
+        layout = "regular"
+        show_caps_lock = true
+        show_keyboard_layout = true
+        show_login_button = true
+        show_media = true
+        show_session_buttons = true
+        show_unlock_hint = true
+        show_weather = true
+
+    [lockscreen_widgets.widget."lockscreen-login-box@X11-1"]
+    box_height = 196.0
+    box_width = 810.0
+    cx = 788.9998779296875
+    cy = 882.05255126953125
+    output = "X11-1"
+    placement_height = 1156.0
+    placement_width = 1578.0
+    rotation = 0.0
+    type = "login_box"
+
+        [lockscreen_widgets.widget."lockscreen-login-box@X11-1".settings]
+        background_color = "surface_variant"
+        background_opacity = 0.88
+        background_radius = 12.0
+        center_password_text = false
+        input_opacity = 1.0
+        input_radius = 6.0
+        layout = "regular"
+        show_caps_lock = true
+        show_keyboard_layout = true
+        show_login_button = true
+        show_media = true
+        show_session_buttons = true
+        show_unlock_hint = true
+        show_weather = true
+
+[osd]
+offset_x = 8
+position = "top_right"
+position_vertical = "top_right"
+
+[plugin_settings."weinguyen/opencode-companion"]
+default_model = "big-pickle"
+
+[plugins]
+enabled = [ "reaperhound/ambient-sounds", "weinguyen/opencode-companion" ]
+
+[shell]
+font_family = "SUSE"
+panel_anchor_bar = "Default"
+telemetry_enabled = true
+
+    [shell.animation]
+    speed = 2.0000000298023224
+
+    [shell.launcher]
+    categories = false
+    layout = "simple"
+    pinned = [
+        "steam",
+        "jetbrains-rider-5ab2fca2-2379-4f2e-a3f0-bd57e577d67d",
+        "jetbrains-goland-dd836618-5276-4d6d-bcf4-f4a901f4221b",
+        "jetbrains-rustrover-0bd810d1-19b3-4cd5-8340-44177b1ad0b4"
+    ]
+
+    [shell.panel]
+    control_center_position = "center"
+
+    [shell.screenshot]
+    annotate = true
+    directory = "/home/rvelte"
+
+[theme]
+builtin = "Rosé Pine"
+community_palette = "Lilac AMOLED"
+custom_palette = "SUSE"
+mode = "dark"
+source = "custom"
+wallpaper_scheme = "m3-content"
+
+    [theme.templates]
+    builtin_ids = [ "gtk3", "gtk4", "kitty", "qt", "sway" ]
+    community_ids = [ "fastfetch", "fzf" ]
+
+[wallpaper]
+directory = "/home/rvelte/.config/noctalia/wallpaper"
+
+    [wallpaper.default]
+    path = "/home/rvelte/.config/noctalia/wallpaper/suse.png"
+
+    [wallpaper.last]
+    path = "/home/rvelte/.config/noctalia/wallpaper/suse.png"
+
+    [wallpaper.monitors.DP-2]
+    path = "/home/rvelte/.config/noctalia/wallpaper/suse.png"
+
+[widget.Main]
+anchor = true
+color = "primary"
+custom_image = "/usr/share/icons/icon-suse.png"
+custom_image_colorize = true
+interactive = false
+scale = 1.25
+type = "custom_button"
+
+[widget.Seperator]
+anchor = true
+glyph = "minus"
+type = "custom_button"
+
+[widget.active_window]
+display = "text_only"
+interactive = false
+max_length = 450
+show_empty_label = true
+title_scroll = "on_hover"
+
+[widget.ambient-sounds]
+type = "reaperhound/ambient-sounds:ambient-sounds"
+
+[widget.clock]
+color = "primary"
+font_weight = 800
+
+    [widget.clock.actions]
+    left = "panel-toggle control-center"
+
+[widget.cpu]
+glyph = "cpu"
+
+[widget.privacy]
+active_color = "error"
+hide_inactive = true
+
+[widget.ram]
+glyph = "article"
+
+[widget.sysmon]
+path = "/home"
+stat = "disk_used_pct"
+
+[widget.workspaces]
+active_pill_size = 2.0
+font_family = "JetBrains Mono ExtraBold"
+font_weight = 800
+inactive_pill_size = 1.25
+show_all_outputs = true

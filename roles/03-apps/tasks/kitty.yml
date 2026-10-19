@@ -1,0 +1,32 @@
+---
+- name: Create Kitty configuration root
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/kitty"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+
+- name: Create Kitty configuration directories
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/kitty/{{ kitty_item.path }}"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/kitty', wantlist=True) }}"
+  loop_control:
+    loop_var: kitty_item
+  when: kitty_item.state == 'directory'
+
+- name: Deploy Kitty configuration files
+  ansible.builtin.copy:
+    src: "{{ kitty_item.src }}"
+    dest: "{{ target_user_home }}/.config/kitty/{{ kitty_item.path }}"
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: preserve
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/kitty', wantlist=True) }}"
+  loop_control:
+    loop_var: kitty_item
+  when: kitty_item.state == 'file'

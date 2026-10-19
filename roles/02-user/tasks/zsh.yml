@@ -52,14 +52,7 @@
     - name: zsh-eza
       repo: https://github.com/z-shell/zsh-eza.git
 
-- name: Install the Powerlevel10k theme
-  ansible.builtin.git:
-    repo: https://github.com/romkatv/powerlevel10k.git
-    dest: "{{ target_user_home }}/.config/zsh/oh-my-zsh/custom/themes/powerlevel10k"
-    update: true
-  become_user: "{{ target_user }}"
-
-- name: Create Zsh configuration directory
+- name: Create Zsh configuration directories
   ansible.builtin.file:
     path: "{{ target_user_home }}/.config/zsh/{{ zsh_item.path }}"
     state: directory
@@ -82,6 +75,27 @@
   loop_control:
     loop_var: zsh_item
   when: zsh_item.state == 'file'
+
+# Shared prompt for zsh, bash and pwsh
+- name: Create the Starship configuration directory
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/starship"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+
+- name: Deploy the Starship configuration
+  ansible.builtin.copy:
+    src: "{{ starship_item.src }}"
+    dest: "{{ target_user_home }}/.config/starship/{{ starship_item.path | regex_replace('\\.j2$', '') }}"
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0644"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/starship', wantlist=True) }}"
+  loop_control:
+    loop_var: starship_item
+  when: starship_item.state == 'file'
 
 - name: Link the Zsh environment file from the home directory
   ansible.builtin.file:
