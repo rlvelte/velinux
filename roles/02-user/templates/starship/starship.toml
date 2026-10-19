@@ -30,7 +30,7 @@ format = "on [$branch]($style) "
 
 [git_status]
 style = "red"
-format = "with ([\\[$all_status$ahead_behind\\]]($style) )"
+format = "([\\[$all_status$ahead_behind\\]]($style) )"
 
 [jobs]
 style = "yellow"
