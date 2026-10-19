@@ -1,0 +1,22 @@
+---
+- name: Create the Git configuration directory
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/git"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+
+- name: Deploy the Git configuration files
+  ansible.builtin.template:
+    src: "git/{{ git_item }}"
+    dest: "{{ target_user_home }}/.config/git/{{ git_item }}"
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0644"
+  loop:
+    - config
+    - attributes
+    - ignore
+  loop_control:
+    loop_var: git_item

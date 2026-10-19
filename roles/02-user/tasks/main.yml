@@ -67,6 +67,9 @@
 - name: Configure GnuPG
   ansible.builtin.include_tasks: gpg.yml
 
+- name: Configure Git
+  ansible.builtin.include_tasks: git.yml
+
 - name: Configure Sway
   ansible.builtin.include_tasks: sway.yml
 
