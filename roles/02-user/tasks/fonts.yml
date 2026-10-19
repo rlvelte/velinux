@@ -90,6 +90,7 @@
     mode: "0644"
   loop: "{{ velinux_user_plain_fonts | subelements('files') }}"
   loop_control:
+    loop_var: plain_font
     label: "{{ plain_font.0.name }} {{ plain_font.1 | basename }}"
   register: plain_font_downloads
 
