@@ -19,3 +19,6 @@ export NPM_CONFIG_CACHE="$HOME/.cache/npm"
 
 # Opencode
 export PATH="$PATH:$HOME/.opencode/bin"
+
+# Aspire
+export PATH="$PATH:$HOME/.aspire/bin"
