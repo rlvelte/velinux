@@ -76,12 +76,6 @@
     loop_var: zsh_item
   when: zsh_item.state == 'file'
 
-# Shared prompt for zsh, bash and pwsh; starship reads ~/.config/starship.toml by default
-- name: Remove the stale Starship configuration directory
-  ansible.builtin.file:
-    path: "{{ target_user_home }}/.config/starship"
-    state: absent
-
 - name: Deploy the Starship configuration
   ansible.builtin.copy:
     src: "{{ starship_item.src }}"
