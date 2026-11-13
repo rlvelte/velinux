@@ -66,6 +66,8 @@ velinux_user_packages:
   - pcsc-ccid
   - gpg2
   - pipewire
+  - pipewire-pulseaudio
+  - wireplumber
   - pinentry-qt6
   - starship
 
