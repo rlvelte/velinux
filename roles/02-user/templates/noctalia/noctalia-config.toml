@@ -147,7 +147,7 @@ telemetry_enabled = false
 [theme]
 builtin = "Rosé Pine"
 community_palette = "Lilac AMOLED"
-custom_palette = "Nürnberg"
+custom_palette = "SUSE"
 mode = "dark"
 source = "custom"
 wallpaper_scheme = "m3-content"
@@ -160,13 +160,13 @@ wallpaper_scheme = "m3-content"
 directory = "/home/rvelte/.config/noctalia/wallpaper"
 
     [wallpaper.default]
-    path = "/home/rvelte/.config/noctalia/wallpaper/vt.png"
+    path = "/home/rvelte/.config/noctalia/wallpaper/suse.png"
 
     [wallpaper.last]
-    path = "/home/rvelte/.config/noctalia/wallpaper/vt.png"
+    path = "/home/rvelte/.config/noctalia/wallpaper/suse.png"
 
     [wallpaper.monitors.DP-2]
-    path = "/home/rvelte/.config/noctalia/wallpaper/vt.png"
+    path = "/home/rvelte/.config/noctalia/wallpaper/suse.png"
 
 [widget.Main]
 anchor = true
@@ -186,7 +186,6 @@ type = "custom_button"
 capsule = false
 capsule_fill = "secondary"
 capsule_radius = "auto"
-color = "primary"
 font_weight = 700
 text = "VELINUX"
 type = "text"

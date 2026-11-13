@@ -50,3 +50,8 @@
   loop_control:
     loop_var: mango_item
   when: mango_item.state == 'file'
+
+- name: Remove the outdated bare Mango config file
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/mango/config"
+    state: absent
