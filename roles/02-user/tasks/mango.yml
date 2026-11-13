@@ -9,6 +9,7 @@
 - name: Build and install Mango from source
   ansible.builtin.shell: |
     set -euo pipefail
+    rm -rf /tmp/wlroots-build /tmp/scenefx-build /tmp/mango-build
     git clone -b {{ velinux_mango_wlroots_version }} https://gitlab.freedesktop.org/wlroots/wlroots.git /tmp/wlroots-build
     cd /tmp/wlroots-build
     meson setup build --prefix=/usr -Dbackends=drm,libinput -Dxwayland=enabled
