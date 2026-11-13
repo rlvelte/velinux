@@ -1,0 +1,29 @@
+#                 _
+#   __ _  ___  __| |   _ __ ___   ___  ___
+#  / _` |/ _ \/ _` | | '_ ` _ \ / _ \/ __|
+# | (_| |  __/ (_| |_| | | | | | | (_) \__ \
+#  \__, |\___|\__,_(_)_| |_| |_|\___/|___/
+#   __/ |
+#  |___/                        by rvelte
+
+source=~/.config/mango/config.d/10-hardware.conf
+source=~/.config/mango/config.d/20-variables.conf
+source=~/.config/mango/config.d/41-appearance.conf
+
+source=~/.config/mango/config.d/bindings/10-application.conf
+source=~/.config/mango/config.d/bindings/20-workspace.conf
+source=~/.config/mango/config.d/bindings/30-window.conf
+source=~/.config/mango/config.d/bindings/40-special.conf
+
+source=~/.config/mango/config.d/rules/10-general.conf
+source=~/.config/mango/config.d/rules/12-thunar.conf
+source=~/.config/mango/config.d/rules/15-vivaldi.conf
+source=~/.config/mango/config.d/rules/16-protonup-qt.conf
+source=~/.config/mango/config.d/rules/17-bluetooth.conf
+source=~/.config/mango/config.d/rules/18-jetbrains-toolbox.conf
+
+# Use only if you use scenefx effects
+source_optional=~/.config/mango/config.d/fx/10-mango-fx.conf
+
+# Use only if you use Noctalia
+source=~/.config/mango/noctalia

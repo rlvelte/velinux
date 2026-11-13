@@ -16,7 +16,7 @@ order = [ "Default" ]
     radius = 14
     scale = 1.5000000149011612
     shadow = false
-    start = [ "text_2", "cpu", "ram", "sysmon", "workspaces" ]
+    start = [ "Velinux", "workspaces" ]
     thickness = 43
     widget_spacing = 16
 
@@ -117,7 +117,7 @@ position_vertical = "top_right"
 default_model = "big-pickle"
 
 [plugins]
-enabled = [ "reaperhound/ambient-sounds", "weinguyen/opencode-companion" ]
+enabled = []
 
 [shell]
 font_family = "SUSE"
@@ -147,7 +147,7 @@ telemetry_enabled = false
 [theme]
 builtin = "Rosé Pine"
 community_palette = "Lilac AMOLED"
-custom_palette = "SUSE"
+custom_palette = "Nürnberg"
 mode = "dark"
 source = "custom"
 wallpaper_scheme = "m3-content"
@@ -160,13 +160,13 @@ wallpaper_scheme = "m3-content"
 directory = "/home/rvelte/.config/noctalia/wallpaper"
 
     [wallpaper.default]
-    path = "/home/rvelte/.config/noctalia/wallpaper/suse.png"
+    path = "/home/rvelte/.config/noctalia/wallpaper/vt.png"
 
     [wallpaper.last]
-    path = "/home/rvelte/.config/noctalia/wallpaper/suse.png"
+    path = "/home/rvelte/.config/noctalia/wallpaper/vt.png"
 
     [wallpaper.monitors.DP-2]
-    path = "/home/rvelte/.config/noctalia/wallpaper/suse.png"
+    path = "/home/rvelte/.config/noctalia/wallpaper/vt.png"
 
 [widget.Main]
 anchor = true
@@ -181,6 +181,15 @@ type = "custom_button"
 anchor = true
 glyph = "minus"
 type = "custom_button"
+
+[widget.Velinux]
+capsule = false
+capsule_fill = "secondary"
+capsule_radius = "auto"
+color = "primary"
+font_weight = 700
+text = "VELINUX"
+type = "text"
 
 [widget.active_window]
 display = "text_only"
@@ -223,4 +232,4 @@ active_pill_size = 2.0
 font_family = "JetBrains Mono ExtraBold"
 font_weight = 800
 inactive_pill_size = 1.25
-show_all_outputs = true
+monitors = [ "*" ]

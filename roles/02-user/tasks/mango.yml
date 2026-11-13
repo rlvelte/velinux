@@ -1,0 +1,51 @@
+---
+- name: Check whether Mango is already installed
+  ansible.builtin.command: mango -v
+  register: mango_version
+  failed_when: false
+  changed_when: false
+  check_mode: false
+
+- name: Build and install Mango from source
+  ansible.builtin.shell: |
+    set -euo pipefail
+    git clone -b {{ velinux_mango_wlroots_version }} https://gitlab.freedesktop.org/wlroots/wlroots.git /tmp/wlroots-build
+    cd /tmp/wlroots-build
+    meson setup build --prefix=/usr -Dbackends=drm,libinput -Dxwayland=enabled
+    ninja -C build install
+    git clone -b {{ velinux_mango_scenefx_version }} https://github.com/wlrfx/scenefx.git /tmp/scenefx-build
+    cd /tmp/scenefx-build
+    meson setup build --prefix=/usr
+    ninja -C build install
+    git clone -b {{ velinux_mango_version }} https://github.com/mangowm/mango.git /tmp/mango-build
+    cd /tmp/mango-build
+    meson setup build --prefix=/usr
+    ninja -C build install
+  args:
+    executable: /bin/bash
+  when: velinux_mango_version not in (mango_version.stdout | default(''))
+  changed_when: true
+
+- name: Create Mango configuration directories
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config/mango/{{ mango_item.path }}"
+    state: directory
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0755"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/mango', wantlist=True) }}"
+  loop_control:
+    loop_var: mango_item
+  when: mango_item.state == 'directory'
+
+- name: Deploy Mango configuration files
+  ansible.builtin.copy:
+    src: "{{ mango_item.src }}"
+    dest: "{{ target_user_home }}/.config/mango/{{ mango_item.path }}"
+    owner: "{{ target_user_uid }}"
+    group: "{{ target_user_gid }}"
+    mode: "0644"
+  loop: "{{ lookup('community.general.filetree', role_path + '/templates/mango', wantlist=True) }}"
+  loop_control:
+    loop_var: mango_item
+  when: mango_item.state == 'file'

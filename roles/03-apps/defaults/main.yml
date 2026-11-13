@@ -53,4 +53,6 @@ velinux_apps_packages:
   - obs-studio
   - steam
   - htop
+  - figlet
   - vgn
+  - dbpeek

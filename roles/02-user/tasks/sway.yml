@@ -23,9 +23,7 @@
     ninja -C build install
   args:
     executable: /bin/bash
-  when:
-    - velinux_swayfx | bool
-    - "'swayfx' not in (sway_version.stdout | default(''))"
+  when: "'swayfx' not in (sway_version.stdout | default(''))"
   changed_when: true
 
 - name: Create Sway configuration directories

@@ -1,5 +1,7 @@
 ---
-velinux_swayfx: false
+velinux_mango_version: "0.18.5"
+velinux_mango_wlroots_version: "0.20.2"
+velinux_mango_scenefx_version: "0.5"
 
 velinux_user_repositories:
   - name: obs-noctalia
@@ -37,6 +39,7 @@ velinux_user_dependencies:
   - pcre2-devel
   - json-c-devel
   - hwdata
+  - cJSON-devel
   - pam-devel
   - libpcap-devel
   - libliftoff-devel
