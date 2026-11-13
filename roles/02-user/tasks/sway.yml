@@ -15,11 +15,11 @@
     ninja -C build install
     git clone -b 0.4.1 https://github.com/wlrfx/scenefx.git /tmp/scenefx-build
     cd /tmp/scenefx-build
-    meson setup build --prefix=/usr
+    meson setup build --prefix=/usr -Dwerror=false
     ninja -C build install
     git clone -b 0.5.3 https://github.com/WillPower3309/swayfx.git /tmp/swayfx-build
     cd /tmp/swayfx-build
-    meson setup build --prefix=/usr
+    meson setup build --prefix=/usr -Dwerror=false
     ninja -C build install
   args:
     executable: /bin/bash

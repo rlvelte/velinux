@@ -15,7 +15,7 @@
     ninja -C build install
     git clone -b {{ velinux_mango_scenefx_version }} https://github.com/wlrfx/scenefx.git /tmp/scenefx-build
     cd /tmp/scenefx-build
-    meson setup build --prefix=/usr
+    meson setup build --prefix=/usr -Dwerror=false
     ninja -C build install
     git clone -b {{ velinux_mango_version }} https://github.com/mangowm/mango.git /tmp/mango-build
     cd /tmp/mango-build
