@@ -153,7 +153,7 @@ source = "custom"
 wallpaper_scheme = "m3-content"
 
     [theme.templates]
-    builtin_ids = [ "gtk3", "gtk4", "kitty", "qt", "sway" ]
+    builtin_ids = [ "gtk3", "gtk4", "kitty", "mango", "qt", "sway" ]
     community_ids = [ "fastfetch", "fzf" ]
 
 [wallpaper]
