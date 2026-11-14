@@ -9,23 +9,22 @@
 - name: Build and install SwayFX from source
   ansible.builtin.shell: |
     set -euo pipefail
+    rm -rf /tmp/wlroots-build /tmp/scenefx-build /tmp/swayfx-build
     git clone -b 0.19.3 https://gitlab.freedesktop.org/wlroots/wlroots.git /tmp/wlroots-build
     cd /tmp/wlroots-build
     meson setup build --prefix=/usr -Dbackends=drm,libinput -Dxwayland=enabled
     ninja -C build install
     git clone -b 0.4.1 https://github.com/wlrfx/scenefx.git /tmp/scenefx-build
     cd /tmp/scenefx-build
-    meson setup build --prefix=/usr
+    meson setup build --prefix=/usr -Dwerror=false
     ninja -C build install
     git clone -b 0.5.3 https://github.com/WillPower3309/swayfx.git /tmp/swayfx-build
     cd /tmp/swayfx-build
-    meson setup build --prefix=/usr
+    meson setup build --prefix=/usr -Dwerror=false
     ninja -C build install
   args:
     executable: /bin/bash
-  when:
-    - velinux_swayfx | bool
-    - "'swayfx' not in (sway_version.stdout | default(''))"
+  when: "'swayfx' not in (sway_version.stdout | default(''))"
   changed_when: true
 
 - name: Create Sway configuration directories

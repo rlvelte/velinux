@@ -1,21 +1,21 @@
 ---
 velinux_apps_repositories:
-  - name: vivaldi
+  - name: sw-vivaldi
     description: "Vivaldi Browser"
     repo: "https://repo.vivaldi.com/archive/rpm/x86_64"
     gpgkey: "https://repo.vivaldi.com/archive/linux_signing_key.pub"
-  - name: sublime
+  - name: sw-sublime
     description: "Sublime Text"
     repo: "https://download.sublimetext.com/rpm/stable/x86_64"
     gpgkey: "https://download.sublimetext.com/sublimehq-pub.gpg"
-  - name: microsoft
+  - name: sw-microsoft
     description: "Microsoft Production"
     repo: "https://packages.microsoft.com/opensuse/15/prod/"
-  - name: librewolf
+  - name: sw-librewolf
     description: "LibreWolf Browser"
     repo: "https://repo.librewolf.net"
     gpgkey: "https://repo.librewolf.net/pubkey.gpg"
-  - name: vscodium
+  - name: sw-vscodium
     description: "VSCodium"
     repo: "https://paulcarroty.gitlab.io/vscodium-deb-rpm-repo/rpms/"
     gpgkey: "https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg"
@@ -53,4 +53,6 @@ velinux_apps_packages:
   - obs-studio
   - steam
   - htop
+  - figlet
   - vgn
+  - dbpeek

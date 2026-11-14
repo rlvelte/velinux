@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Mango
+Comment=Practical and powerful Wayland compositor (dwm but Wayland)
+Exec=mango
+Type=Application
+DesktopNames=mango;wlroots
