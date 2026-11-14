@@ -40,26 +40,24 @@
 
 - name: Prime the gpg-agent after provisioning
   ansible.builtin.command:
-    cmd: gpgconf --launch gpg-agent
-  become: true
-  become_user: "{{ target_user }}"
-  environment:
-    HOME: "{{ target_user_home }}"
-    GNUPGHOME: "{{ target_user_home }}/.gnupg"
-    XDG_RUNTIME_DIR: "/run/user/{{ target_user_uid }}"
+    cmd: >-
+      runuser -u {{ target_user }} --
+      env HOME={{ target_user_home }}
+      GNUPGHOME={{ target_user_home }}/.gnupg
+      XDG_RUNTIME_DIR=/run/user/{{ target_user_uid }}
+      gpgconf --launch gpg-agent
   changed_when: true
   notify: Restart the gpg-agent
 
 - name: Learn the SSH identities provided
   ansible.builtin.command:
-    cmd: ssh-add -l
-  become: true
-  become_user: "{{ target_user }}"
-  environment:
-    HOME: "{{ target_user_home }}"
-    GNUPGHOME: "{{ target_user_home }}/.gnupg"
-    XDG_RUNTIME_DIR: "/run/user/{{ target_user_uid }}"
-    SSH_AUTH_SOCK: "/run/user/{{ target_user_uid }}/gnupg/S.gpg-agent.ssh"
+    cmd: >-
+      runuser -u {{ target_user }} --
+      env HOME={{ target_user_home }}
+      GNUPGHOME={{ target_user_home }}/.gnupg
+      XDG_RUNTIME_DIR=/run/user/{{ target_user_uid }}
+      SSH_AUTH_SOCK=/run/user/{{ target_user_uid }}/gnupg/S.gpg-agent.ssh
+      ssh-add -l
   changed_when: false
   failed_when: false
   register: gpg_ssh_identities

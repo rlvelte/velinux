@@ -9,9 +9,5 @@
 include ~/.config/sway/config.d/*.conf
 include ~/.config/sway/config.d/bindings/*.conf
 include ~/.config/sway/config.d/rules/*.conf
-
-# Use only if you use SwayFX
 include ~/.config/sway/config.d/fx/*.conf
-
-# Use only if you use Noctalia
 include ~/.config/sway/noctalia

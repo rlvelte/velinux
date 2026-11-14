@@ -29,20 +29,33 @@
     state: present
   when: velinux_user_packages | length > 0
 
+- name: Check whether lingering is enabled for the target user
+  ansible.builtin.stat:
+    path: "/var/lib/systemd/linger/{{ target_user }}"
+  register: linger_file
+
+- name: Enable lingering for the target user
+  ansible.builtin.command: "loginctl enable-linger {{ target_user }}"
+  when: not linger_file.stat.exists
+  changed_when: true
+
+- name: Wait for the user manager of the target user
+  ansible.builtin.wait_for:
+    path: "/run/user/{{ target_user_uid }}/systemd/private"
+    state: present
+    timeout: 30
+
 - name: Enable and start user audio services
-  ansible.builtin.systemd:
-    name: "{{ item }}"
-    scope: user
-    enabled: true
-    state: started
+  ansible.builtin.command:
+    cmd: >-
+      runuser -u {{ target_user }} --
+      env XDG_RUNTIME_DIR=/run/user/{{ target_user_uid }}
+      systemctl --user enable --now {{ item }}
   loop:
     - pipewire.socket
     - pipewire-pulse.socket
     - wireplumber.service
-  become: true
-  become_user: "{{ target_user }}"
-  environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ target_user_uid }}"
+  changed_when: true
 
 - name: Create the configuration directory
   ansible.builtin.file:
@@ -73,14 +86,16 @@
 - name: Configure Sway
   ansible.builtin.include_tasks: sway.yml
 
+- name: Configure Mango
+  ansible.builtin.include_tasks: mango.yml
+
 - name: Configure Noctalia
   ansible.builtin.include_tasks: noctalia.yml
 
 - name: Reload the user systemd manager
-  ansible.builtin.systemd:
-    scope: user
-    daemon_reload: true
-  become: true
-  become_user: "{{ target_user }}"
-  environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ target_user_uid }}"
+  ansible.builtin.command:
+    cmd: >-
+      runuser -u {{ target_user }} --
+      env XDG_RUNTIME_DIR=/run/user/{{ target_user_uid }}
+      systemctl --user daemon-reload
+  changed_when: true
